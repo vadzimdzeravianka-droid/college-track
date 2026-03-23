@@ -64,7 +64,11 @@ export async function createCollege(values: z.infer<typeof CollegeSchema>) {
     revalidatePath("/dashboard");
     return { success: "College added!", college };
   } catch (error) {
-    return { error: "Failed to create college" };
+    console.error("Create college error:", error);
+    return {
+      error: "Failed to create college",
+      details: error instanceof Error ? error.message : String(error)
+    };
   }
 }
 

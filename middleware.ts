@@ -10,8 +10,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow auth API routes
-  if (pathname.startsWith("/api/auth")) {
+  // Allow auth and health API routes
+  if (pathname.startsWith("/api/auth") || pathname.startsWith("/api/health")) {
     return NextResponse.next();
   }
 
