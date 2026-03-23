@@ -10,7 +10,7 @@ export async function GET() {
       status: "ok",
       database: "connected",
       env: {
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        hasPostgresPrismaUrl: !!process.env.POSTGRES_PRISMA_URL,
         hasPasskey: !!process.env.APP_PASSKEY,
       }
     });
@@ -20,7 +20,7 @@ export async function GET() {
       database: "disconnected",
       error: error instanceof Error ? error.message : "Unknown error",
       env: {
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        hasPostgresPrismaUrl: !!process.env.POSTGRES_PRISMA_URL,
         hasPasskey: !!process.env.APP_PASSKEY,
       }
     }, { status: 500 });
