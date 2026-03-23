@@ -10,6 +10,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Allow auth API routes
+  if (pathname.startsWith("/api/auth")) {
+    return NextResponse.next();
+  }
+
   // Check for auth cookie
   const isAuthorized = request.cookies.get("is_authorized")?.value === "true";
 
