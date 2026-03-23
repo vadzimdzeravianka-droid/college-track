@@ -100,7 +100,7 @@ export function CollegeForm({ college, onSuccess }: { college?: College; onSucce
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="col-span-2">
               <Label htmlFor="name">College Name *</Label>
               <Input
@@ -128,6 +128,27 @@ export function CollegeForm({ college, onSuccess }: { college?: College; onSucce
                   <SelectItem value="REACH">Reach</SelectItem>
                   <SelectItem value="MATCH">Match</SelectItem>
                   <SelectItem value="SAFETY">Safety</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="status">Status *</Label>
+              <Select
+                value={form.watch("status")}
+                onValueChange={(value) => form.setValue("status", value as any)}
+                disabled={isPending}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NOT_STARTED">Not Started</SelectItem>
+                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                  <SelectItem value="SUBMITTED">Submitted</SelectItem>
+                  <SelectItem value="WAITLISTED">Waitlisted</SelectItem>
+                  <SelectItem value="ACCEPTED">Accepted</SelectItem>
+                  <SelectItem value="DECLINED">Declined</SelectItem>
                 </SelectContent>
               </Select>
             </div>

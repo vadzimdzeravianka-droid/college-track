@@ -7,7 +7,7 @@ export const PasskeySchema = z.object({
 export const CollegeSchema = z.object({
   name: z.string().min(1, "College name is required"),
   category: z.enum(["REACH", "MATCH", "SAFETY"]),
-  status: z.enum(["NOT_STARTED", "IN_PROGRESS", "SUBMITTED", "WAITLISTED", "ACCEPTED", "DECLINED"]).default("NOT_STARTED"),
+  status: z.enum(["NOT_STARTED", "IN_PROGRESS", "SUBMITTED", "WAITLISTED", "ACCEPTED", "DECLINED"]),
   strategy: z.enum(["ED", "EA", "RD"]),
   deadlineApp: z.string().optional().nullable(),
   deadlineFinaid: z.string().optional().nullable(),
