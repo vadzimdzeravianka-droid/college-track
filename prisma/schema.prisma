@@ -1,0 +1,65 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Category {
+  REACH
+  MATCH
+  SAFETY
+}
+
+enum Status {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  WAITLISTED
+  ACCEPTED
+  DECLINED
+}
+
+enum Strategy {
+  ED    // Early Decision
+  EA    // Early Action
+  RD    // Regular Decision
+}
+
+model College {
+  id              String    @id @default(uuid())
+  name            String
+  category        Category
+  status          Status    @default(NOT_STARTED)
+  strategy        Strategy
+  deadlineApp     DateTime? @map("deadline_app")
+  deadlineFinaid  DateTime? @map("deadline_finaid")
+  location        String?
+  major           String?
+  portalUrl       String?   @map("portal_url")
+  portalUser      String?   @map("portal_user")
+  portalPassword  String?   @map("portal_password")
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  checklist       Checklist?
+
+  @@map("colleges")
+}
+
+model Checklist {
+  id                String  @id @default(uuid())
+  collegeId         String  @unique @map("college_id")
+  lorTeacher        Boolean @default(false) @map("lor_teacher")
+  transcriptSent    Boolean @default(false) @map("transcript_sent")
+  testScoresSent    Boolean @default(false) @map("test_scores_sent")
+  essayCount        Int     @default(0) @map("essay_count")
+  finaidGreenLight  Boolean @default(false) @map("finaid_green_light")
+
+  college           College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  @@map("checklists")
+}
