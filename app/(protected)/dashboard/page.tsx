@@ -20,26 +20,28 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-900">College Track</h1>
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 truncate">College Track</h1>
           <form action={handleLogout}>
-            <Button variant="outline" size="sm">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
+            <Button variant="outline" size="sm" className="flex-shrink-0">
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </form>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-900">College Applications</h2>
-            <p className="text-slate-600 mt-1">
+      <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+          <div className="min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">College Applications</h2>
+            <p className="text-sm sm:text-base text-slate-600 mt-1">
               Track your progress and never miss a deadline
             </p>
           </div>
-          <CollegeFormNew />
+          <div className="flex-shrink-0">
+            <CollegeFormNew />
+          </div>
         </div>
 
         {error && (

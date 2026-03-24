@@ -27,8 +27,8 @@ export default async function CollegeDetailPage({
 
   if (error || !college) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-        <div className="container mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
+        <div className="max-w-7xl mx-auto">
           <div className="rounded-lg bg-red-50 p-4 text-red-800">
             {error || "College not found"}
           </div>
@@ -46,19 +46,20 @@ export default async function CollegeDetailPage({
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <Link href="/dashboard">
             <Button variant="ghost">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Button>
           </Link>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">{college.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 break-words">{college.name}</h1>
           <div className="flex flex-wrap gap-2">
             <StatusBadge status={college.status} />
             <CategoryBadge category={college.category} />
