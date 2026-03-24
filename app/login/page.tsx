@@ -51,11 +51,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-6 sm:p-8 shadow-xl">
+    <div className="flex min-h-svh items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md space-y-8 rounded-xl bg-card p-6 sm:p-8 shadow-xl border">
         <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">College Track</h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <h1 className="text-2xl sm:text-3xl font-bold">College Track</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Enter your passkey to access the application
           </p>
         </div>
@@ -79,7 +79,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800">
+            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20">
               {error}
             </div>
           )}

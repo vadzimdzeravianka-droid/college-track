@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, Circle } from "lucide-react";
 
 type Checklist = {
   id: string;
@@ -44,90 +43,66 @@ export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist |
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Application Checklist</h3>
+    <div className="space-y-3">
+      <div className="flex items-center space-x-3">
+        <Checkbox
+          id="lorTeacher"
+          checked={checklist?.lorTeacher || false}
+          onCheckedChange={(checked) => handleCheckboxChange("lorTeacher", checked as boolean)}
+          disabled={isPending}
+        />
+        <Label htmlFor="lorTeacher" className="cursor-pointer">
+          Letter of Recommendation
+        </Label>
+      </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center space-x-3">
-          <Checkbox
-            id="lorTeacher"
-            checked={checklist?.lorTeacher || false}
-            onCheckedChange={(checked) => handleCheckboxChange("lorTeacher", checked as boolean)}
-            disabled={isPending}
-          />
-          <Label htmlFor="lorTeacher" className="cursor-pointer flex items-center gap-2">
-            {checklist?.lorTeacher ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            ) : (
-              <Circle className="h-4 w-4 text-slate-400" />
-            )}
-            Letter of Recommendation
-          </Label>
-        </div>
+      <div className="flex items-center space-x-3">
+        <Checkbox
+          id="transcriptSent"
+          checked={checklist?.transcriptSent || false}
+          onCheckedChange={(checked) => handleCheckboxChange("transcriptSent", checked as boolean)}
+          disabled={isPending}
+        />
+        <Label htmlFor="transcriptSent" className="cursor-pointer">
+          Transcript Sent
+        </Label>
+      </div>
 
-        <div className="flex items-center space-x-3">
-          <Checkbox
-            id="transcriptSent"
-            checked={checklist?.transcriptSent || false}
-            onCheckedChange={(checked) => handleCheckboxChange("transcriptSent", checked as boolean)}
-            disabled={isPending}
-          />
-          <Label htmlFor="transcriptSent" className="cursor-pointer flex items-center gap-2">
-            {checklist?.transcriptSent ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            ) : (
-              <Circle className="h-4 w-4 text-slate-400" />
-            )}
-            Transcript Sent
-          </Label>
-        </div>
+      <div className="flex items-center space-x-3">
+        <Checkbox
+          id="testScoresSent"
+          checked={checklist?.testScoresSent || false}
+          onCheckedChange={(checked) => handleCheckboxChange("testScoresSent", checked as boolean)}
+          disabled={isPending}
+        />
+        <Label htmlFor="testScoresSent" className="cursor-pointer">
+          Test Scores Sent
+        </Label>
+      </div>
 
-        <div className="flex items-center space-x-3">
-          <Checkbox
-            id="testScoresSent"
-            checked={checklist?.testScoresSent || false}
-            onCheckedChange={(checked) => handleCheckboxChange("testScoresSent", checked as boolean)}
-            disabled={isPending}
-          />
-          <Label htmlFor="testScoresSent" className="cursor-pointer flex items-center gap-2">
-            {checklist?.testScoresSent ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            ) : (
-              <Circle className="h-4 w-4 text-slate-400" />
-            )}
-            Test Scores Sent
-          </Label>
-        </div>
+      <div className="flex items-center space-x-3">
+        <Checkbox
+          id="finaidGreenLight"
+          checked={checklist?.finaidGreenLight || false}
+          onCheckedChange={(checked) => handleCheckboxChange("finaidGreenLight", checked as boolean)}
+          disabled={isPending}
+        />
+        <Label htmlFor="finaidGreenLight" className="cursor-pointer">
+          Financial Aid Documents
+        </Label>
+      </div>
 
-        <div className="flex items-center space-x-3">
-          <Checkbox
-            id="finaidGreenLight"
-            checked={checklist?.finaidGreenLight || false}
-            onCheckedChange={(checked) => handleCheckboxChange("finaidGreenLight", checked as boolean)}
-            disabled={isPending}
-          />
-          <Label htmlFor="finaidGreenLight" className="cursor-pointer flex items-center gap-2">
-            {checklist?.finaidGreenLight ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            ) : (
-              <Circle className="h-4 w-4 text-slate-400" />
-            )}
-            Financial Aid Documents
-          </Label>
-        </div>
-
-        <div className="pt-2">
-          <Label htmlFor="essayCount">Supplemental Essays Required</Label>
-          <Input
-            id="essayCount"
-            type="number"
-            min="0"
-            value={essayCount}
-            onChange={(e) => handleEssayCountChange(parseInt(e.target.value) || 0)}
-            disabled={isPending}
-            className="mt-1 w-24"
-          />
-        </div>
+      <div className="pt-2">
+        <Label htmlFor="essayCount">Supplemental Essays Required</Label>
+        <Input
+          id="essayCount"
+          type="number"
+          min="0"
+          value={essayCount}
+          onChange={(e) => handleEssayCountChange(parseInt(e.target.value) || 0)}
+          disabled={isPending}
+          className="mt-1 w-24"
+        />
       </div>
     </div>
   );

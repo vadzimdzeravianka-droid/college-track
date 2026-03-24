@@ -19,7 +19,7 @@ type College = {
   notes: string | null;
 };
 
-export function CollegeEditButton({ college }: { college: College }) {
+export function CollegeEditButton({ college, className, size }: { college: College; className?: string; size?: "default" | "sm" | "lg" | "icon" }) {
   const router = useRouter();
 
   return (
@@ -28,6 +28,8 @@ export function CollegeEditButton({ college }: { college: College }) {
       onSuccess={() => {
         router.refresh();
       }}
+      className={className}
+      size={size}
     />
   );
 }

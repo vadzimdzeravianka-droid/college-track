@@ -32,7 +32,6 @@ export function PortalCredentials({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Portal Access</h3>
 
       {portalUrl && (
         <div>
@@ -118,7 +117,7 @@ export function PortalCredentials({
       )}
 
       {!portalUrl && !portalUser && !portalPassword && (
-        <p className="text-sm text-slate-500">No portal credentials saved</p>
+        <p className="text-sm text-muted-foreground">No portal credentials saved</p>
       )}
     </div>
   );

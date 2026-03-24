@@ -41,13 +41,13 @@ export function DashboardClient({ colleges }: { colleges: College[] }) {
 
       {filteredColleges.length === 0 && (
         <div className="text-center py-16">
-          <div className="rounded-full bg-slate-100 h-20 w-20 flex items-center justify-center mx-auto mb-4">
-            <GraduationCap className="h-10 w-10 text-slate-400" />
+          <div className="rounded-full bg-muted h-20 w-20 flex items-center justify-center mx-auto mb-4">
+            <GraduationCap className="h-10 w-10 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 mb-2">
+          <h3 className="text-xl font-semibold mb-2">
             No colleges found
           </h3>
-          <p className="text-slate-600">
+          <p className="text-muted-foreground">
             {filter === "all" ? "Add your first college to get started" : "No colleges match this filter"}
           </p>
         </div>

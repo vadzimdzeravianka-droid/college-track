@@ -6,6 +6,7 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
@@ -27,6 +28,34 @@ export function DatePicker({
   disabled,
   className,
 }: DatePickerProps) {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Mobile: Use native date input
+  if (isMobile) {
+    return (
+      <Input
+        type="date"
+        disabled={disabled}
+        value={value ? format(value, "yyyy-MM-dd") : ""}
+        onChange={(e) => {
+          const date = e.target.value ? new Date(e.target.value) : undefined;
+          onChange?.(date);
+        }}
+        className={cn("h-11", className)}
+      />
+    );
+  }
+
+  // Desktop: Use Calendar popover
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -43,7 +72,7 @@ export function DatePicker({
           {value ? format(value, "PPP") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="center" side="bottom">
         <Calendar
           mode="single"
           selected={value}

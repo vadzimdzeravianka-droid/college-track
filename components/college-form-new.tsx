@@ -65,11 +65,15 @@ const STEPS = [
 export function CollegeFormNew({
   college,
   onSuccess,
-  variant = "default"
+  variant = "default",
+  className,
+  size = "default"
 }: {
   college?: College;
   onSuccess?: () => void;
   variant?: "default" | "fab";
+  className?: string;
+  size?: "default" | "sm" | "lg" | "icon";
 }) {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -141,14 +145,14 @@ export function CollegeFormNew({
       <DialogTrigger asChild>
         {variant === "fab" ? (
           <Button
-            size="lg"
-            className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all"
+            size="icon"
+            className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all p-0"
           >
-            <Plus className="h-6 w-6" />
+            <Plus className="h-7 w-7 stroke-[2.5]" />
             <span className="sr-only">Add College</span>
           </Button>
         ) : (
-          <Button>
+          <Button size={size} className={className}>
             <Plus className="h-4 w-4 mr-2" />
             {college ? "Edit" : "Add College"}
           </Button>
@@ -185,7 +189,7 @@ export function CollegeFormNew({
                   className="mt-2 h-11"
                 />
                 {form.formState.errors.name && (
-                  <p className="text-sm text-red-600 mt-1.5">{form.formState.errors.name.message}</p>
+                  <p className="text-sm text-destructive mt-1.5">{form.formState.errors.name.message}</p>
                 )}
               </div>
 
@@ -289,8 +293,8 @@ export function CollegeFormNew({
 
               <Separator className="my-4" />
 
-              <Card className="bg-blue-50 border-blue-200">
-                <div className="p-4 text-sm text-blue-800">
+              <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900">
+                <div className="p-4 text-sm text-blue-900 dark:text-blue-300">
                   <p className="font-medium mb-1">💡 Tip</p>
                   <p>Financial aid deadlines are often earlier than application deadlines. Check carefully!</p>
                 </div>
@@ -325,8 +329,8 @@ export function CollegeFormNew({
                 />
               </div>
 
-              <Card className="bg-slate-50 border-slate-200">
-                <div className="p-4 text-sm text-slate-600">
+              <Card className="bg-muted/50">
+                <div className="p-4 text-sm text-muted-foreground">
                   <p>These fields are optional but helpful for organizing your applications.</p>
                 </div>
               </Card>
@@ -374,8 +378,8 @@ export function CollegeFormNew({
                 />
               </div>
 
-              <Card className="bg-amber-50 border-amber-200">
-                <div className="p-4 text-sm text-amber-800">
+              <Card className="bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-900">
+                <div className="p-4 text-sm text-amber-900 dark:text-amber-300">
                   <p className="font-medium mb-1">🔒 Privacy Note</p>
                   <p>Portal credentials are stored as plain text. Only store passwords you're comfortable saving.</p>
                 </div>
@@ -399,8 +403,8 @@ export function CollegeFormNew({
                 />
               </div>
 
-              <Card className="bg-green-50 border-green-200">
-                <div className="p-4 text-sm text-green-800">
+              <Card className="bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-900">
+                <div className="p-4 text-sm text-green-900 dark:text-green-300">
                   <p className="font-medium mb-1">✅ Almost Done!</p>
                   <p>Review your information and click "Submit" to save this college to your list.</p>
                 </div>

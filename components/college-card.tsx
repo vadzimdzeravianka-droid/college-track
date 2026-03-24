@@ -55,7 +55,7 @@ export function CollegeCard({ college }: { college: College }) {
       <Card
         className={cn(
           "transition-all duration-300 hover:shadow-lg cursor-pointer h-full flex flex-col",
-          isUrgent && "border-2 border-red-500 shadow-red-200 animate-pulse"
+          isUrgent && "border-2 border-destructive animate-pulse"
         )}
       >
         <CardHeader>
@@ -69,13 +69,13 @@ export function CollegeCard({ college }: { college: College }) {
         <CardContent className="space-y-3 flex-1 flex flex-col">
           <div className="space-y-2 flex-1">
             {college.location && (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate">{college.location}</span>
               </div>
             )}
             {college.major && (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <GraduationCap className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate">{college.major}</span>
               </div>
@@ -84,13 +84,15 @@ export function CollegeCard({ college }: { college: College }) {
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 flex-shrink-0" />
                 <div className="flex flex-col">
-                  <span className={cn(isUrgent && "text-red-600 font-semibold")}>
+                  <span className={cn(
+                    isUrgent ? "text-destructive font-semibold" : "text-muted-foreground"
+                  )}>
                     App: {formatDate(college.deadlineApp)}
                   </span>
                   {daysUntil !== null && daysUntil >= 0 && (
                     <span className={cn(
                       "text-xs",
-                      isUrgent ? "text-red-600 font-medium" : "text-slate-500"
+                      isUrgent ? "text-destructive font-medium" : "text-muted-foreground"
                     )}>
                       {daysUntil === 0 ? "Due today!" : `${daysUntil} days left`}
                     </span>
@@ -99,22 +101,22 @@ export function CollegeCard({ college }: { college: College }) {
               </div>
             )}
             {college.deadlineFinaid && (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <DollarSign className="h-4 w-4 flex-shrink-0" />
                 <span>FinAid: {formatDate(college.deadlineFinaid)}</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
+          <div className="flex items-center justify-between pt-3 border-t mt-auto">
             <div className="flex items-center gap-1.5 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-slate-400" />
-              <span className="text-slate-600">
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
                 {checklistProgress.completed}/{checklistProgress.total}
               </span>
             </div>
             {hasPortalCredentials && (
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <KeyRound className="h-3.5 w-3.5" />
                 <span>Portal saved</span>
               </div>

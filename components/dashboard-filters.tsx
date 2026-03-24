@@ -31,7 +31,7 @@ export function DashboardFilters({
     <>
       {/* Mobile: Native-looking dropdown */}
       <div className="md:hidden w-full">
-        <Label htmlFor="status-filter" className="text-sm text-slate-600 mb-2 block">
+        <Label htmlFor="status-filter" className="mb-2 block">
           Filter by Status
         </Label>
         <Select value={activeFilter} onValueChange={onFilterChange}>

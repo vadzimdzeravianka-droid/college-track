@@ -28,9 +28,9 @@ export default async function CollegeDetailPage({
 
   if (error || !college) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-8">
+      <div className="min-h-svh bg-background p-4 sm:p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="rounded-lg bg-red-50 p-4 text-red-800">
+          <div className="rounded-lg bg-destructive/10 p-4 text-destructive border border-destructive/20">
             {error || "College not found"}
           </div>
           <Link href="/dashboard">
@@ -45,8 +45,8 @@ export default async function CollegeDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-svh bg-background">
+      <header className="sticky top-0 z-50 w-full bg-background border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <Link href="/dashboard">
             <Button variant="ghost">
@@ -60,18 +60,41 @@ export default async function CollegeDetailPage({
 
       <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 break-words flex-1">{college.name}</h1>
-            <CollegeEditButton college={college} />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <StatusBadge status={college.status} />
-            <CategoryBadge category={college.category} />
-            <StrategyBadge strategy={college.strategy} />
+          <div className="flex flex-col gap-4 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold break-words">{college.name}</h1>
+            <div className="flex flex-wrap gap-2">
+              <StatusBadge status={college.status} />
+              <CategoryBadge category={college.category} />
+              <StrategyBadge strategy={college.strategy} />
+            </div>
+            {/* Mobile: Action buttons */}
+            <div className="flex gap-2 lg:hidden">
+              <div className="flex-1">
+                <CollegeEditButton college={college} className="w-full" size="sm" />
+              </div>
+              <form action={handleDelete.bind(null, college.id)} className="flex-1">
+                <Button variant="destructive" size="sm" type="submit" className="w-full">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Mobile: Checklist first */}
+          <div className="lg:hidden">
+            <Card>
+              <CardHeader>
+                <CardTitle>Checklist</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChecklistForm checklist={college.checklist} collegeId={college.id} />
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Main Content - 2 columns */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
@@ -82,38 +105,38 @@ export default async function CollegeDetailPage({
               <CardContent className="space-y-4">
                 {college.location && (
                   <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5 text-slate-500" />
+                    <MapPin className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium text-slate-700">Location</p>
-                      <p className="text-slate-900">{college.location}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Location</p>
+                      <p>{college.location}</p>
                     </div>
                   </div>
                 )}
 
                 {college.major && (
                   <div className="flex items-center gap-3">
-                    <GraduationCap className="h-5 w-5 text-slate-500" />
+                    <GraduationCap className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium text-slate-700">Intended Major</p>
-                      <p className="text-slate-900">{college.major}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Intended Major</p>
+                      <p>{college.major}</p>
                     </div>
                   </div>
                 )}
 
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-slate-500" />
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium text-slate-700">Application Deadline</p>
-                    <p className="text-slate-900">{formatDate(college.deadlineApp)}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Application Deadline</p>
+                    <p>{formatDate(college.deadlineApp)}</p>
                   </div>
                 </div>
 
                 {college.deadlineFinaid && (
                   <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-slate-500" />
+                    <Calendar className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium text-slate-700">Financial Aid Deadline</p>
-                      <p className="text-slate-900">{formatDate(college.deadlineFinaid)}</p>
+                      <p className="text-sm font-medium text-muted-foreground">Financial Aid Deadline</p>
+                      <p>{formatDate(college.deadlineFinaid)}</p>
                     </div>
                   </div>
                 )}
@@ -141,22 +164,25 @@ export default async function CollegeDetailPage({
                   <CardTitle>Notes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-slate-700 whitespace-pre-wrap">{college.notes}</p>
+                  <p className="text-muted-foreground whitespace-pre-wrap">{college.notes}</p>
                 </CardContent>
               </Card>
             )}
 
-            {/* Delete Button */}
-            <form action={handleDelete.bind(null, college.id)}>
-              <Button variant="destructive" size="sm" type="submit">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete College
-              </Button>
-            </form>
+            {/* Desktop: Action buttons */}
+            <div className="hidden lg:flex gap-2">
+              <CollegeEditButton college={college} size="sm" />
+              <form action={handleDelete.bind(null, college.id)}>
+                <Button variant="destructive" size="sm" type="submit">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete College
+                </Button>
+              </form>
+            </div>
           </div>
 
-          {/* Sidebar - Checklist */}
-          <div className="lg:col-span-1">
+          {/* Desktop: Sidebar - Checklist */}
+          <div className="hidden lg:block lg:col-span-1">
             <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle>Checklist</CardTitle>
