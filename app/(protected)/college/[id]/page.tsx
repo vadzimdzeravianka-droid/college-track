@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge, CategoryBadge, StrategyBadge } from "@/components/status-badge";
 import { ChecklistForm } from "@/components/checklist-form";
 import { PortalCredentials } from "@/components/portal-credentials";
+import { CollegeEditButton } from "@/components/college-edit-button";
 import { formatDate } from "@/lib/utils";
 import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -59,7 +60,10 @@ export default async function CollegeDetailPage({
 
       <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 break-words">{college.name}</h1>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 break-words flex-1">{college.name}</h1>
+            <CollegeEditButton college={college} />
+          </div>
           <div className="flex flex-wrap gap-2">
             <StatusBadge status={college.status} />
             <CategoryBadge category={college.category} />
