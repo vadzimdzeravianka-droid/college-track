@@ -54,7 +54,7 @@ export function DashboardClient({ colleges }: { colleges: College[] }) {
       )}
 
       {filteredColleges.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredColleges.map((college) => (
             <CollegeCard key={college.id} college={college} />
           ))}
