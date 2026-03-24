@@ -17,7 +17,11 @@ export async function getColleges() {
     });
     return { colleges };
   } catch (error) {
-    return { error: "Failed to fetch colleges" };
+    console.error("Get colleges error:", error);
+    return {
+      error: "Failed to fetch colleges",
+      details: error instanceof Error ? error.message : String(error)
+    };
   }
 }
 
