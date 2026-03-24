@@ -14,22 +14,18 @@ export function StatsOverview({ colleges }: { colleges: College[] }) {
   return (
     <>
       {/* Mobile: Compact inline stats */}
-      <div className="flex md:hidden items-center justify-between bg-white rounded-lg p-3 shadow-sm border mb-6">
-        <div className="flex items-center gap-4">
-          <div>
-            <p className="text-xs text-slate-600">Total</p>
-            <p className="text-xl font-bold text-slate-900">{stats.total}</p>
-          </div>
-          <div className="h-8 w-px bg-slate-200" />
-          <div>
-            <p className="text-xs text-slate-600">In Progress</p>
-            <p className="text-xl font-bold text-blue-700">{stats.inProgress}</p>
-          </div>
-          <div className="h-8 w-px bg-slate-200" />
-          <div>
-            <p className="text-xs text-slate-600">Done</p>
-            <p className="text-xl font-bold text-green-700">{stats.submitted + stats.accepted}</p>
-          </div>
+      <div className="flex md:hidden bg-white rounded-lg shadow-sm border mb-6 divide-x divide-slate-200">
+        <div className="flex-1 p-3 text-center">
+          <p className="text-xs text-slate-600 mb-1">Total</p>
+          <p className="text-xl font-bold text-slate-900">{stats.total}</p>
+        </div>
+        <div className="flex-1 p-3 text-center">
+          <p className="text-xs text-slate-600 mb-1">In Progress</p>
+          <p className="text-xl font-bold text-blue-700">{stats.inProgress}</p>
+        </div>
+        <div className="flex-1 p-3 text-center">
+          <p className="text-xs text-slate-600 mb-1">Done</p>
+          <p className="text-xl font-bold text-green-700">{stats.submitted + stats.accepted}</p>
         </div>
       </div>
 
