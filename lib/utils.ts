@@ -22,3 +22,9 @@ export function formatDate(date: Date | null): string {
     year: "numeric",
   }).format(date);
 }
+
+export function getDaysUntilDeadline(deadline: Date): number {
+  const now = new Date();
+  const daysUntil = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return daysUntil;
+}

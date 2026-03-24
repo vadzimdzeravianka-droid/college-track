@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge, CategoryBadge, StrategyBadge } from "@/components/status-badge";
-import { cn, isDeadlineUrgent, formatDate } from "@/lib/utils";
+import { cn, isDeadlineUrgent, formatDate, getDaysUntilDeadline } from "@/lib/utils";
 import Link from "next/link";
-import { Calendar, MapPin, GraduationCap } from "lucide-react";
+import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle2, KeyRound } from "lucide-react";
 
 type College = {
   id: string;
@@ -16,16 +16,45 @@ type College = {
   deadlineFinaid: Date | null;
   location: string | null;
   major: string | null;
+  portalUrl: string | null;
+  portalUser: string | null;
+  checklist?: {
+    lorTeacher: boolean;
+    transcriptSent: boolean;
+    testScoresSent: boolean;
+    essayCount: number;
+    finaidGreenLight: boolean;
+  } | null;
 };
+
+function getChecklistProgress(checklist?: College["checklist"]): { completed: number; total: number } {
+  if (!checklist) return { completed: 0, total: 5 };
+
+  const items = [
+    checklist.lorTeacher,
+    checklist.transcriptSent,
+    checklist.testScoresSent,
+    checklist.essayCount > 0,
+    checklist.finaidGreenLight,
+  ];
+
+  return {
+    completed: items.filter(Boolean).length,
+    total: items.length,
+  };
+}
 
 export function CollegeCard({ college }: { college: College }) {
   const isUrgent = isDeadlineUrgent(college.deadlineApp, college.status);
+  const daysUntil = college.deadlineApp ? getDaysUntilDeadline(college.deadlineApp) : null;
+  const hasPortalCredentials = !!(college.portalUrl || college.portalUser);
+  const checklistProgress = getChecklistProgress(college.checklist);
 
   return (
     <Link href={`/college/${college.id}`}>
       <Card
         className={cn(
-          "transition-all duration-300 hover:shadow-lg cursor-pointer h-full",
+          "transition-all duration-300 hover:shadow-lg cursor-pointer h-full flex flex-col",
           isUrgent && "border-2 border-red-500 shadow-red-200 animate-pulse"
         )}
       >
@@ -37,27 +66,60 @@ export function CollegeCard({ college }: { college: College }) {
             <StrategyBadge strategy={college.strategy} />
           </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {college.location && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <MapPin className="h-4 w-4" />
-              {college.location}
-            </div>
-          )}
-          {college.major && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <GraduationCap className="h-4 w-4" />
-              {college.major}
-            </div>
-          )}
-          {college.deadlineApp && (
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4" />
-              <span className={cn(isUrgent && "text-red-600 font-semibold")}>
-                {formatDate(college.deadlineApp)}
+        <CardContent className="space-y-3 flex-1 flex flex-col">
+          <div className="space-y-2 flex-1">
+            {college.location && (
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <MapPin className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{college.location}</span>
+              </div>
+            )}
+            {college.major && (
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <GraduationCap className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{college.major}</span>
+              </div>
+            )}
+            {college.deadlineApp && (
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4 flex-shrink-0" />
+                <div className="flex flex-col">
+                  <span className={cn(isUrgent && "text-red-600 font-semibold")}>
+                    App: {formatDate(college.deadlineApp)}
+                  </span>
+                  {daysUntil !== null && daysUntil >= 0 && (
+                    <span className={cn(
+                      "text-xs",
+                      isUrgent ? "text-red-600 font-medium" : "text-slate-500"
+                    )}>
+                      {daysUntil === 0 ? "Due today!" : `${daysUntil} days left`}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            {college.deadlineFinaid && (
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <DollarSign className="h-4 w-4 flex-shrink-0" />
+                <span>FinAid: {formatDate(college.deadlineFinaid)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
+            <div className="flex items-center gap-1.5 text-sm">
+              <CheckCircle2 className="h-4 w-4 text-slate-400" />
+              <span className="text-slate-600">
+                {checklistProgress.completed}/{checklistProgress.total}
               </span>
             </div>
-          )}
+            {hasPortalCredentials && (
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <KeyRound className="h-3.5 w-3.5" />
+                <span>Portal saved</span>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </Link>

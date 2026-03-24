@@ -15,6 +15,15 @@ type College = {
   deadlineFinaid: Date | null;
   location: string | null;
   major: string | null;
+  portalUrl: string | null;
+  portalUser: string | null;
+  checklist?: {
+    lorTeacher: boolean;
+    transcriptSent: boolean;
+    testScoresSent: boolean;
+    essayCount: number;
+    finaidGreenLight: boolean;
+  } | null;
 };
 
 type FilterType = "all" | "NOT_STARTED" | "IN_PROGRESS" | "SUBMITTED" | "WAITLISTED" | "ACCEPTED" | "DECLINED";

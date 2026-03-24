@@ -1,4 +1,4 @@
-import { isDeadlineUrgent, formatDate } from '../utils';
+import { isDeadlineUrgent, formatDate, getDaysUntilDeadline } from '../utils';
 
 describe('isDeadlineUrgent', () => {
   const now = new Date('2026-03-23T00:00:00Z');
@@ -71,5 +71,38 @@ describe('formatDate', () => {
 
   it('should return "Not set" for null date', () => {
     expect(formatDate(null)).toBe('Not set');
+  });
+});
+
+describe('getDaysUntilDeadline', () => {
+  const now = new Date('2026-03-23T00:00:00Z');
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(now);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('should return positive days for future deadline', () => {
+    const deadline = new Date('2026-03-30T00:00:00Z'); // 7 days away
+    expect(getDaysUntilDeadline(deadline)).toBe(7);
+  });
+
+  it('should return 0 for deadline today', () => {
+    const deadline = new Date('2026-03-23T00:00:00Z'); // today
+    expect(getDaysUntilDeadline(deadline)).toBe(0);
+  });
+
+  it('should return negative days for past deadline', () => {
+    const deadline = new Date('2026-03-20T00:00:00Z'); // 3 days ago
+    expect(getDaysUntilDeadline(deadline)).toBe(-3);
+  });
+
+  it('should return 1 for deadline tomorrow', () => {
+    const deadline = new Date('2026-03-24T00:00:00Z'); // tomorrow
+    expect(getDaysUntilDeadline(deadline)).toBe(1);
   });
 });
