@@ -62,7 +62,15 @@ const STEPS = [
   { label: "Notes", fields: ["notes"] },
 ];
 
-export function CollegeFormNew({ college, onSuccess }: { college?: College; onSuccess?: () => void }) {
+export function CollegeFormNew({
+  college,
+  onSuccess,
+  variant = "default"
+}: {
+  college?: College;
+  onSuccess?: () => void;
+  variant?: "default" | "fab";
+}) {
   const [open, setOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPending, startTransition] = useTransition();
@@ -131,10 +139,20 @@ export function CollegeFormNew({ college, onSuccess }: { college?: College; onSu
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add College
-        </Button>
+        {variant === "fab" ? (
+          <Button
+            size="lg"
+            className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all"
+          >
+            <Plus className="h-6 w-6" />
+            <span className="sr-only">Add College</span>
+          </Button>
+        ) : (
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            {college ? "Edit" : "Add College"}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>

@@ -39,7 +39,8 @@ export default async function DashboardPage() {
               Track your progress and never miss a deadline
             </p>
           </div>
-          <div className="flex-shrink-0">
+          {/* Desktop: Regular button */}
+          <div className="hidden sm:block flex-shrink-0">
             <CollegeFormNew />
           </div>
         </div>
@@ -53,6 +54,11 @@ export default async function DashboardPage() {
         {colleges && colleges.length > 0 && <StatsOverview colleges={colleges} />}
         {colleges && <DashboardClient colleges={colleges} />}
       </main>
+
+      {/* Mobile: Floating Action Button */}
+      <div className="sm:hidden fixed bottom-6 right-6 z-50">
+        <CollegeFormNew variant="fab" />
+      </div>
     </div>
   );
 }
