@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CollegeSchema } from "@/schemas";
 import { createCollege, updateCollege } from "@/actions/college";
@@ -33,6 +33,9 @@ import {
   StepSeparator,
   StepContent,
 } from "@/components/ui/stepper";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Separator } from "@/components/ui/separator";
+import { Card } from "@/components/ui/card";
 import { Plus, ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 type College = {
@@ -235,31 +238,45 @@ export function CollegeFormNew({ college, onSuccess }: { college?: College; onSu
               <div>
                 <Label htmlFor="deadlineApp" className="text-base">Application Deadline</Label>
                 <p className="text-sm text-muted-foreground mb-2">When is your application due?</p>
-                <Input
-                  {...form.register("deadlineApp")}
-                  id="deadlineApp"
-                  type="date"
-                  disabled={isPending}
-                  className="h-11"
+                <Controller
+                  control={form.control}
+                  name="deadlineApp"
+                  render={({ field }) => (
+                    <DatePicker
+                      value={field.value ? new Date(field.value) : undefined}
+                      onChange={(date) => field.onChange(date?.toISOString().split('T')[0] || '')}
+                      placeholder="Select application deadline"
+                      disabled={isPending}
+                    />
+                  )}
                 />
               </div>
 
               <div>
                 <Label htmlFor="deadlineFinaid" className="text-base">Financial Aid Deadline</Label>
                 <p className="text-sm text-muted-foreground mb-2">When are financial aid documents due?</p>
-                <Input
-                  {...form.register("deadlineFinaid")}
-                  id="deadlineFinaid"
-                  type="date"
-                  disabled={isPending}
-                  className="h-11"
+                <Controller
+                  control={form.control}
+                  name="deadlineFinaid"
+                  render={({ field }) => (
+                    <DatePicker
+                      value={field.value ? new Date(field.value) : undefined}
+                      onChange={(date) => field.onChange(date?.toISOString().split('T')[0] || '')}
+                      placeholder="Select financial aid deadline"
+                      disabled={isPending}
+                    />
+                  )}
                 />
               </div>
 
-              <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800">
-                <p className="font-medium mb-1">💡 Tip</p>
-                <p>Financial aid deadlines are often earlier than application deadlines. Check carefully!</p>
-              </div>
+              <Separator className="my-4" />
+
+              <Card className="bg-blue-50 border-blue-200">
+                <div className="p-4 text-sm text-blue-800">
+                  <p className="font-medium mb-1">💡 Tip</p>
+                  <p>Financial aid deadlines are often earlier than application deadlines. Check carefully!</p>
+                </div>
+              </Card>
             </div>
           </StepContent>
 
@@ -290,9 +307,11 @@ export function CollegeFormNew({ college, onSuccess }: { college?: College; onSu
                 />
               </div>
 
-              <div className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
-                <p>These fields are optional but helpful for organizing your applications.</p>
-              </div>
+              <Card className="bg-slate-50 border-slate-200">
+                <div className="p-4 text-sm text-slate-600">
+                  <p>These fields are optional but helpful for organizing your applications.</p>
+                </div>
+              </Card>
             </div>
           </StepContent>
 
@@ -337,10 +356,12 @@ export function CollegeFormNew({ college, onSuccess }: { college?: College; onSu
                 />
               </div>
 
-              <div className="rounded-lg bg-amber-50 p-4 text-sm text-amber-800">
-                <p className="font-medium mb-1">🔒 Privacy Note</p>
-                <p>Portal credentials are stored as plain text. Only store passwords you're comfortable saving.</p>
-              </div>
+              <Card className="bg-amber-50 border-amber-200">
+                <div className="p-4 text-sm text-amber-800">
+                  <p className="font-medium mb-1">🔒 Privacy Note</p>
+                  <p>Portal credentials are stored as plain text. Only store passwords you're comfortable saving.</p>
+                </div>
+              </Card>
             </div>
           </StepContent>
 
@@ -360,16 +381,19 @@ export function CollegeFormNew({ college, onSuccess }: { college?: College; onSu
                 />
               </div>
 
-              <div className="rounded-lg bg-green-50 p-4 text-sm text-green-800">
-                <p className="font-medium mb-1">✅ Almost Done!</p>
-                <p>Review your information and click "Submit" to save this college to your list.</p>
-              </div>
+              <Card className="bg-green-50 border-green-200">
+                <div className="p-4 text-sm text-green-800">
+                  <p className="font-medium mb-1">✅ Almost Done!</p>
+                  <p>Review your information and click "Submit" to save this college to your list.</p>
+                </div>
+              </Card>
             </div>
           </StepContent>
         </Stepper>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between gap-3 mt-8 pt-6 border-t">
+        <Separator className="mt-8" />
+        <div className="flex items-center justify-between gap-3 pt-6">
           <Button
             type="button"
             variant="outline"
