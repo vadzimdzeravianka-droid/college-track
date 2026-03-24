@@ -7,6 +7,9 @@ import { PasskeySchema } from "@/schemas";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as z from "zod";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,10 +51,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-xl">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-6 sm:p-8 shadow-xl">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-slate-900">College Track</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">College Track</h1>
           <p className="mt-2 text-sm text-slate-600">
             Enter your passkey to access the application
           </p>
@@ -59,19 +62,17 @@ export default function LoginPage() {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
           <div>
-            <label htmlFor="passkey" className="block text-sm font-medium text-slate-700">
-              Passkey
-            </label>
-            <input
+            <Label htmlFor="passkey">Passkey</Label>
+            <Input
               {...form.register("passkey")}
               id="passkey"
               type="password"
               disabled={isPending}
-              className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:opacity-50"
               placeholder="Enter your passkey"
+              className="mt-1.5"
             />
             {form.formState.errors.passkey && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1.5 text-sm text-red-600">
                 {form.formState.errors.passkey.message}
               </p>
             )}
@@ -83,13 +84,13 @@ export default function LoginPage() {
             </div>
           )}
 
-          <button
+          <Button
             type="submit"
             disabled={isPending}
-            className="w-full rounded-lg bg-slate-900 px-4 py-2 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full"
           >
             {isPending ? "Logging in..." : "Login"}
-          </button>
+          </Button>
         </form>
       </div>
     </div>
