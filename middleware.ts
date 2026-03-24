@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow all API routes (they handle their own auth if needed)
+  // Allow all API routes
   if (pathname.startsWith("/api")) {
     return NextResponse.next();
   }
