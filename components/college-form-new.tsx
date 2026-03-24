@@ -36,7 +36,7 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
-import { Plus, ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { Plus, ArrowLeft, ArrowRight, Check, Pencil } from "lucide-react";
 
 type College = {
   id?: string;
@@ -153,7 +153,11 @@ export function CollegeFormNew({
           </Button>
         ) : (
           <Button size={size} className={className}>
-            <Plus className="h-4 w-4 mr-2" />
+            {college ? (
+              <Pencil className="h-4 w-4 mr-2" />
+            ) : (
+              <Plus className="h-4 w-4 mr-2" />
+            )}
             {college ? "Edit" : "Add College"}
           </Button>
         )}

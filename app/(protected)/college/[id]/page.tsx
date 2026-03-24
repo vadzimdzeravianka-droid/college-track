@@ -58,7 +58,7 @@ export default async function CollegeDetailPage({
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+      <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8 pb-32 lg:pb-8">
         <div className="mb-6">
           <div className="flex flex-col gap-4 mb-4">
             <h1 className="text-2xl sm:text-3xl font-bold break-words">{college.name}</h1>
@@ -66,18 +66,6 @@ export default async function CollegeDetailPage({
               <StatusBadge status={college.status} />
               <CategoryBadge category={college.category} />
               <StrategyBadge strategy={college.strategy} />
-            </div>
-            {/* Mobile: Action buttons */}
-            <div className="flex gap-2 lg:hidden">
-              <div className="flex-1">
-                <CollegeEditButton college={college} className="w-full" size="sm" />
-              </div>
-              <form action={handleDelete.bind(null, college.id)} className="flex-1">
-                <Button variant="destructive" size="sm" type="submit" className="w-full">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
-              </form>
             </div>
           </div>
         </div>
@@ -194,6 +182,17 @@ export default async function CollegeDetailPage({
           </div>
         </div>
       </main>
+
+      {/* Mobile: Fixed bottom action buttons */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t p-4 space-y-2">
+        <CollegeEditButton college={college} className="w-full" />
+        <form action={handleDelete.bind(null, college.id)}>
+          <Button variant="destructive" type="submit" className="w-full">
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete College
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

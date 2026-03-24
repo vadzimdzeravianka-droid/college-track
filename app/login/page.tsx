@@ -54,7 +54,7 @@ export default function LoginPage() {
     <div className="flex min-h-svh items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8 rounded-xl bg-card p-6 sm:p-8 shadow-xl border">
         <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold">College Track</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">College Application Tracker</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Enter your passkey to access the application
           </p>
