@@ -1,7 +1,7 @@
 import { getColleges } from "@/actions/college";
 import { DashboardClient } from "@/components/dashboard-client";
 import { StatsOverview } from "@/components/stats-overview";
-import { CollegeForm } from "@/components/college-form";
+import { CollegeFormNew } from "@/components/college-form-new";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { cookies } from "next/headers";
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
               Track your progress and never miss a deadline
             </p>
           </div>
-          <CollegeForm />
+          <CollegeFormNew />
         </div>
 
         {error && (
