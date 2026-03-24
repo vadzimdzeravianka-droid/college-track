@@ -12,8 +12,8 @@
 
 Edit `.env.local`:
 ```bash
-# Replace with your actual Supabase connection string
-DATABASE_URL="postgresql://postgres.xxxx:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+# Replace with your actual Supabase connection string (with pgBouncer pooling)
+POSTGRES_PRISMA_URL="postgres://postgres.xxxx:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true"
 
 # Set your own secure passkey (anything you want)
 APP_PASSKEY="mySecurePasskey123"
@@ -51,10 +51,11 @@ Open http://localhost:3000 and login with your APP_PASSKEY!
 2. Go to https://vercel.com
 3. Click "Import Project"
 4. Select your GitHub repository
-5. Add environment variables:
-   - `DATABASE_URL` (your Supabase connection string)
+5. Add Supabase integration (Storage > Connect Store > Supabase)
+   - This auto-injects `POSTGRES_PRISMA_URL` and other credentials
+6. Add environment variable:
    - `APP_PASSKEY` (your passkey)
-6. Click Deploy!
+7. Click Deploy!
 
 ---
 

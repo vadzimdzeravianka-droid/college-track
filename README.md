@@ -11,7 +11,7 @@ A web application to track college applications, manage portal credentials, and 
 
 2. **Configure environment variables:**
    - Copy `.env.local.example` to `.env.local`
-   - Add your Supabase DATABASE_URL
+   - Add your Supabase POSTGRES_PRISMA_URL
    - Set your APP_PASSKEY
 
 3. **Setup database:**
@@ -43,8 +43,9 @@ A web application to track college applications, manage portal credentials, and 
 
 1. Push to GitHub
 2. Import project in Vercel
-3. Add environment variables (DATABASE_URL, APP_PASSKEY)
-4. Deploy!
+3. Connect Supabase integration (auto-injects POSTGRES_PRISMA_URL)
+4. Add APP_PASSKEY environment variable
+5. Deploy!
 
 ## Status Colors
 
