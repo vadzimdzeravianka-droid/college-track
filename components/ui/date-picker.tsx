@@ -50,35 +50,40 @@ export function DatePicker({
     setOpen(false);
   };
 
+  const triggerButton = (
+    <Button
+      variant="outline"
+      disabled={disabled}
+      className={cn(
+        "w-full justify-start text-left font-normal h-11",
+        !value && "text-muted-foreground",
+        className
+      )}
+    >
+      <CalendarIcon className="mr-2 h-4 w-4" />
+      {value ? format(value, "PPP") : <span>{placeholder}</span>}
+    </Button>
+  );
+
   // Mobile: Use fullscreen modal with calendar
   if (isMobile) {
     return (
       <>
-        <Button
-          variant="outline"
-          disabled={disabled}
-          onClick={() => setOpen(true)}
-          className={cn(
-            "w-full justify-start text-left font-normal h-11",
-            !value && "text-muted-foreground",
-            className
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP") : <span>{placeholder}</span>}
-        </Button>
+        <div onClick={() => !disabled && setOpen(true)}>
+          {triggerButton}
+        </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-[95vw] sm:max-w-md">
-            <DialogHeader>
+          <DialogContent className="max-w-[95vw] sm:max-w-md p-0">
+            <DialogHeader className="p-6 pb-0">
               <DialogTitle>{placeholder}</DialogTitle>
             </DialogHeader>
-            <div className="flex justify-center py-4">
+            <div className="flex justify-center px-4 pb-6">
               <Calendar
                 mode="single"
                 selected={value}
                 onSelect={handleSelect}
                 initialFocus
-                className="rounded-md border"
+                className="rounded-md border-0 [--cell-size:2.75rem]"
               />
             </div>
           </DialogContent>
@@ -89,27 +94,21 @@ export function DatePicker({
 
   // Desktop: Use Calendar popover
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          disabled={disabled}
-          className={cn(
-            "w-full justify-start text-left font-normal h-11",
-            !value && "text-muted-foreground",
-            className
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP") : <span>{placeholder}</span>}
-        </Button>
+        {triggerButton}
       </PopoverTrigger>
-      <PopoverContent className="w-auto overflow-hidden p-0" align="start" sideOffset={4}>
+      <PopoverContent
+        className="w-auto p-0"
+        align="start"
+        sideOffset={4}
+      >
         <Calendar
           mode="single"
           selected={value}
-          onSelect={onChange}
+          onSelect={handleSelect}
           initialFocus
+          className="rounded-md"
         />
       </PopoverContent>
     </Popover>

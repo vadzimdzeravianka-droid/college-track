@@ -269,8 +269,8 @@ export function CollegeFormNew({
                   name="deadlineApp"
                   render={({ field }) => (
                     <DatePicker
-                      value={field.value ? new Date(field.value) : undefined}
-                      onChange={(date) => field.onChange(date?.toISOString().split('T')[0] || '')}
+                      value={field.value && field.value !== "" ? new Date(field.value) : undefined}
+                      onChange={(date) => field.onChange(date?.toISOString().split('T')[0] || "")}
                       placeholder="Select application deadline"
                       disabled={isPending}
                     />
@@ -286,8 +286,8 @@ export function CollegeFormNew({
                   name="deadlineFinaid"
                   render={({ field }) => (
                     <DatePicker
-                      value={field.value ? new Date(field.value) : undefined}
-                      onChange={(date) => field.onChange(date?.toISOString().split('T')[0] || '')}
+                      value={field.value && field.value !== "" ? new Date(field.value) : undefined}
+                      onChange={(date) => field.onChange(date?.toISOString().split('T')[0] || "")}
                       placeholder="Select financial aid deadline"
                       disabled={isPending}
                     />
