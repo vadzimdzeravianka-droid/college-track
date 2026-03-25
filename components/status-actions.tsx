@@ -34,7 +34,7 @@ export function StatusActions({ collegeId, currentStatus }: { collegeId: string;
             variant="outline"
             onClick={() => handleStatusChange("WAITLISTED")}
             disabled={isPending}
-            className="w-full justify-start"
+            className="w-full justify-start border-orange-200 dark:border-orange-800 hover:bg-orange-50 dark:hover:bg-orange-950/30 text-orange-700 dark:text-orange-400"
           >
             <Clock className="h-4 w-4 mr-2" />
             Waitlisted
@@ -43,7 +43,7 @@ export function StatusActions({ collegeId, currentStatus }: { collegeId: string;
             variant="outline"
             onClick={() => handleStatusChange("ACCEPTED")}
             disabled={isPending}
-            className="w-full justify-start text-green-700 dark:text-green-400 hover:text-green-700 dark:hover:text-green-400"
+            className="w-full justify-start border-green-200 dark:border-green-800 hover:bg-green-50 dark:hover:bg-green-950/30 text-green-700 dark:text-green-400"
           >
             <CheckCircle className="h-4 w-4 mr-2" />
             Accepted
@@ -52,7 +52,7 @@ export function StatusActions({ collegeId, currentStatus }: { collegeId: string;
             variant="outline"
             onClick={() => handleStatusChange("DECLINED")}
             disabled={isPending}
-            className="w-full justify-start text-red-700 dark:text-red-400 hover:text-red-700 dark:hover:text-red-400"
+            className="w-full justify-start border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-700 dark:text-red-400"
           >
             <XCircle className="h-4 w-4 mr-2" />
             Declined
@@ -67,13 +67,13 @@ export function StatusActions({ collegeId, currentStatus }: { collegeId: string;
     return (
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          Status set to <strong>{currentStatus}</strong>. Click below if this was a mistake:
+          Status set to <strong className="text-foreground">{currentStatus}</strong>. Click below if this was a mistake:
         </p>
         <Button
           variant="outline"
           onClick={() => handleStatusChange("SUBMITTED")}
           disabled={isPending}
-          className="w-full"
+          className="w-full border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-blue-700 dark:text-blue-400"
         >
           <Undo2 className="h-4 w-4 mr-2" />
           Back to Submitted

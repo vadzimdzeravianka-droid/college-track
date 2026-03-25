@@ -55,13 +55,13 @@ export function CollegeCard({ college }: { college: College }) {
   const urgencyLevel = getUrgencyLevel(
     college.deadlineApp,
     college.status,
-    college.checklist,
+    college.checklist ?? null,
     college.checklist?.essayCount || 0
   );
   const urgencyMessage = getUrgencyMessage(
     college.deadlineApp,
     college.status,
-    college.checklist,
+    college.checklist ?? null,
     college.checklist?.essayCount || 0
   );
   const daysUntil = college.deadlineApp ? getDaysUntilDeadline(college.deadlineApp) : null;
