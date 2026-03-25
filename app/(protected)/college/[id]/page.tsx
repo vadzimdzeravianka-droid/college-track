@@ -45,8 +45,8 @@ export default async function CollegeDetailPage({
     );
   }
 
-  // Disable checklist editing for final statuses
-  const isChecklistDisabled = ["SUBMITTED", "WAITLISTED", "ACCEPTED", "DECLINED"].includes(college.status);
+  // Disable checklist editing only for final decision statuses
+  const isChecklistDisabled = ["WAITLISTED", "ACCEPTED", "DECLINED"].includes(college.status);
 
   return (
     <div className="min-h-svh bg-background">

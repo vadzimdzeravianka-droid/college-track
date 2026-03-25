@@ -185,6 +185,9 @@ export async function updateChecklist(
     } else if (college.status === "IN_PROGRESS" && allComplete) {
       // All complete triggers SUBMITTED
       newStatus = "SUBMITTED";
+    } else if (college.status === "SUBMITTED" && !allComplete) {
+      // Unchecking items from SUBMITTED goes back to IN_PROGRESS
+      newStatus = "IN_PROGRESS";
     }
 
     // Update status if changed

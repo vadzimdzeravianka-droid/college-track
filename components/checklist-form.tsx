@@ -68,7 +68,7 @@ export function ChecklistForm({ checklist, collegeId, disabled = false }: { chec
     <div className="space-y-3">
       {disabled && (
         <div className="mb-4 p-3 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-sm text-blue-700 dark:text-blue-400">
-          <strong>Checklist locked.</strong> Application has been submitted. Use the Back button below to unlock if needed.
+          <strong>Checklist locked.</strong> Final decision recorded. Use the Back button below to revert and unlock checklist.
         </div>
       )}
       <div className="flex items-center space-x-3">
