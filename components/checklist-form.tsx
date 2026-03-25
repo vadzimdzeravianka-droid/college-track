@@ -37,7 +37,6 @@ export function ChecklistForm({ checklist, collegeId, disabled = false }: { chec
 
   const handleEssayCountChange = (value: number) => {
     setEssayCount(value);
-    // Reset supplemental completed if it exceeds new total
     if (supplementalCompleted > value) {
       setSupplementalCompleted(value);
       startTransition(async () => {

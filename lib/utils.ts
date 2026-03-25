@@ -7,21 +7,18 @@ export function cn(...inputs: ClassValue[]) {
 
 // Milestone duration constants (in days)
 const MILESTONE_DURATIONS = {
-  mainEssay: 21,              // 3 weeks for main essay
-  supplementalEssay: 10,      // 10 days per supplemental essay
-  lorRequest: 28,             // 4 weeks for letter of recommendation
-  transcriptRequest: 14,      // 2 weeks for transcript processing
-  testScoresSend: 14,         // 2 weeks to send test scores
-  finaidDocuments: 21,        // 3 weeks for financial aid docs
-  finalReview: 3,             // 3 days final review buffer
-  unexpectedDelay: 7,         // 1 week buffer for unexpected issues
+  mainEssay: 21,
+  supplementalEssay: 10,
+  lorRequest: 28,
+  transcriptRequest: 14,
+  testScoresSend: 14,
+  finaidDocuments: 21,
+  finalReview: 3,
+  unexpectedDelay: 7,
 };
 
-// Parallel items (administrative tasks that can be done simultaneously)
-// These run concurrently, so we only count the longest duration
 const PARALLEL_ITEMS = {
-  longestDuration: MILESTONE_DURATIONS.lorRequest, // LOR takes longest (28 days)
-  // Other parallel items: transcriptRequest (14), testScoresSend (14), finaidDocuments (21)
+  longestDuration: MILESTONE_DURATIONS.lorRequest,
 };
 
 type Checklist = {
@@ -34,25 +31,18 @@ type Checklist = {
   finaidGreenLight: boolean;
 } | null;
 
-// Calculate days needed based on incomplete checklist items (accounting for parallel work)
 export function calculateDaysNeeded(checklist: Checklist, essayCount: number = 0): number {
   let sequentialDays = 0;
   let needsParallelBlock = false;
 
   if (!checklist) {
-    // If no checklist, assume everything needs to be done
-    // Administrative items run in parallel (take longest = LOR 28 days)
     needsParallelBlock = true;
-
-    // Essays are sequential (main + supplementals with overlap)
     sequentialDays = MILESTONE_DURATIONS.mainEssay;
 
-    // Supplemental essays with 30% overlap (not fully sequential)
     if (essayCount > 0) {
       sequentialDays += Math.ceil(essayCount * MILESTONE_DURATIONS.supplementalEssay * 0.7);
     }
   } else {
-    // Check if any parallel administrative tasks are incomplete
     const hasIncompleteAdmin =
       !checklist.lorTeacher ||
       !checklist.transcriptSent ||
@@ -63,12 +53,10 @@ export function calculateDaysNeeded(checklist: Checklist, essayCount: number = 0
       needsParallelBlock = true;
     }
 
-    // Essays (sequential work)
     if (!checklist.mainEssayComplete) {
       sequentialDays += MILESTONE_DURATIONS.mainEssay;
     }
 
-    // Supplemental essays - with 30% overlap factor
     const supplementalsCompleted = checklist.supplementalEssaysCompleted ?? 0;
     const totalSupplementals = checklist.essayCount || 0;
     const supplementalsRemaining = Math.max(0, totalSupplementals - supplementalsCompleted);
@@ -78,17 +66,13 @@ export function calculateDaysNeeded(checklist: Checklist, essayCount: number = 0
     }
   }
 
-  // Calculate total: MAX(parallel block, sequential essays)
   const parallelBlockDuration = needsParallelBlock ? PARALLEL_ITEMS.longestDuration : 0;
   const totalWorkDays = Math.max(parallelBlockDuration, sequentialDays);
-
-  // Add mandatory buffers
   const totalDays = totalWorkDays + MILESTONE_DURATIONS.finalReview + MILESTONE_DURATIONS.unexpectedDelay;
 
   return totalDays;
 }
 
-// Calculate urgency level based on buffer ratio
 export type UrgencyLevel = "red" | "yellow" | "green" | "none";
 
 export function getUrgencyLevel(
@@ -97,7 +81,6 @@ export function getUrgencyLevel(
   checklist: Checklist,
   essayCount: number = 0
 ): UrgencyLevel {
-  // No urgency for submitted/completed applications
   if (!deadline || status === "SUBMITTED" || status === "ACCEPTED" || status === "DECLINED") {
     return "none";
   }
@@ -105,36 +88,29 @@ export function getUrgencyLevel(
   const now = new Date();
   const daysAvailable = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Past deadline or very close
   if (daysAvailable <= 0) {
     return "red";
   }
 
   const daysNeeded = calculateDaysNeeded(checklist, essayCount);
 
-  // If everything is complete, no urgency
-  if (daysNeeded <= 10) { // Only buffers remain
+  if (daysNeeded <= 10) {
     return "green";
   }
 
-  // Calculate buffer ratio
   const bufferRatio = daysAvailable / daysNeeded;
 
-  // Less than 10% buffer → RED (critical)
   if (bufferRatio < 1.1) {
     return "red";
   }
 
-  // Less than 60% buffer → YELLOW (warning)
   if (bufferRatio < 1.6) {
     return "yellow";
   }
 
-  // 60%+ buffer → GREEN (on track)
   return "green";
 }
 
-// Legacy function - kept for backward compatibility, now uses predictive logic
 export function isDeadlineUrgent(deadline: Date | null, status: string): boolean {
   if (!deadline || status === "SUBMITTED" || status === "ACCEPTED" || status === "DECLINED") {
     return false;
@@ -144,7 +120,6 @@ export function isDeadlineUrgent(deadline: Date | null, status: string): boolean
   return daysUntil <= 7 && daysUntil >= 0;
 }
 
-// Get urgency message for display
 export function getUrgencyMessage(
   deadline: Date | null,
   status: string,

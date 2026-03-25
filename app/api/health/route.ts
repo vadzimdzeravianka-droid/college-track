@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   try {
-    // Test database connection
     await db.$queryRaw`SELECT 1`;
 
     return NextResponse.json({

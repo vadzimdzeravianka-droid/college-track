@@ -5,17 +5,14 @@ import { publicRoutes } from "@/routes";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public routes
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
-  // Allow all API routes
   if (pathname.startsWith("/api")) {
     return NextResponse.next();
   }
 
-  // Check for auth cookie
   const isAuthorized = request.cookies.get("is_authorized")?.value === "true";
 
   if (!isAuthorized) {

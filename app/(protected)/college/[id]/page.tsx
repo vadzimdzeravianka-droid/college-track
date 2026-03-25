@@ -6,11 +6,10 @@ import { ChecklistForm } from "@/components/checklist-form";
 import { StatusActions } from "@/components/status-actions";
 import { PortalCredentials } from "@/components/portal-credentials";
 import { CollegeEditButton } from "@/components/college-edit-button";
-import { formatDate, getUrgencyLevel, getUrgencyMessage } from "@/lib/utils";
+import { formatDate, getUrgencyLevel, getUrgencyMessage, cn } from "@/lib/utils";
 import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2, AlertCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 async function handleDelete(id: string) {
   "use server";
@@ -19,7 +18,6 @@ async function handleDelete(id: string) {
     redirect("/dashboard");
   }
 }
-
 export default async function CollegeDetailPage({
   params,
 }: {
@@ -46,10 +44,8 @@ export default async function CollegeDetailPage({
     );
   }
 
-  // Disable checklist editing only for final decision statuses
   const isChecklistDisabled = ["WAITLISTED", "ACCEPTED", "DECLINED"].includes(college.status);
 
-  // Calculate urgency for detail page
   const urgencyLevel = getUrgencyLevel(
     college.deadlineApp,
     college.status,

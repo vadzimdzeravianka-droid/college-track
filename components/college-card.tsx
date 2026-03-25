@@ -32,9 +32,8 @@ type College = {
 function getChecklistProgress(checklist?: College["checklist"]): { completed: number; total: number } {
   if (!checklist) return { completed: 0, total: 0 };
 
-  // Count base items (always present)
   let completed = 0;
-  let total = 5; // LOR, Transcript, Test Scores, Main Essay, Financial Aid
+  let total = 5;
 
   if (checklist.lorTeacher) completed++;
   if (checklist.transcriptSent) completed++;
@@ -42,7 +41,6 @@ function getChecklistProgress(checklist?: College["checklist"]): { completed: nu
   if (checklist.mainEssayComplete) completed++;
   if (checklist.finaidGreenLight) completed++;
 
-  // Add supplemental essays to total and count completed
   const supplementalTotal = checklist.essayCount || 0;
   const supplementalCompleted = checklist.supplementalEssaysCompleted || 0;
   total += supplementalTotal;
@@ -68,7 +66,6 @@ export function CollegeCard({ college }: { college: College }) {
   const hasPortalCredentials = !!(college.portalUrl || college.portalUser);
   const checklistProgress = getChecklistProgress(college.checklist);
 
-  // Determine border styling based on urgency
   const getBorderClass = () => {
     if (urgencyLevel === "red") return "border-2 border-destructive";
     if (urgencyLevel === "yellow") return "border-2 border-yellow-500";

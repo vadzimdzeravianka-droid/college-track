@@ -164,10 +164,8 @@ export async function updateChecklist(
       });
     }
 
-    // Auto-transition status based on checklist state
     const merged = { ...college.checklist, ...updatedChecklist, ...values };
 
-    // Check if all items are complete
     const allComplete =
       merged.lorTeacher &&
       merged.transcriptSent &&
@@ -178,19 +176,14 @@ export async function updateChecklist(
 
     let newStatus = college.status;
 
-    // Auto-transition logic
     if (college.status === "NOT_STARTED") {
-      // Any checkbox triggers IN_PROGRESS
       newStatus = "IN_PROGRESS";
     } else if (college.status === "IN_PROGRESS" && allComplete) {
-      // All complete triggers SUBMITTED
       newStatus = "SUBMITTED";
     } else if (college.status === "SUBMITTED" && !allComplete) {
-      // Unchecking items from SUBMITTED goes back to IN_PROGRESS
       newStatus = "IN_PROGRESS";
     }
 
-    // Update status if changed
     if (newStatus !== college.status) {
       await db.college.update({
         where: { id: collegeId },

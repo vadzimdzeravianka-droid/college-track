@@ -65,7 +65,6 @@ export function DatePicker({
     </Button>
   );
 
-  // Mobile: Use fullscreen modal with calendar
   if (isMobile) {
     return (
       <>
@@ -91,7 +90,6 @@ export function DatePicker({
     );
   }
 
-  // Desktop: Use Calendar popover (classic shadcn pattern)
   return (
     <Popover>
       <PopoverTrigger asChild>
