@@ -6,10 +6,11 @@ import { ChecklistForm } from "@/components/checklist-form";
 import { StatusActions } from "@/components/status-actions";
 import { PortalCredentials } from "@/components/portal-credentials";
 import { CollegeEditButton } from "@/components/college-edit-button";
-import { formatDate } from "@/lib/utils";
-import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2 } from "lucide-react";
+import { formatDate, getUrgencyLevel, getUrgencyMessage } from "@/lib/utils";
+import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2, AlertCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 async function handleDelete(id: string) {
   "use server";
@@ -48,6 +49,20 @@ export default async function CollegeDetailPage({
   // Disable checklist editing only for final decision statuses
   const isChecklistDisabled = ["WAITLISTED", "ACCEPTED", "DECLINED"].includes(college.status);
 
+  // Calculate urgency for detail page
+  const urgencyLevel = getUrgencyLevel(
+    college.deadlineApp,
+    college.status,
+    college.checklist ?? null,
+    college.checklist?.essayCount || 0
+  );
+  const urgencyMessage = getUrgencyMessage(
+    college.deadlineApp,
+    college.status,
+    college.checklist ?? null,
+    college.checklist?.essayCount || 0
+  );
+
   return (
     <div className="min-h-svh bg-background">
       <header className="sticky top-0 z-50 w-full bg-background border-b">
@@ -71,6 +86,22 @@ export default async function CollegeDetailPage({
               <CategoryBadge category={college.category} />
               <StrategyBadge strategy={college.strategy} />
             </div>
+            {urgencyMessage && urgencyLevel !== "none" && (
+              <div className={cn(
+                "flex items-start gap-3 p-4 rounded-lg border",
+                urgencyLevel === "red" && "bg-destructive/10 border-destructive/20 text-destructive",
+                urgencyLevel === "yellow" && "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-400"
+              )}>
+                {urgencyLevel === "red" && <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />}
+                {urgencyLevel === "yellow" && <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />}
+                <div>
+                  <p className="font-semibold text-sm mb-1">
+                    {urgencyLevel === "red" ? "Critical Timeline" : "Timeline Warning"}
+                  </p>
+                  <p className="text-sm">{urgencyMessage}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
