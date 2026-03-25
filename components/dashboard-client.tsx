@@ -42,13 +42,13 @@ export function DashboardClient({ colleges }: { colleges: College[] }) {
     const urgencyA = getUrgencyLevel(
       a.deadlineApp,
       a.status,
-      a.checklist,
+      a.checklist ?? null,
       a.checklist?.essayCount || 0
     );
     const urgencyB = getUrgencyLevel(
       b.deadlineApp,
       b.status,
-      b.checklist,
+      b.checklist ?? null,
       b.checklist?.essayCount || 0
     );
 
