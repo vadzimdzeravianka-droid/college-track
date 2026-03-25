@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CollegeSchema } from "@/schemas";
 import { createCollege, updateCollege } from "@/actions/college";
 import { toast } from "sonner";
+import { format, parseISO } from "date-fns";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -269,8 +270,8 @@ export function CollegeFormNew({
                   name="deadlineApp"
                   render={({ field }) => (
                     <DatePicker
-                      value={field.value && field.value !== "" ? new Date(field.value) : undefined}
-                      onChange={(date) => field.onChange(date?.toISOString().split('T')[0] || "")}
+                      value={field.value && field.value !== "" ? parseISO(field.value) : undefined}
+                      onChange={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
                       placeholder="Select application deadline"
                       disabled={isPending}
                     />
@@ -286,8 +287,8 @@ export function CollegeFormNew({
                   name="deadlineFinaid"
                   render={({ field }) => (
                     <DatePicker
-                      value={field.value && field.value !== "" ? new Date(field.value) : undefined}
-                      onChange={(date) => field.onChange(date?.toISOString().split('T')[0] || "")}
+                      value={field.value && field.value !== "" ? parseISO(field.value) : undefined}
+                      onChange={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
                       placeholder="Select financial aid deadline"
                       disabled={isPending}
                     />

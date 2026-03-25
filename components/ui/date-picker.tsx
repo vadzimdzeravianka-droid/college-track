@@ -73,17 +73,16 @@ export function DatePicker({
           {triggerButton}
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-[95vw] sm:max-w-md p-0">
-            <DialogHeader className="p-6 pb-0">
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
               <DialogTitle>{placeholder}</DialogTitle>
             </DialogHeader>
-            <div className="flex justify-center px-4 pb-6">
+            <div className="flex justify-center py-4">
               <Calendar
                 mode="single"
                 selected={value}
                 onSelect={handleSelect}
                 initialFocus
-                className="rounded-md border-0 [--cell-size:2.75rem]"
               />
             </div>
           </DialogContent>
@@ -92,23 +91,18 @@ export function DatePicker({
     );
   }
 
-  // Desktop: Use Calendar popover
+  // Desktop: Use Calendar popover (classic shadcn pattern)
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover>
       <PopoverTrigger asChild>
         {triggerButton}
       </PopoverTrigger>
-      <PopoverContent
-        className="w-auto p-0"
-        align="start"
-        sideOffset={4}
-      >
+      <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
           selected={value}
-          onSelect={handleSelect}
+          onSelect={onChange}
           initialFocus
-          className="rounded-md"
         />
       </PopoverContent>
     </Popover>
