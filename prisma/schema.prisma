@@ -51,15 +51,17 @@ model College {
 }
 
 model Checklist {
-  id                String  @id @default(uuid())
-  collegeId         String  @unique @map("college_id")
-  lorTeacher        Boolean @default(false) @map("lor_teacher")
-  transcriptSent    Boolean @default(false) @map("transcript_sent")
-  testScoresSent    Boolean @default(false) @map("test_scores_sent")
-  essayCount        Int     @default(0) @map("essay_count")
-  finaidGreenLight  Boolean @default(false) @map("finaid_green_light")
+  id                          String  @id @default(uuid())
+  collegeId                   String  @unique @map("college_id")
+  lorTeacher                  Boolean @default(false) @map("lor_teacher")
+  transcriptSent              Boolean @default(false) @map("transcript_sent")
+  testScoresSent              Boolean @default(false) @map("test_scores_sent")
+  essayCount                  Int     @default(0) @map("essay_count")
+  mainEssayComplete           Boolean @default(false) @map("main_essay_complete")
+  supplementalEssaysCompleted Int     @default(0) @map("supplemental_essays_completed")
+  finaidGreenLight            Boolean @default(false) @map("finaid_green_light")
 
-  college           College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  college                     College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
 
   @@map("checklists")
 }

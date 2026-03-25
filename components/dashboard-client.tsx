@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CollegeCard } from "@/components/college-card";
 import { DashboardFilters } from "@/components/dashboard-filters";
+import { getUrgencyLevel } from "@/lib/utils";
 import { GraduationCap } from "lucide-react";
 
 type College = {
@@ -31,9 +32,44 @@ type FilterType = "all" | "NOT_STARTED" | "IN_PROGRESS" | "SUBMITTED" | "WAITLIS
 export function DashboardClient({ colleges }: { colleges: College[] }) {
   const [filter, setFilter] = useState<FilterType>("all");
 
+  // Filter colleges
   const filteredColleges = filter === "all"
     ? colleges
     : colleges.filter((c) => c.status === filter);
+
+  // Sort by urgency level (red → yellow → green) then by deadline
+  const sortedColleges = [...filteredColleges].sort((a, b) => {
+    const urgencyA = getUrgencyLevel(
+      a.deadlineApp,
+      a.status,
+      a.checklist,
+      a.checklist?.essayCount || 0
+    );
+    const urgencyB = getUrgencyLevel(
+      b.deadlineApp,
+      b.status,
+      b.checklist,
+      b.checklist?.essayCount || 0
+    );
+
+    // Urgency priority: red (3) > yellow (2) > green (1) > none (0)
+    const urgencyWeight = { red: 3, yellow: 2, green: 1, none: 0 };
+    const weightA = urgencyWeight[urgencyA];
+    const weightB = urgencyWeight[urgencyB];
+
+    // Sort by urgency first
+    if (weightA !== weightB) {
+      return weightB - weightA; // Higher weight first
+    }
+
+    // Within same urgency, sort by deadline (soonest first)
+    if (a.deadlineApp && b.deadlineApp) {
+      return a.deadlineApp.getTime() - b.deadlineApp.getTime();
+    }
+    if (a.deadlineApp) return -1;
+    if (b.deadlineApp) return 1;
+    return 0;
+  });
 
   return (
     <div className="space-y-6">
@@ -53,9 +89,9 @@ export function DashboardClient({ colleges }: { colleges: College[] }) {
         </div>
       )}
 
-      {filteredColleges.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredColleges.map((college) => (
+      {sortedColleges.length > 0 && (
+        <div className="grid grid-cols-1 gap-6">
+          {sortedColleges.map((college) => (
             <CollegeCard key={college.id} college={college} />
           ))}
         </div>

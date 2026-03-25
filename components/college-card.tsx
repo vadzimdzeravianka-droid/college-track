@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge, CategoryBadge, StrategyBadge } from "@/components/status-badge";
-import { cn, isDeadlineUrgent, formatDate, getDaysUntilDeadline } from "@/lib/utils";
+import { cn, getUrgencyLevel, getUrgencyMessage, formatDate, getDaysUntilDeadline } from "@/lib/utils";
 import Link from "next/link";
-import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle2, KeyRound } from "lucide-react";
+import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle2, KeyRound, AlertTriangle, AlertCircle } from "lucide-react";
 
 type College = {
   id: string;
@@ -23,50 +23,108 @@ type College = {
     transcriptSent: boolean;
     testScoresSent: boolean;
     essayCount: number;
+    mainEssayComplete?: boolean;
+    supplementalEssaysCompleted?: number;
     finaidGreenLight: boolean;
   } | null;
 };
 
 function getChecklistProgress(checklist?: College["checklist"]): { completed: number; total: number } {
-  if (!checklist) return { completed: 0, total: 5 };
+  if (!checklist) return { completed: 0, total: 0 };
 
-  const items = [
-    checklist.lorTeacher,
-    checklist.transcriptSent,
-    checklist.testScoresSent,
-    checklist.essayCount > 0,
-    checklist.finaidGreenLight,
-  ];
+  // Count base items (always present)
+  let completed = 0;
+  let total = 5; // LOR, Transcript, Test Scores, Main Essay, Financial Aid
 
-  return {
-    completed: items.filter(Boolean).length,
-    total: items.length,
-  };
+  if (checklist.lorTeacher) completed++;
+  if (checklist.transcriptSent) completed++;
+  if (checklist.testScoresSent) completed++;
+  if (checklist.mainEssayComplete) completed++;
+  if (checklist.finaidGreenLight) completed++;
+
+  // Add supplemental essays to total and count completed
+  const supplementalTotal = checklist.essayCount || 0;
+  const supplementalCompleted = checklist.supplementalEssaysCompleted || 0;
+  total += supplementalTotal;
+  completed += supplementalCompleted;
+
+  return { completed, total };
 }
 
 export function CollegeCard({ college }: { college: College }) {
-  const isUrgent = isDeadlineUrgent(college.deadlineApp, college.status);
+  const urgencyLevel = getUrgencyLevel(
+    college.deadlineApp,
+    college.status,
+    college.checklist,
+    college.checklist?.essayCount || 0
+  );
+  const urgencyMessage = getUrgencyMessage(
+    college.deadlineApp,
+    college.status,
+    college.checklist,
+    college.checklist?.essayCount || 0
+  );
   const daysUntil = college.deadlineApp ? getDaysUntilDeadline(college.deadlineApp) : null;
   const hasPortalCredentials = !!(college.portalUrl || college.portalUser);
   const checklistProgress = getChecklistProgress(college.checklist);
+
+  // Determine border styling based on urgency
+  const getBorderClass = () => {
+    if (urgencyLevel === "red") return "border-2 border-destructive";
+    if (urgencyLevel === "yellow") return "border-2 border-yellow-500";
+    return "border";
+  };
+
+  const getUrgencyBadge = () => {
+    if (urgencyLevel === "red") {
+      return (
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-destructive/10 text-destructive rounded-md text-xs font-medium">
+          <AlertCircle className="h-3.5 w-3.5" />
+          CRITICAL
+        </div>
+      );
+    }
+    if (urgencyLevel === "yellow") {
+      return (
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-500 rounded-md text-xs font-medium">
+          <AlertTriangle className="h-3.5 w-3.5" />
+          WARNING
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Link href={`/college/${college.id}`}>
       <Card
         className={cn(
           "transition-all duration-300 hover:shadow-lg cursor-pointer h-full",
-          isUrgent && "border-2 border-destructive animate-pulse"
+          getBorderClass(),
+          urgencyLevel === "red" && "animate-pulse"
         )}
       >
         {/* Mobile: Vertical Layout */}
         <div className="md:hidden">
           <CardHeader>
-            <CardTitle className="text-xl">{college.name}</CardTitle>
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <CardTitle className="text-xl flex-1">{college.name}</CardTitle>
+              {getUrgencyBadge()}
+            </div>
+            <div className="flex flex-wrap gap-2">
               <StatusBadge status={college.status} />
               <CategoryBadge category={college.category} />
               <StrategyBadge strategy={college.strategy} />
             </div>
+            {urgencyMessage && (
+              <div className={cn(
+                "mt-3 text-xs p-2 rounded",
+                urgencyLevel === "red" && "bg-destructive/10 text-destructive",
+                urgencyLevel === "yellow" && "bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-500"
+              )}>
+                {urgencyMessage}
+              </div>
+            )}
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-2">
@@ -87,14 +145,18 @@ export function CollegeCard({ college }: { college: College }) {
                   <Calendar className="h-4 w-4 flex-shrink-0" />
                   <div className="flex flex-col">
                     <span className={cn(
-                      isUrgent ? "text-destructive font-semibold" : "text-muted-foreground"
+                      urgencyLevel === "red" && "text-destructive font-semibold",
+                      urgencyLevel === "yellow" && "text-yellow-700 dark:text-yellow-500 font-semibold",
+                      urgencyLevel === "green" && "text-muted-foreground"
                     )}>
                       App: {formatDate(college.deadlineApp)}
                     </span>
                     {daysUntil !== null && daysUntil >= 0 && (
                       <span className={cn(
                         "text-xs",
-                        isUrgent ? "text-destructive font-medium" : "text-muted-foreground"
+                        urgencyLevel === "red" && "text-destructive font-medium",
+                        urgencyLevel === "yellow" && "text-yellow-700 dark:text-yellow-500 font-medium",
+                        urgencyLevel === "green" && "text-muted-foreground"
                       )}>
                         {daysUntil === 0 ? "Due today!" : `${daysUntil} days left`}
                       </span>
@@ -130,12 +192,24 @@ export function CollegeCard({ college }: { college: College }) {
         <div className="hidden md:flex items-stretch">
           {/* Left: Name & Badges */}
           <div className="flex-shrink-0 w-1/3 p-6 flex flex-col">
-            <CardTitle className="text-lg mb-3">{college.name}</CardTitle>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex items-start justify-between gap-2 mb-3">
+              <CardTitle className="text-lg flex-1">{college.name}</CardTitle>
+              {getUrgencyBadge()}
+            </div>
+            <div className="flex flex-wrap gap-1.5 mb-3">
               <StatusBadge status={college.status} />
               <CategoryBadge category={college.category} />
               <StrategyBadge strategy={college.strategy} />
             </div>
+            {urgencyMessage && (
+              <div className={cn(
+                "text-xs p-2 rounded mt-auto",
+                urgencyLevel === "red" && "bg-destructive/10 text-destructive",
+                urgencyLevel === "yellow" && "bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-500"
+              )}>
+                {urgencyMessage}
+              </div>
+            )}
           </div>
 
           {/* Middle: Details */}
@@ -157,14 +231,18 @@ export function CollegeCard({ college }: { college: College }) {
                 <Calendar className="h-4 w-4 flex-shrink-0" />
                 <div>
                   <span className={cn(
-                    isUrgent ? "text-destructive font-semibold" : "text-muted-foreground"
+                    urgencyLevel === "red" && "text-destructive font-semibold",
+                    urgencyLevel === "yellow" && "text-yellow-700 dark:text-yellow-500 font-semibold",
+                    urgencyLevel === "green" && "text-muted-foreground"
                   )}>
                     App: {formatDate(college.deadlineApp)}
                   </span>
                   {daysUntil !== null && daysUntil >= 0 && (
                     <span className={cn(
                       "text-xs ml-2",
-                      isUrgent ? "text-destructive font-medium" : "text-muted-foreground"
+                      urgencyLevel === "red" && "text-destructive font-medium",
+                      urgencyLevel === "yellow" && "text-yellow-700 dark:text-yellow-500 font-medium",
+                      urgencyLevel === "green" && "text-muted-foreground"
                     )}>
                       ({daysUntil === 0 ? "Due today!" : `${daysUntil} days left`})
                     </span>

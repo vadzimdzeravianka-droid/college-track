@@ -136,6 +136,7 @@ export async function updateChecklist(
         data: values,
       });
       revalidatePath(`/college/${collegeId}`);
+      revalidatePath("/dashboard");
       return { success: "Checklist updated!", checklist };
     } else {
       const checklist = await db.checklist.create({
@@ -145,9 +146,11 @@ export async function updateChecklist(
         },
       });
       revalidatePath(`/college/${collegeId}`);
+      revalidatePath("/dashboard");
       return { success: "Checklist created!", checklist };
     }
   } catch (error) {
-    return { error: "Failed to update checklist" };
+    console.error("Update checklist error:", error);
+    return { error: `Failed to update checklist: ${error instanceof Error ? error.message : String(error)}` };
   }
 }

@@ -24,5 +24,7 @@ export const ChecklistSchema = z.object({
   transcriptSent: z.boolean().default(false),
   testScoresSent: z.boolean().default(false),
   essayCount: z.number().int().min(0).default(0),
+  mainEssayComplete: z.boolean().default(false),
+  supplementalEssaysCompleted: z.number().int().min(0).default(0),
   finaidGreenLight: z.boolean().default(false),
 });
