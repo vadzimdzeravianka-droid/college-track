@@ -125,12 +125,12 @@ export function getUrgencyLevel(
     return "red";
   }
 
-  // Less than 30% buffer → YELLOW (warning)
-  if (bufferRatio < 1.3) {
+  // Less than 60% buffer → YELLOW (warning)
+  if (bufferRatio < 1.6) {
     return "yellow";
   }
 
-  // 30%+ buffer → GREEN (on track)
+  // 60%+ buffer → GREEN (on track)
   return "green";
 }
 
