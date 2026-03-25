@@ -6,11 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CollegeSchema } from "@/schemas";
 import { createCollege, updateCollege } from "@/actions/college";
 import { toast } from "sonner";
+import { format } from "date-fns";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -152,20 +154,20 @@ export function CollegeForm({ college, onSuccess }: { college?: College; onSucce
 
             <div>
               <Label htmlFor="deadlineApp">Application Deadline</Label>
-              <Input
-                {...form.register("deadlineApp")}
-                id="deadlineApp"
-                type="date"
+              <DatePicker
+                value={form.watch("deadlineApp") ? new Date(form.watch("deadlineApp")) : undefined}
+                onChange={(date) => form.setValue("deadlineApp", date ? format(date, "yyyy-MM-dd") : "")}
+                placeholder="Pick application deadline"
                 disabled={isPending}
               />
             </div>
 
             <div>
               <Label htmlFor="deadlineFinaid">Financial Aid Deadline</Label>
-              <Input
-                {...form.register("deadlineFinaid")}
-                id="deadlineFinaid"
-                type="date"
+              <DatePicker
+                value={form.watch("deadlineFinaid") ? new Date(form.watch("deadlineFinaid")) : undefined}
+                onChange={(date) => form.setValue("deadlineFinaid", date ? format(date, "yyyy-MM-dd") : "")}
+                placeholder="Pick financial aid deadline"
                 disabled={isPending}
               />
             </div>

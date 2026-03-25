@@ -6,12 +6,17 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface DatePickerProps {
   value?: Date;
@@ -29,6 +34,7 @@ export function DatePicker({
   className,
 }: DatePickerProps) {
   const [isMobile, setIsMobile] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -39,19 +45,45 @@ export function DatePicker({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Mobile: Use native date input
+  const handleSelect = (date: Date | undefined) => {
+    onChange?.(date);
+    setOpen(false);
+  };
+
+  // Mobile: Use fullscreen modal with calendar
   if (isMobile) {
     return (
-      <Input
-        type="date"
-        disabled={disabled}
-        value={value ? format(value, "yyyy-MM-dd") : ""}
-        onChange={(e) => {
-          const date = e.target.value ? new Date(e.target.value) : undefined;
-          onChange?.(date);
-        }}
-        className={cn("h-11", className)}
-      />
+      <>
+        <Button
+          variant="outline"
+          disabled={disabled}
+          onClick={() => setOpen(true)}
+          className={cn(
+            "w-full justify-start text-left font-normal h-11",
+            !value && "text-muted-foreground",
+            className
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value ? format(value, "PPP") : <span>{placeholder}</span>}
+        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-[95vw] sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{placeholder}</DialogTitle>
+            </DialogHeader>
+            <div className="flex justify-center py-4">
+              <Calendar
+                mode="single"
+                selected={value}
+                onSelect={handleSelect}
+                initialFocus
+                className="rounded-md border"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
@@ -72,7 +104,7 @@ export function DatePicker({
           {value ? format(value, "PPP") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="center" side="bottom">
+      <PopoverContent className="w-auto p-0" align="start" side="bottom">
         <Calendar
           mode="single"
           selected={value}
