@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, CategoryBadge, StrategyBadge } from "@/components/status-badge";
 import { ChecklistForm } from "@/components/checklist-form";
+import { StatusActions } from "@/components/status-actions";
 import { PortalCredentials } from "@/components/portal-credentials";
 import { CollegeEditButton } from "@/components/college-edit-button";
 import { formatDate } from "@/lib/utils";
@@ -44,6 +45,9 @@ export default async function CollegeDetailPage({
     );
   }
 
+  // Disable checklist editing for final statuses
+  const isChecklistDisabled = ["SUBMITTED", "WAITLISTED", "ACCEPTED", "DECLINED"].includes(college.status);
+
   return (
     <div className="min-h-svh bg-background">
       <header className="sticky top-0 z-50 w-full bg-background border-b">
@@ -72,15 +76,25 @@ export default async function CollegeDetailPage({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Mobile: Checklist first */}
-          <div className="lg:hidden">
+          <div className="lg:hidden space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Checklist</CardTitle>
               </CardHeader>
               <CardContent>
-                <ChecklistForm checklist={college.checklist} collegeId={college.id} />
+                <ChecklistForm checklist={college.checklist} collegeId={college.id} disabled={isChecklistDisabled} />
               </CardContent>
             </Card>
+            {(college.status === "SUBMITTED" || college.status === "WAITLISTED" || college.status === "ACCEPTED" || college.status === "DECLINED") && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Application Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StatusActions collegeId={college.id} currentStatus={college.status} />
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Main Content - 2 columns */}
@@ -170,15 +184,25 @@ export default async function CollegeDetailPage({
           </div>
 
           {/* Desktop: Sidebar - Checklist */}
-          <div className="hidden lg:block lg:col-span-1">
+          <div className="hidden lg:block lg:col-span-1 space-y-6">
             <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle>Checklist</CardTitle>
               </CardHeader>
               <CardContent>
-                <ChecklistForm checklist={college.checklist} collegeId={college.id} />
+                <ChecklistForm checklist={college.checklist} collegeId={college.id} disabled={isChecklistDisabled} />
               </CardContent>
             </Card>
+            {(college.status === "SUBMITTED" || college.status === "WAITLISTED" || college.status === "ACCEPTED" || college.status === "DECLINED") && (
+              <Card className="sticky top-4">
+                <CardHeader>
+                  <CardTitle>Application Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StatusActions collegeId={college.id} currentStatus={college.status} />
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </main>

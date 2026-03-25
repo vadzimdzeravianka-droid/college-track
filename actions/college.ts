@@ -116,6 +116,25 @@ export async function deleteCollege(id: string) {
   }
 }
 
+export async function updateCollegeStatus(
+  id: string,
+  status: "NOT_STARTED" | "IN_PROGRESS" | "SUBMITTED" | "WAITLISTED" | "ACCEPTED" | "DECLINED"
+) {
+  try {
+    const college = await db.college.update({
+      where: { id },
+      data: { status },
+      include: { checklist: true },
+    });
+
+    revalidatePath(`/college/${id}`);
+    revalidatePath("/dashboard");
+    return { success: "Status updated!", college };
+  } catch (error) {
+    return { error: "Failed to update status" };
+  }
+}
+
 export async function updateChecklist(
   collegeId: string,
   values: Partial<z.infer<typeof ChecklistSchema>>
@@ -130,25 +149,55 @@ export async function updateChecklist(
       return { error: "College not found" };
     }
 
+    let updatedChecklist;
     if (college.checklist) {
-      const checklist = await db.checklist.update({
+      updatedChecklist = await db.checklist.update({
         where: { collegeId },
         data: values,
       });
-      revalidatePath(`/college/${collegeId}`);
-      revalidatePath("/dashboard");
-      return { success: "Checklist updated!", checklist };
     } else {
-      const checklist = await db.checklist.create({
+      updatedChecklist = await db.checklist.create({
         data: {
           collegeId,
           ...values,
         },
       });
-      revalidatePath(`/college/${collegeId}`);
-      revalidatePath("/dashboard");
-      return { success: "Checklist created!", checklist };
     }
+
+    // Auto-transition status based on checklist state
+    const merged = { ...college.checklist, ...updatedChecklist, ...values };
+
+    // Check if all items are complete
+    const allComplete =
+      merged.lorTeacher &&
+      merged.transcriptSent &&
+      merged.testScoresSent &&
+      merged.mainEssayComplete &&
+      merged.finaidGreenLight &&
+      (merged.essayCount === 0 || merged.supplementalEssaysCompleted >= merged.essayCount);
+
+    let newStatus = college.status;
+
+    // Auto-transition logic
+    if (college.status === "NOT_STARTED") {
+      // Any checkbox triggers IN_PROGRESS
+      newStatus = "IN_PROGRESS";
+    } else if (college.status === "IN_PROGRESS" && allComplete) {
+      // All complete triggers SUBMITTED
+      newStatus = "SUBMITTED";
+    }
+
+    // Update status if changed
+    if (newStatus !== college.status) {
+      await db.college.update({
+        where: { id: collegeId },
+        data: { status: newStatus },
+      });
+    }
+
+    revalidatePath(`/college/${collegeId}`);
+    revalidatePath("/dashboard");
+    return { success: "Checklist updated!", checklist: updatedChecklist };
   } catch (error) {
     console.error("Update checklist error:", error);
     return { error: `Failed to update checklist: ${error instanceof Error ? error.message : String(error)}` };

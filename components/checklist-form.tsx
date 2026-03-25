@@ -19,7 +19,7 @@ type Checklist = {
   finaidGreenLight: boolean;
 };
 
-export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist | null; collegeId: string }) {
+export function ChecklistForm({ checklist, collegeId, disabled = false }: { checklist: Checklist | null; collegeId: string; disabled?: boolean }) {
   const [isPending, startTransition] = useTransition();
   const [essayCount, setEssayCount] = useState(checklist?.essayCount || 0);
   const [supplementalCompleted, setSupplementalCompleted] = useState(checklist?.supplementalEssaysCompleted || 0);
@@ -66,12 +66,17 @@ export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist |
 
   return (
     <div className="space-y-3">
+      {disabled && (
+        <div className="mb-4 p-3 rounded-md bg-muted text-sm text-muted-foreground">
+          Checklist is read-only. Application has been submitted.
+        </div>
+      )}
       <div className="flex items-center space-x-3">
         <Checkbox
           id="lorTeacher"
           checked={checklist?.lorTeacher || false}
           onCheckedChange={(checked) => handleCheckboxChange("lorTeacher", checked as boolean)}
-          disabled={isPending}
+          disabled={isPending || disabled}
         />
         <Label htmlFor="lorTeacher" className="cursor-pointer flex-1">
           Letter of Recommendation
@@ -84,7 +89,7 @@ export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist |
           id="transcriptSent"
           checked={checklist?.transcriptSent || false}
           onCheckedChange={(checked) => handleCheckboxChange("transcriptSent", checked as boolean)}
-          disabled={isPending}
+          disabled={isPending || disabled}
         />
         <Label htmlFor="transcriptSent" className="cursor-pointer flex-1">
           Transcript Sent
@@ -97,7 +102,7 @@ export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist |
           id="testScoresSent"
           checked={checklist?.testScoresSent || false}
           onCheckedChange={(checked) => handleCheckboxChange("testScoresSent", checked as boolean)}
-          disabled={isPending}
+          disabled={isPending || disabled}
         />
         <Label htmlFor="testScoresSent" className="cursor-pointer flex-1">
           Test Scores Sent
@@ -110,7 +115,7 @@ export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist |
           id="finaidGreenLight"
           checked={checklist?.finaidGreenLight || false}
           onCheckedChange={(checked) => handleCheckboxChange("finaidGreenLight", checked as boolean)}
-          disabled={isPending}
+          disabled={isPending || disabled}
         />
         <Label htmlFor="finaidGreenLight" className="cursor-pointer flex-1">
           Financial Aid Documents
@@ -129,7 +134,7 @@ export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist |
               id="mainEssayComplete"
               checked={checklist?.mainEssayComplete || false}
               onCheckedChange={(checked) => handleCheckboxChange("mainEssayComplete", checked as boolean)}
-              disabled={isPending}
+              disabled={isPending || disabled}
             />
             <Label htmlFor="mainEssayComplete" className="cursor-pointer">
               Main Essay Complete
@@ -148,7 +153,7 @@ export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist |
                 max="10"
                 value={essayCount}
                 onChange={(e) => handleEssayCountChange(parseInt(e.target.value) || 0)}
-                disabled={isPending}
+                disabled={isPending || disabled}
                 className="w-20 h-9"
               />
             </div>
@@ -163,7 +168,7 @@ export function ChecklistForm({ checklist, collegeId }: { checklist: Checklist |
                   max={essayCount}
                   value={supplementalCompleted}
                   onChange={(e) => handleSupplementalCompletedChange(parseInt(e.target.value) || 0)}
-                  disabled={isPending}
+                  disabled={isPending || disabled}
                   className="w-20 h-9"
                 />
                 <span className="text-sm text-muted-foreground">
