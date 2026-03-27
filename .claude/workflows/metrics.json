@@ -1,117 +1,22 @@
 {
-  "meta": {
-    "last_updated": "2026-03-27T00:30:00Z",
-    "total_features_attempted": 2,
-    "workflow_version": "1.0.0",
-    "created": "2026-03-26T15:00:00Z"
-  },
-  "current_phase": {
-    "phase": 1,
-    "week": 1,
-    "progress": "Foundation - First Feature Complete",
-    "phase_name": "Testing Skills with Manual Invocation"
-  },
-  "overall": {
-    "total_features": 2,
-    "success_first_attempt": 2,
-    "success_rate": 1.0,
-    "human_interventions": 0,
-    "human_intervention_rate": 0.0,
-    "avg_tokens_per_feature": 34500,
-    "avg_cost_per_feature_usd": 0.19,
-    "avg_time_minutes": 47,
-    "test_coverage_avg": 0.96
-  },
-  "quality_gates": {
-    "unit_tests": { "pass": 2, "fail": 0, "pass_rate": 1.0 },
-    "coverage": { "pass": 2, "fail": 0, "pass_rate": 1.0 },
-    "linting": { "pass": 1, "fail": 0, "pass_rate": 1.0 },
-    "type_check": { "pass": 2, "fail": 0, "pass_rate": 1.0 },
-    "build": { "pass": 2, "fail": 0, "pass_rate": 1.0 },
-    "e2e": { "pass": 0, "fail": 0, "pass_rate": 0.0 },
-    "acceptance": { "pass": 2, "fail": 0, "pass_rate": 1.0 }
-  },
-  "skill_performance": {
-    "groom-requirement": {
-      "version": "1.0.0",
-      "executions": 2,
-      "avg_tokens": 18500,
-      "avg_time_minutes": 30,
-      "last_used": "2026-03-27"
-    },
-    "create-ticket": {
-      "version": "1.0.0",
-      "executions": 2,
-      "avg_tokens": 8500,
-      "avg_time_minutes": 11,
-      "last_used": "2026-03-27"
-    },
-    "implement-feature": {
-      "version": "1.0.0",
-      "executions": 2,
-      "avg_tokens": 31500,
-      "avg_time_minutes": 43,
-      "coverage_avg": 0.96,
-      "last_used": "2026-03-27"
-    },
-    "validate-quality": {
-      "version": "1.0.0",
-      "executions": 2,
-      "avg_tokens": 4500,
-      "avg_time_minutes": 7,
-      "last_used": "2026-03-27"
-    }
-  },
-  "learning": {
-    "cycles_run": 0,
-    "last_cycle": null,
-    "skills_improved": [],
-    "avg_improvement_per_cycle": 0.0,
-    "next_cycle_at_ticket_count": 5
-  },
-  "targets": {
-    "success_rate": 0.85,
-    "token_budget_per_feature": 50000,
-    "cost_per_feature_usd": 0.27,
-    "test_coverage": 0.90,
-    "human_intervention_rate": 0.10
-  },
-  "recent_features": [
-    {
-      "ticket_id": "URGENCY-ABSOLUTE-THRESHOLDS-20260327",
-      "feature_name": "Urgency System - Absolute Day Thresholds",
-      "date": "2026-03-27",
-      "completed": "2026-03-27",
-      "tokens_used": 21000,
-      "time_minutes": 25,
-      "test_coverage": 0.9788,
-      "gates_passed": 5,
-      "gates_failed": 0,
-      "first_attempt_success": true,
-      "issues_encountered": 0,
-      "commits": 1,
-      "rework_needed": false,
-      "primary_commit": "f6aa037",
-      "fix_commits": [],
-      "lessons_captured": true
-    },
-    {
-      "ticket_id": "COST-TRACKING-20260326",
-      "feature_name": "Total Cost of Attendance Tracking",
-      "date": "2026-03-26",
-      "completed": "2026-03-27",
-      "tokens_used": 48000,
-      "time_minutes": 120,
-      "test_coverage": 0.95,
-      "gates_passed": 5,
-      "gates_failed": 0,
-      "first_attempt_success": true,
-      "issues_encountered": 5,
-      "commits": 8,
-      "rework_needed": true,
-      "primary_commit": "be6d0c3",
-      "fix_commits": ["9436540", "780dcf3", "b648aef", "2c08d2c", "b4c27e9"],
-      "lessons_captured": true
-    }
-  ]
+  "tickets_completed": 1,
+  "tickets_since_last_learning": 1,
+  "last_learning_date": null,
+  "learning_trigger_threshold": 5,
+  "auto_learning_enabled": true,
+  "tickets_validated": 1,
+  "passed_first_attempt": 1,
+  "failed_first_attempt": 0,
+  "avg_token_usage": 17000,
+  "avg_coverage": 0.1087,
+  "avg_validation_time_minutes": 3,
+  "most_common_failure": null,
+  "code_reviews": {
+    "total": 0,
+    "auto_approved": 0,
+    "request_changes": 0,
+    "rejected": 0,
+    "avg_score": 0,
+    "avg_duration_seconds": 0
+  }
 }

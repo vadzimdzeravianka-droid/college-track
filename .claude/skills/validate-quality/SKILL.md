@@ -400,15 +400,78 @@ mv .claude/workflows/tickets/qa/[ticket-id].md .claude/workflows/tickets/in-prog
 
 **DO NOT COMMIT**
 
-### Step 11: Notify or Escalate
+### Step 11: Update Metrics and Check Learning Trigger
 
-If auto-commit succeeds:
-- Log success to audit trail
-- Update metrics
+#### After Successful Validation
 
-If validation fails:
-- Log failure details
-- If repeated failures (3+ attempts), escalate to human review
+Update metrics and check if learning should trigger:
+
+```bash
+# Path to metrics file
+METRICS_FILE=".claude/workflows/metrics.json"
+
+# Read current counts
+COMPLETED=$(jq '.tickets_completed' "$METRICS_FILE")
+SINCE_LEARNING=$(jq '.tickets_since_last_learning' "$METRICS_FILE")
+PASSED_FIRST=$(jq '.passed_first_attempt' "$METRICS_FILE")
+
+# Increment counters
+NEW_COMPLETED=$((COMPLETED + 1))
+NEW_SINCE_LEARNING=$((SINCE_LEARNING + 1))
+NEW_PASSED_FIRST=$((PASSED_FIRST + 1))
+
+# Update metrics
+jq ".tickets_completed = $NEW_COMPLETED | \
+    .tickets_since_last_learning = $NEW_SINCE_LEARNING | \
+    .passed_first_attempt = $NEW_PASSED_FIRST | \
+    .tickets_validated = $NEW_COMPLETED" \
+    "$METRICS_FILE" > tmp.json && mv tmp.json "$METRICS_FILE"
+
+echo "✅ Metrics updated: $NEW_COMPLETED tickets completed, $NEW_SINCE_LEARNING since last learning"
+
+# Check if learning trigger reached
+THRESHOLD=$(jq '.learning_trigger_threshold' "$METRICS_FILE")
+AUTO_ENABLED=$(jq '.auto_learning_enabled' "$METRICS_FILE")
+
+if [[ $NEW_SINCE_LEARNING -ge $THRESHOLD ]] && [[ "$AUTO_ENABLED" == "true" ]]; then
+  echo ""
+  echo "🎓 =============================================="
+  echo "   LEARNING TRIGGER REACHED!"
+  echo "   Completed $NEW_SINCE_LEARNING/$THRESHOLD tickets"
+  echo "   Triggering self-learning workflow..."
+  echo "=============================================="
+  echo ""
+
+  # Trigger self-learn skill (background, non-blocking)
+  claude "/self-learn" &
+
+  # Reset counter and update last learning date
+  jq ".tickets_since_last_learning = 0 | \
+      .last_learning_date = \"$(date -Iseconds)\"" \
+      "$METRICS_FILE" > tmp.json && mv tmp.json "$METRICS_FILE"
+
+  echo "✨ Self-learning initiated in background"
+  echo "📊 Counter reset. Next learning after 5 more tickets."
+fi
+```
+
+#### After Validation Failure
+
+Update failure metrics:
+
+```bash
+METRICS_FILE=".claude/workflows/metrics.json"
+FAILED=$(jq '.failed_first_attempt' "$METRICS_FILE")
+NEW_FAILED=$((FAILED + 1))
+
+jq ".failed_first_attempt = $NEW_FAILED" \
+    "$METRICS_FILE" > tmp.json && mv tmp.json "$METRICS_FILE"
+
+# If repeated failures (3+ attempts), escalate to human review
+if [[ $NEW_FAILED -ge 3 ]]; then
+  echo "⚠️  Multiple validation failures detected. Consider human review."
+fi
+```
 
 ## Quality Metrics Tracking
 
