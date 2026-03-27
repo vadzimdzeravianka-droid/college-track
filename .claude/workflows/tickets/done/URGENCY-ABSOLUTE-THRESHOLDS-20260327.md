@@ -1,9 +1,13 @@
 # Ticket: Urgency System - Absolute Day Thresholds
 
-**Status**: READY
+**Status**: ✅ DONE
 **Priority**: MEDIUM
 **Estimated Tokens**: 24K
+**Actual Tokens**: 21K
+**Completed**: 2026-03-27 00:30
+**Commit**: f6aa037
 **Groomed Requirement**: `.claude/workflows/requirements/groomed/koef-change.md`
+**Validation Report**: `.claude/workflows/validation-reports/URGENCY-ABSOLUTE-THRESHOLDS-20260327/report.md`
 
 ## Summary
 
