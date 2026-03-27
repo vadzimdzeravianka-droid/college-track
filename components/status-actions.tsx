@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { updateCollegeStatus } from "@/actions/college";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

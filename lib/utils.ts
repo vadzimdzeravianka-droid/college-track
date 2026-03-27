@@ -79,7 +79,7 @@ export function getUrgencyLevel(
   deadline: Date | null,
   status: string,
   checklist: Checklist,
-  essayCount: number = 0
+  _essayCount: number = 0
 ): UrgencyLevel {
   if (!deadline || status === "SUBMITTED" || status === "ACCEPTED" || status === "DECLINED") {
     return "none";

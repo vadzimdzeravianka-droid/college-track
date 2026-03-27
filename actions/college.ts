@@ -4,9 +4,9 @@ import { db } from "@/lib/db";
 import { CollegeSchema, ChecklistSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
-import { Decimal } from "@prisma/client/runtime/library";
 
 // Helper to convert Decimal to number for Client Components
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeCollege(college: any): any {
   return {
     ...college,
@@ -59,7 +59,7 @@ export async function getCollegeById(id: string) {
     const serializedCollege = serializeCollege(college);
 
     return { college: serializedCollege };
-  } catch (error) {
+  } catch (_error) {
     return { error: "Failed to fetch college" };
   }
 }
@@ -120,7 +120,7 @@ export async function updateCollege(
     revalidatePath("/dashboard");
     revalidatePath(`/college/${id}`);
     return { success: "College updated!", college };
-  } catch (error) {
+  } catch (_error) {
     return { error: "Failed to update college" };
   }
 }
@@ -133,7 +133,7 @@ export async function deleteCollege(id: string) {
 
     revalidatePath("/dashboard");
     return { success: "College deleted!" };
-  } catch (error) {
+  } catch (_error) {
     return { error: "Failed to delete college" };
   }
 }
@@ -152,7 +152,7 @@ export async function updateCollegeStatus(
     revalidatePath(`/college/${id}`);
     revalidatePath("/dashboard");
     return { success: "Status updated!", college };
-  } catch (error) {
+  } catch (_error) {
     return { error: "Failed to update status" };
   }
 }

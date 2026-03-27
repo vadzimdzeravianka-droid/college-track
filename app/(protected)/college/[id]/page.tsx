@@ -7,7 +7,7 @@ import { StatusActions } from "@/components/status-actions";
 import { PortalCredentials } from "@/components/portal-credentials";
 import { CollegeEditButton } from "@/components/college-edit-button";
 import { formatDate, getUrgencyLevel, getUrgencyMessage, cn, formatCurrency, hasCostData } from "@/lib/utils";
-import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2, AlertCircle, AlertTriangle, DollarSign } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2, AlertCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 

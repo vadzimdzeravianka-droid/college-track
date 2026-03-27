@@ -25,7 +25,7 @@ export function PortalCredentials({
       setCopiedField(field);
       toast.success("Copied to clipboard!");
       setTimeout(() => setCopiedField(null), 2000);
-    } catch (err) {
+    } catch (_err) {
       toast.error("Failed to copy");
     }
   };
