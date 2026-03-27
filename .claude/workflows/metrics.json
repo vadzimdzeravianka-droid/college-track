@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "last_updated": "2026-03-26T15:00:00Z",
+    "total_features_attempted": 0,
+    "workflow_version": "1.0.0",
+    "created": "2026-03-26T15:00:00Z"
+  },
+  "current_phase": {
+    "phase": 1,
+    "week": 1,
+    "progress": "Foundation - Ready to Start",
+    "phase_name": "Testing Skills with Manual Invocation"
+  },
+  "overall": {
+    "total_features": 0,
+    "success_first_attempt": 0,
+    "success_rate": 0.0,
+    "human_interventions": 0,
+    "human_intervention_rate": 0.0,
+    "avg_tokens_per_feature": 0,
+    "avg_cost_per_feature_usd": 0.0,
+    "avg_time_minutes": 0,
+    "test_coverage_avg": 0.0
+  },
+  "quality_gates": {
+    "unit_tests": { "pass": 0, "fail": 0, "pass_rate": 0.0 },
+    "coverage": { "pass": 0, "fail": 0, "pass_rate": 0.0 },
+    "linting": { "pass": 0, "fail": 0, "pass_rate": 0.0 },
+    "type_check": { "pass": 0, "fail": 0, "pass_rate": 0.0 },
+    "build": { "pass": 0, "fail": 0, "pass_rate": 0.0 },
+    "e2e": { "pass": 0, "fail": 0, "pass_rate": 0.0 },
+    "acceptance": { "pass": 0, "fail": 0, "pass_rate": 0.0 }
+  },
+  "skill_performance": {
+    "groom-requirement": {
+      "version": "1.0.0",
+      "executions": 0,
+      "avg_tokens": 0,
+      "avg_time_minutes": 0,
+      "last_used": null
+    },
+    "create-ticket": {
+      "version": "1.0.0",
+      "executions": 0,
+      "avg_tokens": 0,
+      "avg_time_minutes": 0,
+      "last_used": null
+    },
+    "implement-feature": {
+      "version": "1.0.0",
+      "executions": 0,
+      "avg_tokens": 0,
+      "avg_time_minutes": 0,
+      "coverage_avg": 0.0,
+      "last_used": null
+    },
+    "validate-quality": {
+      "version": "1.0.0",
+      "executions": 0,
+      "avg_tokens": 0,
+      "avg_time_minutes": 0,
+      "last_used": null
+    }
+  },
+  "learning": {
+    "cycles_run": 0,
+    "last_cycle": null,
+    "skills_improved": [],
+    "avg_improvement_per_cycle": 0.0,
+    "next_cycle_at_ticket_count": 5
+  },
+  "targets": {
+    "success_rate": 0.85,
+    "token_budget_per_feature": 50000,
+    "cost_per_feature_usd": 0.27,
+    "test_coverage": 0.90,
+    "human_intervention_rate": 0.10
+  }
+}

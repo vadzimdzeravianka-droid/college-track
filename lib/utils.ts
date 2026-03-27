@@ -167,3 +167,123 @@ export function getDaysUntilDeadline(deadline: Date): number {
   const daysUntil = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   return daysUntil;
 }
+
+// Cost utility types
+type CostValue = number | { toNumber: () => number } | null | undefined;
+
+type CollegeWithCosts = {
+  costTuition?: CostValue;
+  costRoomBoard?: CostValue;
+  costFees?: CostValue;
+  costBooks?: CostValue;
+  costPersonal?: CostValue;
+  costOther?: CostValue;
+};
+
+/**
+ * Convert a cost value (number or Decimal) to a number, handling null/undefined
+ */
+function toNumber(value: CostValue): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number") return value;
+  // Handle Prisma Decimal type
+  if (typeof value === "object" && "toNumber" in value) {
+    return value.toNumber();
+  }
+  return null;
+}
+
+/**
+ * Calculate total cost from all cost components (sum of non-null values)
+ * @param college - College object with cost fields
+ * @returns Total cost or null if all fields are null/undefined
+ */
+export function calculateTotalCost(college: CollegeWithCosts): number | null {
+  const costs = [
+    toNumber(college.costTuition),
+    toNumber(college.costRoomBoard),
+    toNumber(college.costFees),
+    toNumber(college.costBooks),
+    toNumber(college.costPersonal),
+    toNumber(college.costOther),
+  ].filter((cost): cost is number => cost !== null);
+
+  if (costs.length === 0) return null;
+
+  return costs.reduce((sum, cost) => sum + cost, 0);
+}
+
+/**
+ * Format a cost value as USD currency
+ * @param amount - Number or Decimal to format
+ * @returns Formatted currency string or "Not specified" for null/undefined
+ */
+export function formatCurrency(amount: CostValue): string {
+  const numValue = toNumber(amount);
+  if (numValue === null) return "Not specified";
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(numValue);
+}
+
+/**
+ * Calculate grouped costs for dashboard display
+ * @param college - College object with cost fields
+ * @returns Object with tuitionAndFees, roomAndBoard, other, and total
+ */
+export function getGroupedCosts(college: CollegeWithCosts): {
+  tuitionAndFees: number | null;
+  roomAndBoard: number | null;
+  other: number | null;
+  total: number | null;
+} {
+  const tuition = toNumber(college.costTuition);
+  const fees = toNumber(college.costFees);
+  const roomBoard = toNumber(college.costRoomBoard);
+  const books = toNumber(college.costBooks);
+  const personal = toNumber(college.costPersonal);
+  const other = toNumber(college.costOther);
+
+  // Calculate tuition + fees
+  const tuitionAndFees =
+    tuition !== null || fees !== null
+      ? (tuition ?? 0) + (fees ?? 0)
+      : null;
+
+  // Room & board is standalone
+  const roomAndBoard = roomBoard;
+
+  // Other combines books + personal + other
+  const otherGroup =
+    books !== null || personal !== null || other !== null
+      ? (books ?? 0) + (personal ?? 0) + (other ?? 0)
+      : null;
+
+  // Total is sum of all non-null components
+  const total = calculateTotalCost(college);
+
+  return {
+    tuitionAndFees,
+    roomAndBoard: roomAndBoard,
+    other: otherGroup,
+    total,
+  };
+}
+
+/**
+ * Check if a college has any cost data
+ * @param college - College object with cost fields
+ * @returns True if any cost field is non-null/undefined, false otherwise
+ */
+export function hasCostData(college: CollegeWithCosts): boolean {
+  return (
+    toNumber(college.costTuition) !== null ||
+    toNumber(college.costRoomBoard) !== null ||
+    toNumber(college.costFees) !== null ||
+    toNumber(college.costBooks) !== null ||
+    toNumber(college.costPersonal) !== null ||
+    toNumber(college.costOther) !== null
+  );
+}

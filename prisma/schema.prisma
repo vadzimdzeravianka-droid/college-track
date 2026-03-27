@@ -42,6 +42,13 @@ model College {
   portalUser      String?   @map("portal_user")
   portalPassword  String?   @map("portal_password")
   notes           String?   @db.Text
+  costTuition     Decimal?  @map("cost_tuition") @db.Decimal(10, 2)
+  costRoomBoard   Decimal?  @map("cost_room_board") @db.Decimal(10, 2)
+  costFees        Decimal?  @map("cost_fees") @db.Decimal(10, 2)
+  costBooks       Decimal?  @map("cost_books") @db.Decimal(10, 2)
+  costPersonal    Decimal?  @map("cost_personal") @db.Decimal(10, 2)
+  costOther       Decimal?  @map("cost_other") @db.Decimal(10, 2)
+  isInState       Boolean?  @map("is_in_state")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 

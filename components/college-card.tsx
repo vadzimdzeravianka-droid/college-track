@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge, CategoryBadge, StrategyBadge } from "@/components/status-badge";
-import { cn, getUrgencyLevel, getUrgencyMessage, formatDate, getDaysUntilDeadline } from "@/lib/utils";
+import { cn, getUrgencyLevel, getUrgencyMessage, formatDate, getDaysUntilDeadline, formatCurrency, getGroupedCosts, hasCostData } from "@/lib/utils";
 import Link from "next/link";
 import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle2, KeyRound, AlertTriangle, AlertCircle } from "lucide-react";
 
@@ -18,6 +18,13 @@ type College = {
   major: string | null;
   portalUrl: string | null;
   portalUser: string | null;
+  costTuition?: number | { toNumber: () => number } | null;
+  costRoomBoard?: number | { toNumber: () => number } | null;
+  costFees?: number | { toNumber: () => number } | null;
+  costBooks?: number | { toNumber: () => number } | null;
+  costPersonal?: number | { toNumber: () => number } | null;
+  costOther?: number | { toNumber: () => number } | null;
+  isInState?: boolean | null;
   checklist?: {
     lorTeacher: boolean;
     transcriptSent: boolean;
@@ -65,6 +72,7 @@ export function CollegeCard({ college }: { college: College }) {
   const daysUntil = college.deadlineApp ? getDaysUntilDeadline(college.deadlineApp) : null;
   const hasPortalCredentials = !!(college.portalUrl || college.portalUser);
   const checklistProgress = getChecklistProgress(college.checklist);
+  const costData = hasCostData(college) ? getGroupedCosts(college) : null;
 
   const getBorderClass = () => {
     if (urgencyLevel === "red") return "border-2 border-destructive";
@@ -167,6 +175,32 @@ export function CollegeCard({ college }: { college: College }) {
                   <span>FinAid: {formatDate(college.deadlineFinaid)}</span>
                 </div>
               )}
+              {costData && (
+                <div className="pt-3 border-t space-y-1">
+                  <div className="text-xs font-medium text-muted-foreground mb-1.5">Cost of Attendance</div>
+                  {costData.tuitionAndFees !== null && (
+                    <div className="text-xs text-muted-foreground">
+                      Tuition + Fees: <span className="font-medium text-foreground">{formatCurrency(costData.tuitionAndFees)}</span>
+                    </div>
+                  )}
+                  {costData.roomAndBoard !== null && (
+                    <div className="text-xs text-muted-foreground">
+                      Room & Board: <span className="font-medium text-foreground">{formatCurrency(costData.roomAndBoard)}</span>
+                    </div>
+                  )}
+                  {costData.other !== null && (
+                    <div className="text-xs text-muted-foreground">
+                      Other: <span className="font-medium text-foreground">{formatCurrency(costData.other)}</span>
+                    </div>
+                  )}
+                  {costData.total !== null && (
+                    <div className="text-sm font-semibold pt-1">
+                      Total: {formatCurrency(costData.total)}
+                      {college.isInState && <span className="text-xs font-normal text-muted-foreground ml-1">(In-State)</span>}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex items-center justify-between pt-3 border-t">
               <div className="flex items-center gap-1.5 text-sm">
@@ -254,6 +288,41 @@ export function CollegeCard({ college }: { college: College }) {
               </div>
             )}
           </div>
+
+          {/* Middle-Right: Cost */}
+          {costData ? (
+            <div className="flex-shrink-0 w-44 p-6 border-l flex flex-col justify-center space-y-1.5">
+              <div className="text-xs font-medium text-muted-foreground mb-1">Cost</div>
+              {costData.tuitionAndFees !== null && (
+                <div className="text-xs leading-snug">
+                  <span className="text-muted-foreground">Tuition + Fees:</span>
+                  <div className="font-medium">{formatCurrency(costData.tuitionAndFees)}</div>
+                </div>
+              )}
+              {costData.roomAndBoard !== null && (
+                <div className="text-xs leading-snug">
+                  <span className="text-muted-foreground">Room & Board:</span>
+                  <div className="font-medium">{formatCurrency(costData.roomAndBoard)}</div>
+                </div>
+              )}
+              {costData.other !== null && (
+                <div className="text-xs leading-snug">
+                  <span className="text-muted-foreground">Other:</span>
+                  <div className="font-medium">{formatCurrency(costData.other)}</div>
+                </div>
+              )}
+              {costData.total !== null && (
+                <div className="text-sm font-semibold pt-1.5 border-t">
+                  {formatCurrency(costData.total)}
+                  {college.isInState && <div className="text-xs font-normal text-muted-foreground">(In-State)</div>}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex-shrink-0 w-44 p-6 border-l flex flex-col justify-center items-center">
+              <div className="text-xs text-muted-foreground text-center">Cost N/A</div>
+            </div>
+          )}
 
           {/* Right: Progress */}
           <div className="flex-shrink-0 w-32 p-6 border-l flex flex-col justify-center items-center gap-3">

@@ -17,6 +17,13 @@ export const CollegeSchema = z.object({
   portalUser: z.string().optional().nullable(),
   portalPassword: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  costTuition: z.number().min(0, "Cost must be positive").max(200000, "Cost seems unrealistic").optional().nullable(),
+  costRoomBoard: z.number().min(0, "Cost must be positive").max(200000, "Cost seems unrealistic").optional().nullable(),
+  costFees: z.number().min(0, "Cost must be positive").max(200000, "Cost seems unrealistic").optional().nullable(),
+  costBooks: z.number().min(0, "Cost must be positive").max(200000, "Cost seems unrealistic").optional().nullable(),
+  costPersonal: z.number().min(0, "Cost must be positive").max(200000, "Cost seems unrealistic").optional().nullable(),
+  costOther: z.number().min(0, "Cost must be positive").max(200000, "Cost seems unrealistic").optional().nullable(),
+  isInState: z.boolean().optional().nullable(),
 });
 
 export const ChecklistSchema = z.object({

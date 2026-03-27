@@ -1,0 +1,44 @@
+{
+  "requirement_id": "total-cost-of-attendance",
+  "timestamp": "2026-03-26T16:30:00Z",
+  "time_minutes": 18,
+  "approaches_count": 3,
+  "recommended_approach": "A",
+  "recommended_reasoning": "Direct fields in College model - matches existing pattern, type-safe, straightforward for single-family use",
+  "token_estimate": 42000,
+  "complexity": "medium",
+  "research_conducted": [
+    "Prisma Decimal type for financial data",
+    "Intl.NumberFormat for currency formatting",
+    "Database schema patterns for money storage"
+  ],
+  "edge_cases_identified": [
+    "Negative value prevention",
+    "Partial cost data handling",
+    "NULL vs $0 semantic difference",
+    "In-state vs out-of-state labeling",
+    "Migration safety for existing colleges",
+    "Dashboard column space efficiency",
+    "Logical grouping for cost categories"
+  ],
+  "human_feedback": {
+    "iteration": 1,
+    "change_requested": "Dashboard should show breakdown column with logical grouping, not just total on cards",
+    "reasoning": "Enable easy cost comparison across colleges, save space with grouped categories",
+    "impact": "Increased complexity for dashboard layout (+4K tokens), improved UX for cost comparison"
+  },
+  "memory_learnings": [
+    "Use Decimal type (@db.Decimal(10, 2)) for financial data in Prisma/PostgreSQL",
+    "Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}) is standard for currency display",
+    "Avoid Float for money - precision issues",
+    "Calculate totals dynamically to avoid data inconsistency",
+    "IMPORTANT: User prefers detailed breakdowns visible in dashboard columns for comparison, not just summary on cards",
+    "Logical grouping pattern: Tuition+Fees, Room&Board, Other (books+personal+misc) saves space while showing detail"
+  ],
+  "lessons_for_future_grooming": [
+    "When cost/pricing features requested, always consider dashboard visibility and comparison needs",
+    "Ask about breakdown vs summary display early in grooming",
+    "Space-efficient multi-line column layouts are preferred over wide single-line displays",
+    "Financial data should enable easy comparison across items (colleges, products, etc.)"
+  ]
+}

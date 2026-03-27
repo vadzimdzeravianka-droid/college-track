@@ -6,8 +6,8 @@ import { ChecklistForm } from "@/components/checklist-form";
 import { StatusActions } from "@/components/status-actions";
 import { PortalCredentials } from "@/components/portal-credentials";
 import { CollegeEditButton } from "@/components/college-edit-button";
-import { formatDate, getUrgencyLevel, getUrgencyMessage, cn } from "@/lib/utils";
-import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2, AlertCircle, AlertTriangle } from "lucide-react";
+import { formatDate, getUrgencyLevel, getUrgencyMessage, cn, formatCurrency, hasCostData } from "@/lib/utils";
+import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2, AlertCircle, AlertTriangle, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -171,6 +171,79 @@ export default async function CollegeDetailPage({
                 )}
               </CardContent>
             </Card>
+
+            {/* Cost of Attendance */}
+            {hasCostData(college) ? (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <CardTitle>{college.isInState ? "In-State Cost" : "Cost of Attendance"}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {college.costTuition !== null && college.costTuition !== undefined && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-sm text-muted-foreground">Tuition</span>
+                        <span className="font-medium">{formatCurrency(college.costTuition)}</span>
+                      </div>
+                    )}
+                    {college.costRoomBoard !== null && college.costRoomBoard !== undefined && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-sm text-muted-foreground">Room & Board</span>
+                        <span className="font-medium">{formatCurrency(college.costRoomBoard)}</span>
+                      </div>
+                    )}
+                    {college.costFees !== null && college.costFees !== undefined && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-sm text-muted-foreground">Fees</span>
+                        <span className="font-medium">{formatCurrency(college.costFees)}</span>
+                      </div>
+                    )}
+                    {college.costBooks !== null && college.costBooks !== undefined && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-sm text-muted-foreground">Books & Supplies</span>
+                        <span className="font-medium">{formatCurrency(college.costBooks)}</span>
+                      </div>
+                    )}
+                    {college.costPersonal !== null && college.costPersonal !== undefined && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-sm text-muted-foreground">Personal Expenses</span>
+                        <span className="font-medium">{formatCurrency(college.costPersonal)}</span>
+                      </div>
+                    )}
+                    {college.costOther !== null && college.costOther !== undefined && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="text-sm text-muted-foreground">Other</span>
+                        <span className="font-medium">{formatCurrency(college.costOther)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-3 mt-2 border-t-2">
+                      <span className="text-base font-semibold">Total Annual Cost</span>
+                      <span className="text-lg font-bold text-primary">
+                        {(() => {
+                          const costs = [
+                            college.costTuition,
+                            college.costRoomBoard,
+                            college.costFees,
+                            college.costBooks,
+                            college.costPersonal,
+                            college.costOther,
+                          ];
+                          let total = 0;
+                          for (const cost of costs) {
+                            if (cost !== null && cost !== undefined) {
+                              total += typeof cost === 'number' ? cost : cost.toNumber();
+                            }
+                          }
+                          return formatCurrency(total);
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
 
             {/* Portal Credentials */}
             <Card>

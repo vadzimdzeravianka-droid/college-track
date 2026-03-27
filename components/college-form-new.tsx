@@ -37,7 +37,9 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, ArrowLeft, ArrowRight, Check, Pencil } from "lucide-react";
+import { formatCurrency, calculateTotalCost } from "@/lib/utils";
 
 type College = {
   id?: string;
@@ -53,12 +55,20 @@ type College = {
   portalUser: string | null;
   portalPassword: string | null;
   notes: string | null;
+  costTuition?: number | null;
+  costRoomBoard?: number | null;
+  costFees?: number | null;
+  costBooks?: number | null;
+  costPersonal?: number | null;
+  costOther?: number | null;
+  isInState?: boolean | null;
 };
 
 const STEPS = [
   { label: "Basics", fields: ["name", "category", "status", "strategy"] },
   { label: "Deadlines", fields: ["deadlineApp", "deadlineFinaid"] },
   { label: "Details", fields: ["location", "major"] },
+  { label: "Cost", fields: ["costTuition", "costRoomBoard", "costFees", "costBooks", "costPersonal", "costOther", "isInState"] },
   { label: "Portal", fields: ["portalUrl", "portalUser", "portalPassword"] },
   { label: "Notes", fields: ["notes"] },
 ];
@@ -95,6 +105,13 @@ export function CollegeFormNew({
       portalUser: college?.portalUser || "",
       portalPassword: college?.portalPassword || "",
       notes: college?.notes || "",
+      costTuition: college?.costTuition ?? null,
+      costRoomBoard: college?.costRoomBoard ?? null,
+      costFees: college?.costFees ?? null,
+      costBooks: college?.costBooks ?? null,
+      costPersonal: college?.costPersonal ?? null,
+      costOther: college?.costOther ?? null,
+      isInState: college?.isInState ?? null,
     },
   });
 
@@ -342,8 +359,188 @@ export function CollegeFormNew({
             </div>
           </StepContent>
 
-          {/* Step 4: Portal */}
+          {/* Step 4: Cost of Attendance */}
           <StepContent step={3}>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-base font-medium">Cost of Attendance (Optional)</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Enter costs as published by the college. All fields are optional.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="costTuition" className="text-base">Tuition</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Annual tuition cost</p>
+                  <Input
+                    {...form.register("costTuition", {
+                      setValueAs: (v) => v === "" || v === null ? null : Number(v)
+                    })}
+                    id="costTuition"
+                    type="number"
+                    placeholder="50000"
+                    disabled={isPending}
+                    className="h-11"
+                    min="0"
+                    step="100"
+                  />
+                  {form.formState.errors.costTuition && (
+                    <p className="text-sm text-destructive mt-1.5">{form.formState.errors.costTuition.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="costRoomBoard" className="text-base">Room & Board</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Housing and meals</p>
+                  <Input
+                    {...form.register("costRoomBoard", {
+                      setValueAs: (v) => v === "" || v === null ? null : Number(v)
+                    })}
+                    id="costRoomBoard"
+                    type="number"
+                    placeholder="18000"
+                    disabled={isPending}
+                    className="h-11"
+                    min="0"
+                    step="100"
+                  />
+                  {form.formState.errors.costRoomBoard && (
+                    <p className="text-sm text-destructive mt-1.5">{form.formState.errors.costRoomBoard.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="costFees" className="text-base">Fees</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Student fees, activity fees</p>
+                  <Input
+                    {...form.register("costFees", {
+                      setValueAs: (v) => v === "" || v === null ? null : Number(v)
+                    })}
+                    id="costFees"
+                    type="number"
+                    placeholder="5000"
+                    disabled={isPending}
+                    className="h-11"
+                    min="0"
+                    step="100"
+                  />
+                  {form.formState.errors.costFees && (
+                    <p className="text-sm text-destructive mt-1.5">{form.formState.errors.costFees.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="costBooks" className="text-base">Books & Supplies</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Textbooks and materials</p>
+                  <Input
+                    {...form.register("costBooks", {
+                      setValueAs: (v) => v === "" || v === null ? null : Number(v)
+                    })}
+                    id="costBooks"
+                    type="number"
+                    placeholder="1200"
+                    disabled={isPending}
+                    className="h-11"
+                    min="0"
+                    step="100"
+                  />
+                  {form.formState.errors.costBooks && (
+                    <p className="text-sm text-destructive mt-1.5">{form.formState.errors.costBooks.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="costPersonal" className="text-base">Personal Expenses</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Personal spending</p>
+                  <Input
+                    {...form.register("costPersonal", {
+                      setValueAs: (v) => v === "" || v === null ? null : Number(v)
+                    })}
+                    id="costPersonal"
+                    type="number"
+                    placeholder="1500"
+                    disabled={isPending}
+                    className="h-11"
+                    min="0"
+                    step="100"
+                  />
+                  {form.formState.errors.costPersonal && (
+                    <p className="text-sm text-destructive mt-1.5">{form.formState.errors.costPersonal.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="costOther" className="text-base">Other Costs</Label>
+                  <p className="text-sm text-muted-foreground mb-2">Transportation, etc.</p>
+                  <Input
+                    {...form.register("costOther", {
+                      setValueAs: (v) => v === "" || v === null ? null : Number(v)
+                    })}
+                    id="costOther"
+                    type="number"
+                    placeholder="500"
+                    disabled={isPending}
+                    className="h-11"
+                    min="0"
+                    step="100"
+                  />
+                  {form.formState.errors.costOther && (
+                    <p className="text-sm text-destructive mt-1.5">{form.formState.errors.costOther.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <Controller
+                  control={form.control}
+                  name="isInState"
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isInState"
+                      checked={field.value === true}
+                      onCheckedChange={(checked) => field.onChange(checked === true ? true : null)}
+                      disabled={isPending}
+                    />
+                  )}
+                />
+                <Label
+                  htmlFor="isInState"
+                  className="text-base font-normal cursor-pointer"
+                >
+                  In-State Student
+                </Label>
+              </div>
+
+              <Separator />
+
+              <div>
+                <div className="text-sm font-medium mb-1">Estimated Total Annual Cost</div>
+                <div className="text-2xl font-bold text-primary">
+                  {(() => {
+                    const total = calculateTotalCost({
+                      costTuition: form.watch("costTuition"),
+                      costRoomBoard: form.watch("costRoomBoard"),
+                      costFees: form.watch("costFees"),
+                      costBooks: form.watch("costBooks"),
+                      costPersonal: form.watch("costPersonal"),
+                      costOther: form.watch("costOther"),
+                    });
+                    return total !== null ? formatCurrency(total) : "Not specified";
+                  })()}
+                </div>
+              </div>
+
+              <Card className="bg-muted/50">
+                <div className="p-4 text-sm text-muted-foreground">
+                  <p>Cost information helps you compare colleges financially. You can skip this section and add costs later.</p>
+                </div>
+              </Card>
+            </div>
+          </StepContent>
+
+          {/* Step 5: Portal */}
+          <StepContent step={4}>
             <div className="space-y-6">
               <div>
                 <Label htmlFor="portalUrl" className="text-base">Application Portal URL</Label>
@@ -392,8 +589,8 @@ export function CollegeFormNew({
             </div>
           </StepContent>
 
-          {/* Step 5: Notes */}
-          <StepContent step={4}>
+          {/* Step 6: Notes */}
+          <StepContent step={5}>
             <div className="space-y-6">
               <div>
                 <Label htmlFor="notes" className="text-base">Additional Notes</Label>
