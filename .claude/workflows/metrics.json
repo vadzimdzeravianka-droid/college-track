@@ -81,13 +81,19 @@
       "ticket_id": "COST-TRACKING-20260326",
       "feature_name": "Total Cost of Attendance Tracking",
       "date": "2026-03-26",
+      "completed": "2026-03-27",
       "tokens_used": 48000,
-      "time_minutes": 68,
+      "time_minutes": 120,
       "test_coverage": 0.95,
       "gates_passed": 5,
       "gates_failed": 0,
       "first_attempt_success": true,
-      "commit": "be6d0c3"
+      "issues_encountered": 5,
+      "commits": 8,
+      "rework_needed": true,
+      "primary_commit": "be6d0c3",
+      "fix_commits": ["9436540", "780dcf3", "b648aef", "2c08d2c", "b4c27e9"],
+      "lessons_captured": true
     }
   ]
 }

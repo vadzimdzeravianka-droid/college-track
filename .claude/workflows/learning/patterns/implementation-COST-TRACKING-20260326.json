@@ -1,0 +1,137 @@
+{
+  "ticket_id": "COST-TRACKING-20260326",
+  "date": "2026-03-27",
+  "feature": "Total Cost of Attendance Tracking",
+  "outcome": "success",
+  "estimated_tokens": 42000,
+  "actual_tokens": 48000,
+  "token_accuracy": 0.875,
+  "implementation_time_minutes": 120,
+  "iterations": 3,
+  "commits": 8,
+
+  "issues_encountered": [
+    {
+      "issue": "Database connection failure - hostname not resolving",
+      "root_cause": "Supabase changed infrastructure, old db.* hostname no longer exists",
+      "solution": "Updated connection string from db.tqztcoypkdhjpbkqhyxd.supabase.co to aws-1-us-east-1.pooler.supabase.com",
+      "lesson": "Database hostnames can change when infrastructure is migrated. Always check DNS resolution when connection fails unexpectedly."
+    },
+    {
+      "issue": "Prisma db push failed with 'prepared statement already exists'",
+      "root_cause": "Using transaction pooler (port 6543) with pgbouncer=true for migrations",
+      "solution": "Use direct connection (port 5432) or session pooler for migrations, transaction pooler only for queries",
+      "lesson": "Prisma migrations require direct connection or session mode pooler. Transaction pooler doesn't support prepared statements needed for migrations."
+    },
+    {
+      "issue": "Decimal objects cannot be passed to Client Components",
+      "root_cause": "Prisma returns Decimal objects, Next.js serialization doesn't support them",
+      "solution": "Added serializeCollege() helper to explicitly convert Decimal fields to numbers using Number()",
+      "lesson": "Always serialize Prisma Decimal/DateTime/JSON fields in server actions before passing to Client Components. Use Number() for Decimals, toISOString() for dates."
+    },
+    {
+      "issue": "Fix appeared not to work initially",
+      "root_cause": "Next.js dev server caches server actions, didn't pick up code changes",
+      "solution": "Restart dev server to reload server action code",
+      "lesson": "Server action changes require dev server restart. Create test API endpoint to verify fix works before claiming success."
+    },
+    {
+      "issue": "Pushed commits without verifying they work",
+      "root_cause": "Assumed serialization fix worked without testing in browser",
+      "solution": "User correctly called out - must test/verify before pushing",
+      "lesson": "CRITICAL: Follow proper validation flow: 1) Reproduce issue, 2) Apply fix, 3) Verify fix works, 4) THEN commit/push. Never push without verification."
+    }
+  ],
+
+  "ui_iterations": [
+    {
+      "iteration": 1,
+      "issue": "Mobile stepper too wide with 6 steps",
+      "solution": "Reduced circle size (h-8→h-6), gaps (gap-2→gap-1), separator width (min-w-4→min-w-2)"
+    },
+    {
+      "iteration": 2,
+      "issue": "Cost column too narrow, label+value on separate lines",
+      "solution": "Increased width (w-44→w-56), used flex justify-between for same-line display"
+    },
+    {
+      "iteration": 3,
+      "issue": "Deadline countdown cluttering one line",
+      "solution": "Changed to flex-col to put countdown on next line, adjusted column widths"
+    }
+  ],
+
+  "what_went_well": [
+    "TDD approach - wrote tests first, then implementation",
+    "Comprehensive utility function coverage (22 tests, 95%+)",
+    "Proper type handling for Prisma Decimal",
+    "Clean separation of concerns (utilities, components, data layer)",
+    "User caught issues before they became problems",
+    "Iterative UI refinement based on actual usage"
+  ],
+
+  "what_needs_improvement": [
+    "Should have tested database connection before starting",
+    "Should verify fixes work before committing/pushing",
+    "Need better understanding of Next.js server action caching",
+    "Token estimate was low (42K vs 48K actual) - underestimated debugging time",
+    "Should create test endpoints proactively for verification"
+  ],
+
+  "patterns_discovered": [
+    {
+      "pattern": "Supabase connection string structure",
+      "details": "Use port 5432 for migrations, port 6543 for queries. Transaction pooler (?pgbouncer=true) not compatible with migrations."
+    },
+    {
+      "pattern": "Next.js Client Component serialization",
+      "details": "Must explicitly convert non-plain objects (Decimal, Date, etc) to plain types in server actions. JSON.stringify won't automatically handle these."
+    },
+    {
+      "pattern": "Dev server caching behavior",
+      "details": "Server actions are cached by Next.js dev server. Changes require restart. Client components hot reload fine."
+    },
+    {
+      "pattern": "Proper validation workflow",
+      "details": "1. Reproduce and see issue, 2. Apply fix, 3. Verify it works, 4. Then commit. Never skip step 3."
+    }
+  ],
+
+  "metrics": {
+    "test_coverage": 0.95,
+    "tests_written": 22,
+    "files_modified": 7,
+    "files_created": 2,
+    "lines_added": 450,
+    "quality_gates_passed": 5,
+    "quality_gates_failed": 0,
+    "rework_iterations": 2
+  },
+
+  "recommendations": {
+    "for_similar_tickets": [
+      "Check database connectivity early in implementation",
+      "Document connection string requirements (direct vs pooler)",
+      "Always serialize Prisma special types in server actions",
+      "Create test endpoints for verification",
+      "Restart dev server after server action changes",
+      "Test in browser before pushing commits",
+      "Budget extra time for infrastructure issues"
+    ],
+    "for_workflow": [
+      "Add database connectivity check to pre-implementation validation",
+      "Include 'verify fix works' as explicit QA gate",
+      "Create automated serialization checks for Prisma types",
+      "Add token buffer for unexpected debugging (20% extra)"
+    ]
+  },
+
+  "user_feedback": "User correctly insisted on proper validation workflow (reproduce → fix → verify) rather than pushing untested code. This prevented bad commits going to production.",
+
+  "success_factors": [
+    "User involvement in catching issues early",
+    "Iterative refinement based on actual UI usage",
+    "Proper test coverage prevented regressions",
+    "Documentation (CLAUDE.md) updated with new patterns"
+  ]
+}
