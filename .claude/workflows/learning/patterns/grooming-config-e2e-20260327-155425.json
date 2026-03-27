@@ -1,0 +1,22 @@
+{
+  "requirement_id": "config-e2e",
+  "timestamp": "2026-03-27T00:00:00Z",
+  "time_minutes": 8,
+  "approaches_count": 2,
+  "recommended_approach": "A",
+  "token_estimate": 20000,
+  "complexity": "medium",
+  "research_sources": [
+    "https://nextjs.org/docs/app/building-your-application/testing/playwright",
+    "https://playwright.dev/docs/intro"
+  ],
+  "lessons": [
+    "Playwright is officially recommended by Next.js 15 for E2E testing",
+    "Minimal critical path approach (80/20 rule) unblocks Gate 6 faster",
+    "Infrastructure setup is more valuable than comprehensive tests initially",
+    "Gate 6 integration requires dev server management (start/kill)"
+  ],
+  "edge_cases_identified": 5,
+  "test_scenarios_defined": 5,
+  "references_linked": 6
+}

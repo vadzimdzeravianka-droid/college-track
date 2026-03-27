@@ -136,60 +136,47 @@ npm run build
 
 ### Step 7: Gate 6 - E2E Testing (if applicable)
 
-If ticket includes E2E test scenarios, run them using Chrome MCP.
+Check if E2E tests exist in `e2e/` directory. If they do, run Playwright tests.
 
-**Setup**:
-1. Start dev server:
+**Check for E2E Tests**:
 ```bash
-npm run dev &
-DEV_SERVER_PID=$!
-sleep 5  # Wait for server startup
+if [ -d "e2e" ] && [ "$(ls -A e2e/*.spec.ts 2>/dev/null)" ]; then
+  echo "📋 Gate 6: E2E tests found, running Playwright..."
+  E2E_TESTS_EXIST=true
+else
+  echo "⏭️  Gate 6: No E2E tests found, skipping..."
+  E2E_TESTS_EXIST=false
+fi
 ```
 
-2. Run E2E tests (example):
-```typescript
-// Using Chrome MCP via Puppeteer
-import puppeteer from 'puppeteer';
+**If E2E Tests Exist**:
 
-async function runE2ETests() {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
+Run Playwright tests (Playwright automatically starts dev server via webServer config):
 
-  try {
-    // Test scenario from ticket
-    await page.goto('http://localhost:3000/dashboard');
-
-    // Login
-    await page.type('input[name="passkey"]', process.env.APP_PASSKEY);
-    await page.click('button[type="submit"]');
-    await page.waitForNavigation();
-
-    // Execute test scenario
-    // ... (specific to feature)
-
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  } finally {
-    await browser.close();
-  }
-}
-```
-
-3. Cleanup:
 ```bash
-kill $DEV_SERVER_PID
+npm run test:e2e
+E2E_EXIT_CODE=$?
 ```
 
 **Pass Criteria**:
-- All E2E tests pass
+- Exit code 0 (all E2E tests pass)
+- No test failures
 - No timeout errors
-- Visual regression checks pass (if configured)
+- Screenshots saved for any failures
 
 **If Fails**:
-- Capture screenshots of failures
-- Save to `.claude/workflows/validation-reports/[ticket-id]/screenshots/`
+- Capture test output
+- Screenshots automatically saved to `test-results/`
+- Playwright report saved to `playwright-report/`
+- Copy artifacts to validation report:
+```bash
+mkdir -p .claude/workflows/validation-reports/[ticket-id]/e2e/
+cp -r test-results/ .claude/workflows/validation-reports/[ticket-id]/e2e/test-results/
+cp -r playwright-report/ .claude/workflows/validation-reports/[ticket-id]/e2e/playwright-report/
+```
 - **Block commit**
+
+**Note**: Playwright config (`playwright.config.ts`) handles dev server start/stop automatically via `webServer` setting. No manual server management needed.
 
 ### Step 8: Gate 7 - Acceptance Criteria Validation
 

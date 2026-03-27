@@ -1,0 +1,27 @@
+{
+  "ticket_id": "CONFIG-E2E-20260327",
+  "timestamp": "2026-03-27T00:00:00Z",
+  "subtask_count": 5,
+  "estimated_tokens": 20000,
+  "complexity_breakdown": {
+    "simple": 4,
+    "medium": 1,
+    "complex": 0
+  },
+  "test_strategy": {
+    "e2e_tests": 8,
+    "helper_functions": 3,
+    "cross_browser": true
+  },
+  "files_to_create": 5,
+  "files_to_modify": 4,
+  "dependencies": [
+    "@playwright/test"
+  ],
+  "lessons": [
+    "E2E infrastructure requires server management (start/kill) in Gate 6",
+    "Helper functions (login, createCollege, cleanup) reduce test duplication",
+    "Minimal critical path (5 tests) unblocks Gate 6 efficiently",
+    "Test organization by domain (auth, crud, checklist) improves maintainability"
+  ]
+}

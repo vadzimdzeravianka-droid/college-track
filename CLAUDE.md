@@ -22,9 +22,78 @@ npm run build
 npm run lint
 
 # Testing
-npm test                  # Run all tests
+npm test                  # Run unit tests
 npm run test:watch        # Watch mode
 npm run test:coverage     # Coverage report
+npm run test:e2e          # Run E2E tests (Playwright)
+npm run test:e2e:ui       # Run E2E tests with UI mode
+npm run test:e2e:headed   # Run E2E tests in headed mode (see browser)
+```
+
+## E2E Testing
+
+End-to-end tests use Playwright to test complete user workflows. Tests are located in `e2e/` directory.
+
+### Running E2E Tests
+
+```bash
+# Run all E2E tests in headless mode
+npm run test:e2e
+
+# Open Playwright UI for interactive debugging
+npm run test:e2e:ui
+
+# Run tests in headed mode (watch browser)
+npm run test:e2e:headed
+
+# Run specific test file
+npx playwright test e2e/auth.spec.ts
+
+# Run tests for specific browser
+npx playwright test --project=chromium
+npx playwright test --project=firefox
+npx playwright test --project=webkit
+```
+
+### Test Organization
+
+- `e2e/auth.spec.ts` - Authentication flow tests (login, logout, protected routes)
+- `e2e/college-crud.spec.ts` - College creation, updates, and management
+- `e2e/checklist.spec.ts` - Checklist updates and auto-status progression
+- `e2e/helpers.ts` - Reusable test helpers (login, createCollege, cleanup)
+
+### Configuration
+
+Playwright configuration in `playwright.config.ts`:
+- **Base URL**: `http://localhost:3000`
+- **Browsers**: Chromium, Firefox, WebKit
+- **Auto-start dev server**: Configured via `webServer` setting
+- **Screenshots**: Captured on failure
+- **Traces**: Captured on first retry
+
+### Environment Requirements
+
+E2E tests require `APP_PASSKEY` environment variable set in `.env.local` for authentication tests.
+
+### Best Practices
+
+- Tests run in parallel by default for speed
+- Each test should be independent (no shared state)
+- Use helper functions for common operations (login, createCollege)
+- Clean up test data after tests complete
+- Tests automatically retry once on CI if they fail
+
+### Debugging Failed Tests
+
+```bash
+# View HTML report after test run
+npx playwright show-report
+
+# Run with debug mode
+npx playwright test --debug
+
+# Run specific test in UI mode
+npx playwright test e2e/auth.spec.ts --ui
 ```
 
 ## Database Commands
