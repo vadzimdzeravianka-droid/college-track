@@ -1,0 +1,44 @@
+{
+  "requirement_id": "urgency-absolute-thresholds",
+  "timestamp": "2026-03-27T00:00:00Z",
+  "time_minutes": 15,
+  "approaches_count": 3,
+  "recommended_approach": "A",
+  "recommended_reasoning": "Simple absolute thresholds - directly addresses user complaint about percentage complexity, creates predictable yellow zone",
+  "token_estimate": 24000,
+  "complexity": "low",
+  "research_conducted": [
+    "Current urgency calculation logic (buffer ratio)",
+    "Components using urgency display",
+    "Past user feedback on urgency system"
+  ],
+  "edge_cases_identified": [
+    "Overdue deadlines (already handled)",
+    "No deadline set (already handled)",
+    "Completed statuses (already handled)",
+    "Boundary cases (7 days, 21 days)",
+    "Message wording changes (remove buffer ratio language)",
+    "Backward compatibility (function signatures unchanged)"
+  ],
+  "user_feedback": {
+    "iteration": 0,
+    "complaint": "Never saw yellow because percentage works incorrectly",
+    "preference": "Absolute day counts easier to understand than buffer ratios",
+    "reasoning": "One week buffer = red but feasible, two more weeks = time to act",
+    "impact": "Simplifies logic, makes yellow zone common (7-21 day range)"
+  },
+  "memory_learnings": [
+    "User prefers simple, predictable thresholds over intelligent ratio-based systems",
+    "Mental model: 1 week = urgent, 3 weeks = warning, more = comfortable",
+    "Absolute day thresholds are more intuitive than percentage-based buffers",
+    "Yellow zone was too narrow with ratio logic (1.1-1.6 range)",
+    "Fixed day boundaries (7, 21) create predictable behavior"
+  ],
+  "lessons_for_future_grooming": [
+    "When user complains about 'never seeing' a state, check threshold ranges",
+    "Simple absolute thresholds often better than complex calculated ratios",
+    "User's mental model (stated preferences) should guide approach selection",
+    "Backward compatibility is easy when function signatures remain unchanged",
+    "Removing complexity (calculateDaysNeeded from urgency) can improve predictability"
+  ]
+}

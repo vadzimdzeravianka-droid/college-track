@@ -92,19 +92,12 @@ export function getUrgencyLevel(
     return "red";
   }
 
-  const daysNeeded = calculateDaysNeeded(checklist, essayCount);
-
-  if (daysNeeded <= 10) {
-    return "green";
-  }
-
-  const bufferRatio = daysAvailable / daysNeeded;
-
-  if (bufferRatio < 1.1) {
+  // Absolute day-based thresholds
+  if (daysAvailable <= 7) {
     return "red";
   }
 
-  if (bufferRatio < 1.6) {
+  if (daysAvailable <= 21) {
     return "yellow";
   }
 
@@ -134,23 +127,25 @@ export function getUrgencyMessage(
 
   const daysAvailable = getDaysUntilDeadline(deadline);
   const daysNeeded = calculateDaysNeeded(checklist, essayCount);
-  const bufferDays = daysAvailable - daysNeeded;
 
   if (urgency === "red") {
     if (daysAvailable <= 0) {
       return "Deadline passed";
     }
-    if (bufferDays < 0) {
-      return `Need ${daysNeeded} days, have ${daysAvailable} days — Short by ${Math.abs(bufferDays)} days`;
+    if (daysNeeded > daysAvailable) {
+      return `Critical: Need ${daysNeeded} days, only ${daysAvailable} days left`;
     }
-    return `Critical: Less than 10% time buffer (${bufferDays} days)`;
+    return `Critical: Less than 1 week until deadline`;
   }
 
   if (urgency === "yellow") {
-    return `Warning: Tight timeline (${bufferDays} days buffer)`;
+    if (daysNeeded > daysAvailable) {
+      return `Warning: Need ${daysNeeded} days, only ${daysAvailable} days left`;
+    }
+    return `Warning: 1-3 weeks until deadline`;
   }
 
-  return `On track (${bufferDays} days buffer)`;
+  return `On track: ${daysAvailable} days until deadline`;
 }
 
 export function formatDate(date: Date | null): string {

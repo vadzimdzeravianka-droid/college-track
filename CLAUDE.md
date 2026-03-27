@@ -102,22 +102,20 @@ Forms use `react-hook-form` with `@hookform/resolvers` for Zod integration.
 
 ### Urgency Calculation System
 
-Core logic in `lib/utils.ts` calculates deadline urgency based on:
-- Days until deadline
-- Checklist completion status
-- Essay requirements
-- Milestone duration constants (e.g., main essay = 21 days, supplemental = 10 days)
+Core logic in `lib/utils.ts` calculates deadline urgency based on absolute days until deadline.
 
 Functions:
-- `calculateDaysNeeded(checklist, essayCount)` - Estimates days to complete remaining tasks
+- `calculateDaysNeeded(checklist, essayCount)` - Estimates days to complete remaining tasks (used for informational messages)
 - `getUrgencyLevel(deadline, status, checklist, essayCount)` - Returns "red", "yellow", "green", or "none"
-- `getUrgencyMessage(...)` - Human-readable urgency explanation
+- `getUrgencyMessage(...)` - Human-readable urgency explanation showing days left vs. days needed
 - `isDeadlineUrgent(deadline, status)` - Simple 7-day alert (legacy)
 
-Urgency thresholds:
-- **Red**: Buffer ratio < 1.1 (less than 10% buffer) OR overdue
-- **Yellow**: Buffer ratio < 1.6 (less than 60% buffer)
-- **Green**: Buffer ratio >= 1.6 OR minimal work remaining (<= 10 days needed)
+Urgency thresholds (absolute day-based):
+- **Red**: 1-7 days until deadline OR overdue
+- **Yellow**: 7-21 days until deadline (1-3 weeks)
+- **Green**: 21+ days until deadline
+
+Note: `calculateDaysNeeded()` still estimates required time based on checklist completion, essay requirements, and milestone duration constants (e.g., main essay = 21 days, supplemental = 10 days), but urgency color is determined solely by absolute days remaining.
 
 ### Component Organization
 

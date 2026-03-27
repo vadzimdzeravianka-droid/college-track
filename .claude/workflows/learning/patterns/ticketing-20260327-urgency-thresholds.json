@@ -1,0 +1,63 @@
+{
+  "ticket_id": "URGENCY-ABSOLUTE-THRESHOLDS-20260327",
+  "timestamp": "2026-03-27T00:00:00Z",
+  "requirement_id": "urgency-absolute-thresholds",
+  "subtask_count": 4,
+  "estimated_tokens": 25000,
+  "complexity": "low-medium",
+  "ticket_creation_time_minutes": 12,
+  "subtask_breakdown": [
+    {
+      "id": 1,
+      "title": "Implement Absolute Thresholds in getUrgencyLevel()",
+      "complexity": "simple",
+      "estimated_tokens": 5000,
+      "primary_file": "lib/utils.ts"
+    },
+    {
+      "id": 2,
+      "title": "Update Urgency Messages",
+      "complexity": "simple",
+      "estimated_tokens": 6000,
+      "primary_file": "lib/utils.ts"
+    },
+    {
+      "id": 3,
+      "title": "Create Comprehensive Test Suite",
+      "complexity": "medium",
+      "estimated_tokens": 9000,
+      "primary_file": "lib/__tests__/utils.urgency.test.ts"
+    },
+    {
+      "id": 4,
+      "title": "Update Documentation",
+      "complexity": "simple",
+      "estimated_tokens": 2000,
+      "primary_file": "CLAUDE.md"
+    }
+  ],
+  "test_strategy": {
+    "unit_tests": 16,
+    "integration_tests": 3,
+    "e2e_tests": 0,
+    "coverage_target": 90
+  },
+  "files_affected": {
+    "to_modify": [
+      "lib/utils.ts",
+      "CLAUDE.md"
+    ],
+    "to_create": [
+      "lib/__tests__/utils.urgency.test.ts"
+    ]
+  },
+  "dependencies": [],
+  "backward_compatible": true,
+  "lessons": [
+    "Small focused changes (2 functions) benefit from granular subtask breakdown",
+    "Test creation as separate subtask allows for comprehensive coverage planning",
+    "Documentation update as final subtask ensures accuracy after implementation",
+    "No existing tests for urgency functions - opportunity to add comprehensive suite",
+    "Boundary testing critical for threshold-based logic (0, 7, 8, 21, 22 days)"
+  ]
+}
