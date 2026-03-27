@@ -291,35 +291,38 @@ export function CollegeCard({ college }: { college: College }) {
 
           {/* Middle-Right: Cost */}
           {costData ? (
-            <div className="flex-shrink-0 w-44 p-6 border-l flex flex-col justify-center space-y-1.5">
+            <div className="flex-shrink-0 w-56 p-6 border-l flex flex-col justify-center space-y-1.5">
               <div className="text-xs font-medium text-muted-foreground mb-1">Cost</div>
               {costData.tuitionAndFees !== null && (
-                <div className="text-xs leading-snug">
+                <div className="flex justify-between items-baseline text-xs gap-2">
                   <span className="text-muted-foreground">Tuition + Fees:</span>
-                  <div className="font-medium">{formatCurrency(costData.tuitionAndFees)}</div>
+                  <span className="font-medium">{formatCurrency(costData.tuitionAndFees)}</span>
                 </div>
               )}
               {costData.roomAndBoard !== null && (
-                <div className="text-xs leading-snug">
+                <div className="flex justify-between items-baseline text-xs gap-2">
                   <span className="text-muted-foreground">Room & Board:</span>
-                  <div className="font-medium">{formatCurrency(costData.roomAndBoard)}</div>
+                  <span className="font-medium">{formatCurrency(costData.roomAndBoard)}</span>
                 </div>
               )}
               {costData.other !== null && (
-                <div className="text-xs leading-snug">
+                <div className="flex justify-between items-baseline text-xs gap-2">
                   <span className="text-muted-foreground">Other:</span>
-                  <div className="font-medium">{formatCurrency(costData.other)}</div>
+                  <span className="font-medium">{formatCurrency(costData.other)}</span>
                 </div>
               )}
               {costData.total !== null && (
-                <div className="text-sm font-semibold pt-1.5 border-t">
-                  {formatCurrency(costData.total)}
-                  {college.isInState && <div className="text-xs font-normal text-muted-foreground">(In-State)</div>}
+                <div className="flex justify-between items-baseline text-sm font-semibold pt-1.5 border-t gap-2">
+                  <span>Total:</span>
+                  <div className="flex flex-col items-end">
+                    <span>{formatCurrency(costData.total)}</span>
+                    {college.isInState && <span className="text-xs font-normal text-muted-foreground">(In-State)</span>}
+                  </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex-shrink-0 w-44 p-6 border-l flex flex-col justify-center items-center">
+            <div className="flex-shrink-0 w-56 p-6 border-l flex flex-col justify-center items-center">
               <div className="text-xs text-muted-foreground text-center">Cost N/A</div>
             </div>
           )}
