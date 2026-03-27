@@ -54,7 +54,7 @@ export function Stepper({
 export function StepperHeader({ children }: { children: React.ReactNode }) {
   return (
     <div className="mb-8">
-      <div className="flex items-center justify-center gap-2 sm:gap-4">
+      <div className="flex items-center justify-center gap-1 sm:gap-4">
         {children}
       </div>
     </div>
@@ -75,7 +75,7 @@ export function StepIndicator({ step, label }: StepIndicatorProps) {
     <div className="flex flex-col items-center gap-2">
       <div
         className={cn(
-          "flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full border-2 transition-all",
+          "flex h-6 w-6 sm:h-10 sm:w-10 items-center justify-center rounded-full border-2 transition-all",
           isActive &&
             "border-primary bg-primary text-primary-foreground shadow-lg scale-110",
           isCompleted && "border-primary bg-primary text-primary-foreground",
@@ -83,9 +83,9 @@ export function StepIndicator({ step, label }: StepIndicatorProps) {
         )}
       >
         {isCompleted ? (
-          <Check className="h-4 w-4 sm:h-5 sm:w-5" />
+          <Check className="h-3 w-3 sm:h-5 sm:w-5" />
         ) : (
-          <span className="text-xs sm:text-sm font-semibold">{step + 1}</span>
+          <span className="text-[10px] sm:text-sm font-semibold">{step + 1}</span>
         )}
       </div>
       {label && (
@@ -105,7 +105,7 @@ export function StepIndicator({ step, label }: StepIndicatorProps) {
 
 export function StepSeparator() {
   return (
-    <div className="flex-1 h-0.5 bg-border min-w-4 sm:min-w-8 mt-4 sm:mt-5" />
+    <div className="flex-1 h-0.5 bg-border min-w-2 sm:min-w-8 mt-3 sm:mt-5" />
   );
 }
 
