@@ -222,7 +222,7 @@ export function CollegeCard({ college }: { college: College }) {
         {/* Desktop: Horizontal Layout */}
         <div className="hidden md:flex items-stretch">
           {/* Left: Name & Badges */}
-          <div className="flex-shrink-0 w-1/3 p-6 flex flex-col">
+          <div className="flex-shrink-0 w-2/5 p-6 flex flex-col">
             <div className="flex items-start justify-between gap-2 mb-3">
               <CardTitle className="text-lg flex-1">{college.name}</CardTitle>
               {getUrgencyBadge()}
@@ -244,7 +244,7 @@ export function CollegeCard({ college }: { college: College }) {
           </div>
 
           {/* Middle: Details */}
-          <div className="flex-1 p-6 border-l space-y-2">
+          <div className="flex-shrink-0 w-64 p-6 border-l space-y-2">
             {college.location && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 flex-shrink-0" />
