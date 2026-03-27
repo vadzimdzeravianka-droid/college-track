@@ -292,7 +292,6 @@ export function CollegeCard({ college }: { college: College }) {
           {/* Middle-Right: Cost */}
           {costData ? (
             <div className="flex-shrink-0 w-56 p-6 border-l flex flex-col justify-center space-y-1.5">
-              <div className="text-xs font-medium text-muted-foreground mb-1">Cost</div>
               {costData.tuitionAndFees !== null && (
                 <div className="flex justify-between items-baseline text-xs gap-2">
                   <span className="text-muted-foreground">Tuition + Fees:</span>
