@@ -4,6 +4,34 @@ import { db } from "@/lib/db";
 import { CollegeSchema, ChecklistSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
+import { Decimal } from "@prisma/client/runtime/library";
+
+// Helper to convert Decimal to number for Client Components
+function serializeCollege(college: any): any {
+  const serialized = { ...college };
+
+  // Convert all Decimal fields to numbers
+  if (serialized.costTuition instanceof Decimal) {
+    serialized.costTuition = serialized.costTuition.toNumber();
+  }
+  if (serialized.costRoomBoard instanceof Decimal) {
+    serialized.costRoomBoard = serialized.costRoomBoard.toNumber();
+  }
+  if (serialized.costFees instanceof Decimal) {
+    serialized.costFees = serialized.costFees.toNumber();
+  }
+  if (serialized.costBooks instanceof Decimal) {
+    serialized.costBooks = serialized.costBooks.toNumber();
+  }
+  if (serialized.costPersonal instanceof Decimal) {
+    serialized.costPersonal = serialized.costPersonal.toNumber();
+  }
+  if (serialized.costOther instanceof Decimal) {
+    serialized.costOther = serialized.costOther.toNumber();
+  }
+
+  return serialized;
+}
 
 export async function getColleges() {
   try {
@@ -15,7 +43,11 @@ export async function getColleges() {
         deadlineApp: "asc",
       },
     });
-    return { colleges };
+
+    // Serialize Decimal fields to numbers for Client Components
+    const serializedColleges = colleges.map(serializeCollege);
+
+    return { colleges: serializedColleges };
   } catch (error) {
     console.error("Get colleges error:", error);
     return {
@@ -36,7 +68,11 @@ export async function getCollegeById(id: string) {
     if (!college) {
       return { error: "College not found" };
     }
-    return { college };
+
+    // Serialize Decimal fields to numbers for Client Components
+    const serializedCollege = serializeCollege(college);
+
+    return { college: serializedCollege };
   } catch (error) {
     return { error: "Failed to fetch college" };
   }
