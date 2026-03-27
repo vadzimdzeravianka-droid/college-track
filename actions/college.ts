@@ -8,29 +8,15 @@ import { Decimal } from "@prisma/client/runtime/library";
 
 // Helper to convert Decimal to number for Client Components
 function serializeCollege(college: any): any {
-  const serialized = { ...college };
-
-  // Convert all Decimal fields to numbers
-  if (serialized.costTuition instanceof Decimal) {
-    serialized.costTuition = serialized.costTuition.toNumber();
-  }
-  if (serialized.costRoomBoard instanceof Decimal) {
-    serialized.costRoomBoard = serialized.costRoomBoard.toNumber();
-  }
-  if (serialized.costFees instanceof Decimal) {
-    serialized.costFees = serialized.costFees.toNumber();
-  }
-  if (serialized.costBooks instanceof Decimal) {
-    serialized.costBooks = serialized.costBooks.toNumber();
-  }
-  if (serialized.costPersonal instanceof Decimal) {
-    serialized.costPersonal = serialized.costPersonal.toNumber();
-  }
-  if (serialized.costOther instanceof Decimal) {
-    serialized.costOther = serialized.costOther.toNumber();
-  }
-
-  return serialized;
+  return {
+    ...college,
+    costTuition: college.costTuition ? Number(college.costTuition) : college.costTuition,
+    costRoomBoard: college.costRoomBoard ? Number(college.costRoomBoard) : college.costRoomBoard,
+    costFees: college.costFees ? Number(college.costFees) : college.costFees,
+    costBooks: college.costBooks ? Number(college.costBooks) : college.costBooks,
+    costPersonal: college.costPersonal ? Number(college.costPersonal) : college.costPersonal,
+    costOther: college.costOther ? Number(college.costOther) : college.costOther,
+  };
 }
 
 export async function getColleges() {
