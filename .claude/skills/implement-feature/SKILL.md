@@ -40,14 +40,71 @@ Extract:
 - Test scenarios
 - Token budget
 
-Move ticket to `in-progress/`:
-```bash
-mv .claude/workflows/tickets/ready/[ticket-id].md .claude/workflows/tickets/in-progress/[ticket-id].md
-```
-
 Read CLAUDE.md for architectural context.
 
-### Step 2: Set Up Test Environment
+### Step 2: Create Feature Branch
+
+**Feature Branch Workflow** (recommended):
+
+```bash
+# Source git utilities
+source .claude/workflows/lib/git-branch-utils.sh
+
+# Extract ticket ID
+TICKET_ID="[ticket-id]"
+
+# Determine branch type from ticket ID
+BRANCH_TYPE=$(get_branch_type "$TICKET_ID")
+
+# Check current branch
+CURRENT_BRANCH=$(get_current_branch)
+
+if is_on_main; then
+  echo "📍 On main branch. Creating feature branch..."
+
+  # Create feature branch
+  create_feature_branch "$TICKET_ID" "$BRANCH_TYPE"
+
+  # Initial commit: ticket setup
+  mv .claude/workflows/tickets/ready/$TICKET_ID.md \
+     .claude/workflows/tickets/in-progress/$TICKET_ID.md
+
+  git add .claude/workflows/
+  git commit -m "chore($TICKET_ID): initialize feature branch with ticket
+
+Moved ticket to in-progress and ready for implementation.
+Branch: ${BRANCH_TYPE}/${TICKET_ID}"
+
+  echo "✅ Feature branch ready: ${BRANCH_TYPE}/${TICKET_ID}"
+else
+  echo "📍 Already on branch: $CURRENT_BRANCH"
+  echo "   Continuing implementation on current branch"
+
+  # Just move ticket if not already moved
+  if [[ -f ".claude/workflows/tickets/ready/$TICKET_ID.md" ]]; then
+    mv .claude/workflows/tickets/ready/$TICKET_ID.md \
+       .claude/workflows/tickets/in-progress/$TICKET_ID.md
+
+    git add .claude/workflows/
+    git commit -m "chore($TICKET_ID): move ticket to in-progress"
+  fi
+fi
+```
+
+**Legacy Mode** (direct main branch):
+
+If feature branches not desired, set in `.claude/workflows/config.json`:
+```json
+{
+  "git": {
+    "use_feature_branches": false
+  }
+}
+```
+
+Then skip branch creation and work directly on main.
+
+### Step 3: Set Up Test Environment
 
 Verify test environment:
 ```bash
@@ -312,7 +369,15 @@ Closes: EXPORT-CSV-20260326"
 
 ```bash
 mv .claude/workflows/tickets/in-progress/[ticket-id].md .claude/workflows/tickets/qa/[ticket-id].md
+
+# Commit ticket status change
+git add .claude/workflows/tickets/
+git commit -m "chore([ticket-id]): move ticket to QA stage
+
+Implementation complete, ready for validation."
 ```
+
+**Note**: If on feature branch, commits stay on branch. The validate-quality skill will handle merging to main after all gates pass.
 
 ## Quality Standards
 

@@ -1,0 +1,24 @@
+{
+  "git": {
+    "use_feature_branches": true,
+    "auto_create_branch": true,
+    "merge_strategy": "squash",
+    "branch_prefixes": {
+      "feature": "feature/",
+      "bugfix": "fix/",
+      "configuration": "config/",
+      "refactor": "refactor/"
+    },
+    "auto_cleanup_branches": true,
+    "require_rebase_before_merge": true
+  },
+  "validation": {
+    "auto_commit_on_pass": true,
+    "auto_merge_on_pass": true,
+    "require_human_approval": false
+  },
+  "learning": {
+    "auto_trigger_enabled": true,
+    "trigger_threshold": 5
+  }
+}

@@ -344,6 +344,25 @@ Save report to: `.claude/workflows/validation-reports/[ticket-id]/report.md`
 
 #### If All Gates Pass ✅
 
+**Check Branch Strategy:**
+
+```bash
+# Source git utilities
+source .claude/workflows/lib/git-branch-utils.sh
+
+CURRENT_BRANCH=$(get_current_branch)
+TICKET_ID="[ticket-id]"
+
+if is_on_main; then
+  echo "📍 On main branch - Direct commit mode"
+  MODE="direct"
+else
+  echo "📍 On feature branch: $CURRENT_BRANCH"
+  echo "   Will merge to main after commit"
+  MODE="feature_branch"
+fi
+```
+
 **Auto-commit with conventional commit message:**
 
 ```bash
@@ -361,6 +380,48 @@ QA: All validation gates passed
 Closes: [ticket-id]
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+
+COMMIT_SHA=$(git rev-parse HEAD)
+echo "✅ Committed: $COMMIT_SHA"
+```
+
+**If on Feature Branch - Merge to Main:**
+
+```bash
+if [[ "$MODE" == "feature_branch" ]]; then
+  echo ""
+  echo "🔄 Merging to main..."
+
+  # Update from main
+  git fetch origin main 2>/dev/null || git fetch main 2>/dev/null || true
+  git rebase origin/main 2>/dev/null || git rebase main 2>/dev/null || true
+
+  # Switch to main
+  git checkout main
+  git pull --ff-only 2>/dev/null || true
+
+  # Squash merge
+  git merge --squash "$CURRENT_BRANCH"
+
+  # Commit consolidated changes
+  git commit -m "feat: ${TICKET_SUMMARY}
+
+[Body with details]
+
+Tests: [X]% coverage, all passing
+QA: All validation gates passed
+Closes: [ticket-id]
+Branch: $CURRENT_BRANCH
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+
+  MAIN_COMMIT_SHA=$(git rev-parse HEAD)
+  echo "✅ Merged to main: $MAIN_COMMIT_SHA"
+
+  # Cleanup feature branch
+  git branch -d "$CURRENT_BRANCH"
+  echo "🧹 Deleted feature branch: $CURRENT_BRANCH"
+fi
 ```
 
 **Move ticket to done:**
