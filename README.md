@@ -4,31 +4,40 @@ A web application to track college applications, manage portal credentials, and 
 
 ## Setup
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### 1. Set up Supabase (Free Tier)
 
-2. **Configure environment variables:**
-   - Copy `.env.local.example` to `.env.local`
-   - Add your Supabase POSTGRES_PRISMA_URL
-   - Set your APP_PASSKEY
+1. Go to https://supabase.com and create a free account
+2. Create a new project
+3. Go to Project Settings > Database
+4. Copy the "Connection string" under "Connection pooling"
+5. Replace `[YOUR-PASSWORD]` with your database password
 
-3. **Setup database:**
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
+### 2. Configure Environment Variables
 
-4. **Run development server:**
-   ```bash
-   npm run dev
-   ```
+Create `.env.local`:
+```bash
+# Supabase connection string (with pgBouncer pooling)
+POSTGRES_PRISMA_URL="postgres://postgres.xxxx:[YOUR-PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true"
 
-5. **Access the application:**
-   - Open http://localhost:3000
-   - Login with your passkey
-   - Start tracking colleges!
+# Set your own secure passkey
+APP_PASSKEY="mySecurePasskey123"
+```
+
+### 3. Install Dependencies & Initialize Database
+
+```bash
+npm install
+npx prisma generate
+npx prisma db push
+```
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+Open http://localhost:3000 and login with your APP_PASSKEY!
 
 ## Features
 
@@ -41,11 +50,38 @@ A web application to track college applications, manage portal credentials, and 
 
 ## Deployment to Vercel
 
-1. Push to GitHub
-2. Import project in Vercel
-3. Connect Supabase integration (auto-injects POSTGRES_PRISMA_URL)
-4. Add APP_PASSKEY environment variable
-5. Deploy!
+1. **Push to GitHub:**
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial College Track app"
+   git branch -M main
+   git remote add origin <your-github-repo-url>
+   git push -u origin main
+   ```
+
+2. **Deploy on Vercel:**
+   - Go to https://vercel.com
+   - Click "Import Project"
+   - Select your GitHub repository
+   - Add Supabase integration (Storage > Connect Store > Supabase)
+     - This auto-injects `POSTGRES_PRISMA_URL`
+   - Add environment variable: `APP_PASSKEY` (your passkey)
+   - Click Deploy!
+
+## Using the Application
+
+### Dashboard Features
+- **Add College:** Click "Add College" button to create a new entry
+- **View Details:** Click any college card to see full details
+- **Urgency Alerts:** Cards show color-coded urgency based on deadline proximity
+- **Filters:** Use status filters to view specific groups
+
+### College Detail Page
+- **Portal Credentials:** Click copy buttons to copy username/password
+- **Checklist:** Check off items as you complete them
+- **Edit:** Click "Edit" to modify college details
+- **Delete:** Remove a college entry
 
 ## Status Colors
 
