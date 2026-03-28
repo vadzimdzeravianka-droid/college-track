@@ -159,6 +159,12 @@ export function CollegeCard({ college }: { college: College }) {
               <CategoryBadge category={college.category} />
               <StrategyBadge strategy={college.strategy} />
             </div>
+            {hasPortalCredentials && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
+                <KeyRound className="h-3.5 w-3.5" />
+                <span>Portal saved</span>
+              </div>
+            )}
             {urgencyMessage && (
               <div className={cn(
                 "mt-3 text-xs p-2 rounded",
@@ -243,15 +249,6 @@ export function CollegeCard({ college }: { college: College }) {
             <div className="pt-3 border-t space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Checklist:</span>
-                </div>
-                <span className="text-sm font-medium">
-                  {checklistProgress.completed}/{checklistProgress.total}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-sm">
                   {getDataCompletenessIcon()}
                   <span className="text-muted-foreground">Data:</span>
                 </div>
@@ -260,12 +257,15 @@ export function CollegeCard({ college }: { college: College }) {
                   {dataCompleteness.overall.percentage}%)
                 </span>
               </div>
-              {hasPortalCredentials && (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <KeyRound className="h-3.5 w-3.5" />
-                  <span>Portal saved</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Checklist:</span>
                 </div>
-              )}
+                <span className="text-sm font-medium">
+                  {checklistProgress.completed}/{checklistProgress.total}
+                </span>
+              </div>
             </div>
           </CardContent>
         </div>
@@ -283,6 +283,12 @@ export function CollegeCard({ college }: { college: College }) {
               <CategoryBadge category={college.category} />
               <StrategyBadge strategy={college.strategy} />
             </div>
+            {hasPortalCredentials && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
+                <KeyRound className="h-3.5 w-3.5" />
+                <span>Portal saved</span>
+              </div>
+            )}
             {urgencyMessage && (
               <div className={cn(
                 "text-xs p-2 rounded mt-auto",
@@ -378,23 +384,6 @@ export function CollegeCard({ college }: { college: College }) {
             </div>
           )}
 
-          {/* Checklist Progress */}
-          <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center gap-3" style={{ width: 'var(--college-card-checklist)' }}>
-            <div className="flex flex-col items-center gap-1">
-              <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                {checklistProgress.completed}/{checklistProgress.total}
-              </span>
-              <span className="text-xs text-muted-foreground">checklist</span>
-            </div>
-            {hasPortalCredentials && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2">
-                <KeyRound className="h-3.5 w-3.5" />
-                <span>Portal</span>
-              </div>
-            )}
-          </div>
-
           {/* Data Completeness - Only show when < 100% */}
           {dataCompleteness.overall.percentage < 100 && (
             <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center" style={{ width: 'var(--college-card-data)' }}>
@@ -407,6 +396,17 @@ export function CollegeCard({ college }: { college: College }) {
               </div>
             </div>
           )}
+
+          {/* Checklist Progress */}
+          <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center" style={{ width: 'var(--college-card-checklist)' }}>
+            <div className="flex flex-col items-center gap-1">
+              <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                {checklistProgress.completed}/{checklistProgress.total}
+              </span>
+              <span className="text-xs text-muted-foreground">checklist</span>
+            </div>
+          </div>
         </div>
       </Card>
     </Link>

@@ -414,9 +414,9 @@ describe('CollegeCard', () => {
     });
 
     it('should apply CSS custom property for checklist column width', () => {
-      const { container } = render(<CollegeCard college={mockCollege} />);
-      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
-      const checklistColumn = desktopLayout?.querySelector('.gap-3');
+      const { container, getByText } = render(<CollegeCard college={mockCollege} />);
+      const checklistLabel = getByText('checklist');
+      const checklistColumn = checklistLabel.closest('[style*="--college-card-checklist"]');
       expect(checklistColumn).toHaveStyle({ width: 'var(--college-card-checklist)' });
     });
 
