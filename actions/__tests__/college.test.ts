@@ -74,9 +74,9 @@ describe('Server Actions - college.ts', () => {
 
       expect(result.colleges).toBeDefined();
       expect(result.colleges).toHaveLength(2);
-      expect(result.colleges[0].name).toBe('MIT');
-      expect(result.colleges[0].costTuition).toBe(50000);
-      expect(result.colleges[1].costTuition).toBeNull();
+      expect(result.colleges?.[0].name).toBe('MIT');
+      expect(result.colleges?.[0].costTuition).toBe(50000);
+      expect(result.colleges?.[1].costTuition).toBeNull();
       expect(db.college.findMany).toHaveBeenCalledWith({
         include: { checklist: true },
         orderBy: { deadlineApp: 'asc' },
@@ -100,12 +100,12 @@ describe('Server Actions - college.ts', () => {
 
       const result = await getColleges();
 
-      expect(result.colleges[0].costTuition).toBe(60000);
-      expect(result.colleges[0].costRoomBoard).toBe(15000);
-      expect(result.colleges[0].costFees).toBe(2000);
-      expect(result.colleges[0].costBooks).toBe(1000);
-      expect(result.colleges[0].costPersonal).toBe(3000);
-      expect(result.colleges[0].costOther).toBe(500);
+      expect(result.colleges?.[0].costTuition).toBe(60000);
+      expect(result.colleges?.[0].costRoomBoard).toBe(15000);
+      expect(result.colleges?.[0].costFees).toBe(2000);
+      expect(result.colleges?.[0].costBooks).toBe(1000);
+      expect(result.colleges?.[0].costPersonal).toBe(3000);
+      expect(result.colleges?.[0].costOther).toBe(500);
     });
 
     it('should handle database errors', async () => {
@@ -241,6 +241,8 @@ describe('Server Actions - college.ts', () => {
         name: '',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         category: 'INVALID' as any,
+        status: 'NOT_STARTED' as const,
+        strategy: 'RD' as const,
       };
 
       const result = await createCollege(invalidData);
@@ -370,7 +372,7 @@ describe('Server Actions - college.ts', () => {
         const result = await updateCollegeStatus('1', status);
 
         expect(result.success).toBe('Status updated!');
-        expect(result.college.status).toBe(status);
+        expect(result.college?.status).toBe(status);
       }
     });
 
