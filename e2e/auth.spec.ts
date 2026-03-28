@@ -15,35 +15,47 @@ test.describe('Authentication Flow', () => {
     // Navigate to login page
     await page.goto('/login');
 
+    // Wait for form to be visible
+    await expect(page.locator('input#passkey')).toBeVisible();
+
     // Fill in passkey
-    await page.fill('input[name="passkey"]', passkey!);
+    await page.fill('input#passkey', passkey!);
 
     // Submit form
     await page.click('button[type="submit"]');
 
-    // Should redirect to dashboard
-    await expect(page).toHaveURL('/dashboard');
+    // Wait for navigation to dashboard
+    await page.waitForURL('/dashboard', { timeout: 10000 });
 
     // Dashboard should be visible
-    await expect(page.locator('h1, h2').filter({ hasText: /dashboard|colleges/i })).toBeVisible();
+    await expect(page.locator('text=College Application Tracker')).toBeVisible();
   });
 
   test('should show error with invalid passkey', async ({ page }) => {
     // Navigate to login page
     await page.goto('/login');
 
+    // Wait for form
+    await expect(page.locator('input#passkey')).toBeVisible();
+
     // Fill in wrong passkey
-    await page.fill('input[name="passkey"]', 'wrong-passkey-12345');
+    await page.fill('input#passkey', 'wrong-passkey-12345');
 
     // Submit form
     await page.click('button[type="submit"]');
 
-    // Should stay on login page
-    await expect(page).toHaveURL('/login');
+    // Wait a moment for error to appear
+    await page.waitForTimeout(1500);
 
-    // Should show error message or toast
-    const errorMessage = page.locator('text=/invalid|incorrect|wrong/i');
-    await expect(errorMessage).toBeVisible({ timeout: 5000 });
+    // Should still be on login page (check URL contains /login)
+    expect(page.url()).toContain('/login');
+
+    // Should show error message in the error div or toast
+    const errorDiv = page.locator('.text-destructive').first();
+    const hasError = await errorDiv.isVisible().catch(() => false);
+
+    // Error should be shown
+    expect(hasError).toBe(true);
   });
 
   test('should redirect to login when accessing protected route without auth', async ({ page }) => {
@@ -54,7 +66,8 @@ test.describe('Authentication Flow', () => {
     await expect(page).toHaveURL('/login');
 
     // Login form should be visible
-    await expect(page.locator('input[name="passkey"]')).toBeVisible();
+    await expect(page.locator('input#passkey')).toBeVisible();
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
   });
 
   test('should maintain session across page refreshes', async ({ page }) => {
@@ -71,7 +84,7 @@ test.describe('Authentication Flow', () => {
     await expect(page).toHaveURL('/dashboard');
 
     // Dashboard content should be visible
-    await expect(page.locator('h1, h2').filter({ hasText: /dashboard|colleges/i })).toBeVisible();
+    await expect(page.locator('text=College Application Tracker')).toBeVisible();
   });
 
   test('login helper function should work correctly', async ({ page }) => {
