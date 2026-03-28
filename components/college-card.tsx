@@ -222,9 +222,9 @@ export function CollegeCard({ college }: { college: College }) {
         {/* Desktop: Horizontal Layout */}
         <div className="hidden md:flex items-stretch">
           {/* Left: Name & Badges */}
-          <div className="flex-shrink-0 w-1/3 p-6 flex flex-col">
+          <div className="flex-1 p-6 flex flex-col" style={{ minWidth: 'var(--college-card-name-min)' }}>
             <div className="flex items-start justify-between gap-2 mb-3">
-              <CardTitle className="text-lg flex-1">{college.name}</CardTitle>
+              <CardTitle className="text-lg flex-1 truncate" title={college.name}>{college.name}</CardTitle>
               {getUrgencyBadge()}
             </div>
             <div className="flex flex-wrap gap-1.5 mb-3">
@@ -244,33 +244,34 @@ export function CollegeCard({ college }: { college: College }) {
           </div>
 
           {/* Middle: Details */}
-          <div className="flex-shrink-0 w-72 p-6 border-l space-y-2">
+          <div className="flex-shrink-0 p-6 border-l space-y-2" style={{ width: 'var(--college-card-details)' }}>
             {college.location && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{college.location}</span>
+                <span className="truncate" title={college.location}>{college.location}</span>
               </div>
             )}
             {college.major && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <GraduationCap className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{college.major}</span>
+                <span className="truncate" title={college.major}>{college.major}</span>
               </div>
             )}
             {college.deadlineApp && (
               <div className="flex items-start gap-2 text-sm">
                 <Calendar className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                   <span className={cn(
+                    "truncate",
                     urgencyLevel === "red" && "text-destructive font-semibold",
                     urgencyLevel === "yellow" && "text-yellow-700 dark:text-yellow-500 font-semibold",
                     urgencyLevel === "green" && "text-muted-foreground"
-                  )}>
+                  )} title={`App: ${formatDate(college.deadlineApp)}`}>
                     App: {formatDate(college.deadlineApp)}
                   </span>
                   {daysUntil !== null && daysUntil >= 0 && (
                     <span className={cn(
-                      "text-xs",
+                      "text-xs truncate",
                       urgencyLevel === "red" && "text-destructive font-medium",
                       urgencyLevel === "yellow" && "text-yellow-700 dark:text-yellow-500 font-medium",
                       urgencyLevel === "green" && "text-muted-foreground"
@@ -284,36 +285,36 @@ export function CollegeCard({ college }: { college: College }) {
             {college.deadlineFinaid && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <DollarSign className="h-4 w-4 flex-shrink-0" />
-                <span>FinAid: {formatDate(college.deadlineFinaid)}</span>
+                <span className="truncate" title={`FinAid: ${formatDate(college.deadlineFinaid)}`}>FinAid: {formatDate(college.deadlineFinaid)}</span>
               </div>
             )}
           </div>
 
           {/* Middle-Right: Cost */}
           {costData ? (
-            <div className="flex-shrink-0 w-56 p-6 border-l flex flex-col justify-center space-y-1.5">
+            <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center space-y-1.5" style={{ width: 'var(--college-card-cost)' }}>
               {costData.tuitionAndFees !== null && (
                 <div className="flex justify-between items-baseline text-xs gap-2">
-                  <span className="text-muted-foreground">Tuition + Fees:</span>
-                  <span className="font-medium">{formatCurrency(costData.tuitionAndFees)}</span>
+                  <span className="text-muted-foreground truncate">Tuition + Fees:</span>
+                  <span className="font-medium flex-shrink-0">{formatCurrency(costData.tuitionAndFees)}</span>
                 </div>
               )}
               {costData.roomAndBoard !== null && (
                 <div className="flex justify-between items-baseline text-xs gap-2">
-                  <span className="text-muted-foreground">Room & Board:</span>
-                  <span className="font-medium">{formatCurrency(costData.roomAndBoard)}</span>
+                  <span className="text-muted-foreground truncate">Room & Board:</span>
+                  <span className="font-medium flex-shrink-0">{formatCurrency(costData.roomAndBoard)}</span>
                 </div>
               )}
               {costData.other !== null && (
                 <div className="flex justify-between items-baseline text-xs gap-2">
-                  <span className="text-muted-foreground">Other:</span>
-                  <span className="font-medium">{formatCurrency(costData.other)}</span>
+                  <span className="text-muted-foreground truncate">Other:</span>
+                  <span className="font-medium flex-shrink-0">{formatCurrency(costData.other)}</span>
                 </div>
               )}
               {costData.total !== null && (
                 <div className="flex justify-between items-baseline text-sm font-semibold pt-1.5 border-t gap-2">
-                  <span>Total:</span>
-                  <div className="flex flex-col items-end">
+                  <span className="truncate">Total:</span>
+                  <div className="flex flex-col items-end flex-shrink-0">
                     <span>{formatCurrency(costData.total)}</span>
                     {college.isInState && <span className="text-xs font-normal text-muted-foreground">(In-State)</span>}
                   </div>
@@ -321,13 +322,13 @@ export function CollegeCard({ college }: { college: College }) {
               )}
             </div>
           ) : (
-            <div className="flex-shrink-0 w-56 p-6 border-l flex flex-col justify-center items-center">
+            <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center" style={{ width: 'var(--college-card-cost)' }}>
               <div className="text-xs text-muted-foreground text-center">Cost N/A</div>
             </div>
           )}
 
           {/* Right: Progress */}
-          <div className="flex-shrink-0 w-32 p-6 border-l flex flex-col justify-center items-center gap-3">
+          <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center gap-3" style={{ width: 'var(--college-card-progress)' }}>
             <div className="flex flex-col items-center gap-1">
               <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
               <span className="text-sm font-medium">

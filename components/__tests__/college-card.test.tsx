@@ -367,4 +367,79 @@ describe('CollegeCard', () => {
       expect(screen.getAllByText('0/7').length).toBeGreaterThan(0);
     });
   });
+
+  describe('Desktop Layout Column Widths', () => {
+    it('should render desktop layout with flex-1 name column', () => {
+      const { container } = render(<CollegeCard college={mockCollege} />);
+      // Check that desktop layout exists (hidden md:flex)
+      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
+      expect(desktopLayout).toBeInTheDocument();
+
+      // Check that name column uses flex-1
+      const nameColumn = desktopLayout?.querySelector('.flex-1.p-6.flex.flex-col');
+      expect(nameColumn).toBeInTheDocument();
+    });
+
+    it('should apply CSS custom property for name column min-width', () => {
+      const { container } = render(<CollegeCard college={mockCollege} />);
+      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
+      const nameColumn = desktopLayout?.querySelector('.flex-1');
+      expect(nameColumn).toHaveStyle({ minWidth: 'var(--college-card-name-min)' });
+    });
+
+    it('should apply CSS custom property for details column width', () => {
+      const { container } = render(<CollegeCard college={mockCollege} />);
+      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
+      const detailsColumn = desktopLayout?.querySelector('.space-y-2');
+      expect(detailsColumn).toHaveStyle({ width: 'var(--college-card-details)' });
+    });
+
+    it('should apply CSS custom property for cost column width', () => {
+      (utils.hasCostData as jest.Mock).mockReturnValue(true);
+      (utils.getGroupedCosts as jest.Mock).mockReturnValue({
+        tuitionAndFees: 62000,
+        roomAndBoard: 15000,
+        other: null,
+        total: 77000,
+      });
+
+      const { container } = render(<CollegeCard college={mockCollege} />);
+      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
+      const costColumn = desktopLayout?.querySelector('.space-y-1\\.5');
+      expect(costColumn).toHaveStyle({ width: 'var(--college-card-cost)' });
+    });
+
+    it('should apply CSS custom property for progress column width', () => {
+      const { container } = render(<CollegeCard college={mockCollege} />);
+      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
+      const progressColumn = desktopLayout?.querySelector('.gap-3');
+      expect(progressColumn).toHaveStyle({ width: 'var(--college-card-progress)' });
+    });
+
+    it('should apply truncate class and title attribute to college name', () => {
+      const longNameCollege = { ...mockCollege, name: 'Very Long University Name That Might Get Truncated' };
+      const { container } = render(<CollegeCard college={longNameCollege} />);
+      const nameTitle = container.querySelector('.text-lg.flex-1.truncate');
+      expect(nameTitle).toBeInTheDocument();
+      expect(nameTitle).toHaveAttribute('title', 'Very Long University Name That Might Get Truncated');
+    });
+
+    it('should apply truncate class and title attribute to location when provided', () => {
+      const { container } = render(<CollegeCard college={mockCollege} />);
+      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
+      const locationElements = desktopLayout?.querySelectorAll('.truncate');
+      const locationSpan = Array.from(locationElements || []).find(el => el.textContent === 'Cambridge, MA');
+      expect(locationSpan).toBeInTheDocument();
+      expect(locationSpan).toHaveAttribute('title', 'Cambridge, MA');
+    });
+
+    it('should apply truncate class and title attribute to major when provided', () => {
+      const { container } = render(<CollegeCard college={mockCollege} />);
+      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
+      const truncateElements = desktopLayout?.querySelectorAll('.truncate');
+      const majorSpan = Array.from(truncateElements || []).find(el => el.textContent === 'Computer Science');
+      expect(majorSpan).toBeInTheDocument();
+      expect(majorSpan).toHaveAttribute('title', 'Computer Science');
+    });
+  });
 });
