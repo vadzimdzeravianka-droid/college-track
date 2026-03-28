@@ -97,8 +97,6 @@ const mockCollege = {
 };
 
 describe('CollegeDetailPage - Button asChild Pattern', () => {
-  const { getCollegeById } = jest.requireActual('@/actions/college');
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
