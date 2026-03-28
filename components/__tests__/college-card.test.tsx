@@ -48,6 +48,8 @@ const mockCollege = {
   major: 'Computer Science',
   portalUrl: 'https://portal.mit.edu',
   portalUser: 'student@mit.edu',
+  portalPassword: null,
+  notes: null,
   costTuition: 60000,
   costRoomBoard: 15000,
   costFees: 2000,
@@ -339,6 +341,8 @@ describe('CollegeCard', () => {
         major: null,
         portalUrl: null,
         portalUser: null,
+        portalPassword: null,
+        notes: null,
         checklist: null,
       };
 

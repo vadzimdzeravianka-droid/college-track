@@ -32,6 +32,8 @@ const mockColleges = [
     major: null,
     portalUrl: null,
     portalUser: null,
+    portalPassword: null,
+    notes: null,
     checklist: {
       lorTeacher: false,
       transcriptSent: false,
@@ -52,6 +54,8 @@ const mockColleges = [
     major: null,
     portalUrl: null,
     portalUser: null,
+    portalPassword: null,
+    notes: null,
     checklist: null,
   },
   {
@@ -66,6 +70,8 @@ const mockColleges = [
     major: null,
     portalUrl: null,
     portalUser: null,
+    portalPassword: null,
+    notes: null,
     checklist: null,
   },
   {
@@ -80,6 +86,8 @@ const mockColleges = [
     major: null,
     portalUrl: null,
     portalUser: null,
+    portalPassword: null,
+    notes: null,
     checklist: null,
   },
 ];
