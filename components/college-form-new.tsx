@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, Fragment } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CollegeSchema } from "@/schemas";
@@ -192,10 +192,10 @@ export function CollegeFormNew({
         <Stepper currentStep={currentStep} onStepChange={setCurrentStep}>
           <StepperHeader>
             {STEPS.map((step, index) => (
-              <>
-                <StepIndicator key={index} step={index} label={step.label} />
-                {index < STEPS.length - 1 && <StepSeparator key={`sep-${index}`} />}
-              </>
+              <Fragment key={index}>
+                <StepIndicator step={index} label={step.label} />
+                {index < STEPS.length - 1 && <StepSeparator />}
+              </Fragment>
             ))}
           </StepperHeader>
 
