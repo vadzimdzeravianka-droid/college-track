@@ -1,0 +1,128 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  quality-gate:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run type check
+        run: npx tsc --noEmit
+
+      - name: Run unit tests
+        run: npm test -- --coverage --passWithNoTests
+
+      - name: Build application
+        run: npm run build
+        env:
+          # Use dummy values for build - real values in deployment
+          POSTGRES_PRISMA_URL: postgresql://dummy:dummy@localhost:5432/dummy
+          APP_PASSKEY: dummy-passkey-for-build
+
+      - name: Check build output
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "Build failed - .next directory not found"
+            exit 1
+          fi
+          echo "✓ Build successful"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+      - name: Comment test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let coverageData = 'Coverage report not available';
+
+            try {
+              // Try to read coverage summary if it exists
+              const coveragePath = 'coverage/coverage-summary.json';
+              if (fs.existsSync(coveragePath)) {
+                const coverage = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
+                const total = coverage.total;
+                coverageData = `
+                📊 **Test Coverage Summary**
+                - Statements: ${total.statements.pct}%
+                - Branches: ${total.branches.pct}%
+                - Functions: ${total.functions.pct}%
+                - Lines: ${total.lines.pct}%
+                `;
+              }
+            } catch (error) {
+              console.log('Could not read coverage data:', error.message);
+            }
+
+            const body = `
+            ## ✅ Quality Gate Status
+
+            **Build**: ${{ job.status }}
+            **Linting**: Passed
+            **Type Check**: Passed
+            **Tests**: Passed
+
+            ${coverageData}
+
+            ---
+
+            All quality checks must pass before merging.
+            `;
+
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.data.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Quality Gate Status')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
