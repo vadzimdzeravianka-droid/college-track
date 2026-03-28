@@ -1,8 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge, CategoryBadge, StrategyBadge } from "@/components/status-badge";
-import { cn, getUrgencyLevel, getUrgencyMessage, formatDate, getDaysUntilDeadline, formatCurrency, getGroupedCosts, hasCostData } from "@/lib/utils";
+import { cn, getUrgencyLevel, getUrgencyMessage, formatDate, getDaysUntilDeadline, formatCurrency, getGroupedCosts, hasCostData, getDataCompleteness } from "@/lib/utils";
 import Link from "next/link";
 import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle2, KeyRound, AlertTriangle, AlertCircle } from "lucide-react";
 
@@ -18,6 +19,7 @@ type College = {
   major: string | null;
   portalUrl: string | null;
   portalUser: string | null;
+  portalPassword: string | null;
   costTuition?: number | { toNumber: () => number } | null;
   costRoomBoard?: number | { toNumber: () => number } | null;
   costFees?: number | { toNumber: () => number } | null;
@@ -25,6 +27,7 @@ type College = {
   costPersonal?: number | { toNumber: () => number } | null;
   costOther?: number | { toNumber: () => number } | null;
   isInState?: boolean | null;
+  notes: string | null;
   checklist?: {
     lorTeacher: boolean;
     transcriptSent: boolean;
@@ -73,6 +76,41 @@ export function CollegeCard({ college }: { college: College }) {
   const hasPortalCredentials = !!(college.portalUrl || college.portalUser);
   const checklistProgress = getChecklistProgress(college.checklist);
   const costData = hasCostData(college) ? getGroupedCosts(college) : null;
+
+  // Calculate data completeness with useMemo for performance
+  const dataCompleteness = useMemo(
+    () => getDataCompleteness(college),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      college.location,
+      college.major,
+      college.deadlineApp,
+      college.deadlineFinaid,
+      college.portalUrl,
+      college.portalUser,
+      college.portalPassword,
+      college.costTuition,
+      college.costRoomBoard,
+      college.costFees,
+      college.costBooks,
+      college.costPersonal,
+      college.costOther,
+      college.isInState,
+      college.notes,
+    ]
+  );
+
+  const getDataCompletenessIcon = () => {
+    switch (dataCompleteness.status) {
+      case "complete":
+      case "good":
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case "warning":
+        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+      case "alert":
+        return <AlertCircle className="h-5 w-5 text-destructive" />;
+    }
+  };
 
   const getBorderClass = () => {
     if (urgencyLevel === "red") return "border-2 border-destructive";
@@ -202,11 +240,24 @@ export function CollegeCard({ college }: { college: College }) {
                 </div>
               )}
             </div>
-            <div className="flex items-center justify-between pt-3 border-t">
-              <div className="flex items-center gap-1.5 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">
+            <div className="pt-3 border-t space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Checklist:</span>
+                </div>
+                <span className="text-sm font-medium">
                   {checklistProgress.completed}/{checklistProgress.total}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-sm">
+                  {getDataCompletenessIcon()}
+                  <span className="text-muted-foreground">Data:</span>
+                </div>
+                <span className="text-sm font-medium">
+                  {dataCompleteness.overall.completed}/{dataCompleteness.overall.total} (
+                  {dataCompleteness.overall.percentage}%)
                 </span>
               </div>
               {hasPortalCredentials && (
@@ -334,10 +385,17 @@ export function CollegeCard({ college }: { college: College }) {
               <span className="text-sm font-medium">
                 {checklistProgress.completed}/{checklistProgress.total}
               </span>
-              <span className="text-xs text-muted-foreground">complete</span>
+              <span className="text-xs text-muted-foreground">checklist</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 pt-2 border-t w-full">
+              {getDataCompletenessIcon()}
+              <span className="text-sm font-medium">
+                {dataCompleteness.overall.completed}/{dataCompleteness.overall.total}
+              </span>
+              <span className="text-xs text-muted-foreground">data</span>
             </div>
             {hasPortalCredentials && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2">
                 <KeyRound className="h-3.5 w-3.5" />
                 <span>Portal</span>
               </div>
