@@ -421,13 +421,12 @@ describe('CollegeCard', () => {
     });
 
     it('should show data completeness column when percentage < 100%', () => {
-      const incompleteCollege = { ...mockCollege, location: null }; // Missing location = incomplete data
+      const incompleteCollege = { ...mockCollege, location: null };
       const { container } = render(<CollegeCard college={incompleteCollege} />);
       const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
-      // Data completeness column should exist
       const allColumns = desktopLayout?.querySelectorAll('.border-l');
       expect(allColumns).toBeTruthy();
-      expect(allColumns!.length).toBeGreaterThan(3); // Name + Details + Cost + Checklist + Data
+      expect(allColumns!.length).toBeGreaterThan(3);
     });
 
     it('should apply truncate class and title attribute to college name', () => {
