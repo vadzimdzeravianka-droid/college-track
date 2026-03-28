@@ -33,12 +33,12 @@ export default async function CollegeDetailPage({
           <div className="rounded-lg bg-destructive/10 p-4 text-destructive border border-destructive/20">
             {error || "College not found"}
           </div>
-          <Link href="/dashboard">
-            <Button variant="outline" className="mt-4">
+          <Button variant="outline" className="mt-4" asChild>
+            <Link href="/dashboard">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     );
@@ -63,13 +63,13 @@ export default async function CollegeDetailPage({
     <div className="min-h-svh bg-background">
       <header className="sticky top-0 z-50 w-full bg-background border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <Link href="/dashboard">
-            <Button variant="ghost">
+          <Button variant="ghost" asChild>
+            <Link href="/dashboard">
               <ArrowLeft className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Back to Dashboard</span>
               <span className="sm:hidden">Back</span>
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </header>
 
