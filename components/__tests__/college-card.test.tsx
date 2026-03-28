@@ -413,11 +413,21 @@ describe('CollegeCard', () => {
       expect(costColumn).toHaveStyle({ width: 'var(--college-card-cost)' });
     });
 
-    it('should apply CSS custom property for progress column width', () => {
+    it('should apply CSS custom property for checklist column width', () => {
       const { container } = render(<CollegeCard college={mockCollege} />);
       const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
-      const progressColumn = desktopLayout?.querySelector('.gap-3');
-      expect(progressColumn).toHaveStyle({ width: 'var(--college-card-progress)' });
+      const checklistColumn = desktopLayout?.querySelector('.gap-3');
+      expect(checklistColumn).toHaveStyle({ width: 'var(--college-card-checklist)' });
+    });
+
+    it('should show data completeness column when percentage < 100%', () => {
+      const incompleteCollege = { ...mockCollege, location: null }; // Missing location = incomplete data
+      const { container } = render(<CollegeCard college={incompleteCollege} />);
+      const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
+      // Data completeness column should exist
+      const allColumns = desktopLayout?.querySelectorAll('.border-l');
+      expect(allColumns).toBeTruthy();
+      expect(allColumns!.length).toBeGreaterThan(3); // Name + Details + Cost + Checklist + Data
     });
 
     it('should apply truncate class and title attribute to college name', () => {
