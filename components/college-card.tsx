@@ -378,21 +378,14 @@ export function CollegeCard({ college }: { college: College }) {
             </div>
           )}
 
-          {/* Right: Progress */}
-          <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center gap-3" style={{ width: 'var(--college-card-progress)' }}>
+          {/* Checklist Progress */}
+          <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center gap-3" style={{ width: 'var(--college-card-checklist)' }}>
             <div className="flex flex-col items-center gap-1">
               <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
               <span className="text-sm font-medium">
                 {checklistProgress.completed}/{checklistProgress.total}
               </span>
               <span className="text-xs text-muted-foreground">checklist</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 pt-2 border-t w-full">
-              {getDataCompletenessIcon()}
-              <span className="text-sm font-medium">
-                {dataCompleteness.overall.completed}/{dataCompleteness.overall.total}
-              </span>
-              <span className="text-xs text-muted-foreground">data</span>
             </div>
             {hasPortalCredentials && (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-2">
@@ -401,6 +394,19 @@ export function CollegeCard({ college }: { college: College }) {
               </div>
             )}
           </div>
+
+          {/* Data Completeness - Only show when < 100% */}
+          {dataCompleteness.overall.percentage < 100 && (
+            <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center" style={{ width: 'var(--college-card-data)' }}>
+              <div className="flex flex-col items-center gap-1">
+                {getDataCompletenessIcon()}
+                <span className="text-sm font-medium">
+                  {dataCompleteness.overall.completed}/{dataCompleteness.overall.total}
+                </span>
+                <span className="text-xs text-muted-foreground">data</span>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
     </Link>

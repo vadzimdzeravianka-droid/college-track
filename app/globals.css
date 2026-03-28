@@ -72,20 +72,22 @@
      * - Min widths prevent cards from becoming unreadable
      *
      * RECOMMENDED STARTING POINTS:
-     * - Small laptop (1280px): details=280px, cost=200px, progress=120px
-     * - Standard desktop (1920px): details=288px, cost=224px, progress=128px (default)
-     * - Large desktop (2560px): details=320px, cost=280px, progress=160px
+     * - Small laptop (1280px): details=280px, cost=200px, checklist=100px, data=100px
+     * - Standard desktop (1920px): details=288px, cost=224px, checklist=96px, data=96px (default)
+     * - Large desktop (2560px): details=320px, cost=280px, checklist=120px, data=120px
      *
      * CURRENT TOTALS WITH FLEX:
      * - name-col: flex-1 (takes remaining space after fixed columns)
      * - details-col: 288px fixed (location, major, dates)
      * - cost-col: 224px fixed (cost breakdown)
-     * - progress-col: 128px fixed (checklist progress)
+     * - checklist-col: 96px fixed (checklist progress, always visible)
+     * - data-col: 96px fixed (data completeness, only shown when < 100%)
      */
     --college-card-name-min: 320px;     /* Name column minimum width */
     --college-card-details: 288px;      /* Location, major, dates */
     --college-card-cost: 224px;         /* Cost breakdown */
-    --college-card-progress: 128px;     /* Checklist progress */
+    --college-card-checklist: 96px;     /* Checklist progress */
+    --college-card-data: 96px;          /* Data completeness (conditional) */
   }
 
   .dark {
