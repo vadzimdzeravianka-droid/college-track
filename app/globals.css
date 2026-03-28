@@ -47,6 +47,45 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+
+    /**
+     * College Card Desktop Column Widths
+     * ====================================
+     * These control the desktop (md:) layout columns in dashboard college cards
+     * Changes apply to components/college-card.tsx desktop horizontal layout
+     *
+     * HOW TO ADJUST COLUMN WIDTHS IN DEVTOOLS:
+     *
+     * 1. Open DevTools (F12 or Cmd+Option+I)
+     * 2. Go to Elements/Inspector tab
+     * 3. Find <html> or <body> element
+     * 4. In Styles panel, scroll to :root selector
+     * 5. Click on any --college-card-* value
+     * 6. Edit the value (try: 320px, 24rem, 30vw, etc.)
+     * 7. Changes apply immediately without refresh
+     *
+     * TIPS:
+     * - Use px for precise control (e.g., 240px)
+     * - Use rem for scaling with font size (e.g., 18rem)
+     * - Use vw for viewport-relative (e.g., 20vw)
+     * - Keep total width < 100vw to avoid horizontal scroll
+     * - Min widths prevent cards from becoming unreadable
+     *
+     * RECOMMENDED STARTING POINTS:
+     * - Small laptop (1280px): details=280px, cost=200px, progress=120px
+     * - Standard desktop (1920px): details=288px, cost=224px, progress=128px (default)
+     * - Large desktop (2560px): details=320px, cost=280px, progress=160px
+     *
+     * CURRENT TOTALS WITH FLEX:
+     * - name-col: flex-1 (takes remaining space after fixed columns)
+     * - details-col: 288px fixed (location, major, dates)
+     * - cost-col: 224px fixed (cost breakdown)
+     * - progress-col: 128px fixed (checklist progress)
+     */
+    --college-card-name-min: 320px;     /* Name column minimum width */
+    --college-card-details: 288px;      /* Location, major, dates */
+    --college-card-cost: 224px;         /* Cost breakdown */
+    --college-card-progress: 128px;     /* Checklist progress */
   }
 
   .dark {
