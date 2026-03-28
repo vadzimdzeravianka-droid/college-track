@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import CollegeDetailPage from '../page';
-import { getCollegeById } from '@/actions/college';
 
 // Mock Next.js modules
 jest.mock('next/link', () => {
@@ -98,6 +97,9 @@ const mockCollege = {
 };
 
 describe('CollegeDetailPage - Button asChild Pattern', () => {
+  // Get the mocked function
+  const { getCollegeById } = jest.requireMock('@/actions/college');
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
