@@ -7,9 +7,10 @@ I want to track data gatetherin completeness progress. What I mean, seems like t
 (alert|warning|check) 6/7 <whatever name of current >
 clickable (open in new widnow) link to portal
 
-## Why
+Also we need to separate card, I think it could be placed under Checklist on application view page.
 
-[Optional: Why do you need this? What problem does it solve?]
+## Why
+Because data collection is also continues problem, and we may brainshtorm the list of universities first then gradually enrich the data from different sources.
 
 ## Constraints
 
