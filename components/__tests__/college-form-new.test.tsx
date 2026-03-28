@@ -21,6 +21,26 @@ describe('CollegeFormNew', () => {
     jest.clearAllMocks();
   });
 
+  // Helper to navigate through form steps
+  const navigateToStep = async (targetStep: number) => {
+    // Wait for step content by checking for step-specific text that's always visible
+    const stepVerification = [
+      () => screen.getByLabelText(/college name/i), // Step 0 (already there)
+      () => screen.getByText(/when is your application due/i), // Step 1
+      () => screen.getByLabelText(/location/i), // Step 2
+      () => screen.getByLabelText(/tuition/i), // Step 3
+      () => screen.getByLabelText(/application portal url/i), // Step 4
+      () => screen.getByLabelText(/additional notes/i), // Step 5
+    ];
+
+    for (let i = 0; i < targetStep; i++) {
+      fireEvent.click(screen.getByRole('button', { name: /next/i }));
+      await waitFor(() => {
+        expect(stepVerification[i + 1]()).toBeInTheDocument();
+      });
+    }
+  };
+
   describe('Rendering', () => {
     it('should render trigger button for default variant', () => {
       render(<CollegeFormNew />);
@@ -70,8 +90,11 @@ describe('CollegeFormNew', () => {
         expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
       });
 
-      // Required fields should be present
-      expect(screen.getByLabelText(/college name/i)).toBeRequired();
+      // Required fields should be present (validation handled by Zod, not HTML required attribute)
+      expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      expect(screen.getByText(/category/i)).toBeInTheDocument();
+      expect(screen.getByText(/status/i)).toBeInTheDocument();
+      expect(screen.getByText(/strategy/i)).toBeInTheDocument();
     });
 
     it('should fill name field', async () => {
@@ -110,17 +133,19 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /add college/i }));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        fireEvent.change(nameInput, { target: { value: '' } });
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      });
 
-        const nextButton = screen.getByRole('button', { name: /next/i });
-        fireEvent.click(nextButton);
+      const nameInput = screen.getByLabelText(/college name/i);
+      fireEvent.change(nameInput, { target: { value: '' } });
 
-        // Should remain on step 1
-        await waitFor(() => {
-          expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
-        });
+      const nextButton = screen.getByRole('button', { name: /next/i });
+      fireEvent.click(nextButton);
+
+      // Should remain on step 1 (name field still visible)
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
       });
     });
   });
@@ -131,18 +156,22 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /add college/i }));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        fireEvent.change(nameInput, { target: { value: 'MIT' } });
-
-        const nextButton = screen.getByRole('button', { name: /next/i });
-        fireEvent.click(nextButton);
-
-        await waitFor(() => {
-          const backButton = screen.queryByRole('button', { name: /back/i });
-          expect(backButton).toBeInTheDocument();
-        });
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
       });
+
+      const nameInput = screen.getByLabelText(/college name/i);
+      fireEvent.change(nameInput, { target: { value: 'MIT' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+      // Wait for step 2 to appear
+      await waitFor(() => {
+        expect(screen.getByText(/when is your application due/i)).toBeInTheDocument();
+      });
+
+      // Now back button should be visible
+      expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument();
     });
 
     it('should navigate back to previous step', async () => {
@@ -150,25 +179,30 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /add college/i }));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        fireEvent.change(nameInput, { target: { value: 'Stanford' } });
-
-        // Go to next step
-        fireEvent.click(screen.getByRole('button', { name: /next/i }));
-
-        await waitFor(async () => {
-          // Go back
-          const backButton = screen.getByRole('button', { name: /back/i });
-          fireEvent.click(backButton);
-
-          await waitFor(() => {
-            // Should be back on step 1
-            expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
-            expect(screen.getByLabelText(/college name/i)).toHaveValue('Stanford');
-          });
-        });
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
       });
+
+      const nameInput = screen.getByLabelText(/college name/i);
+      fireEvent.change(nameInput, { target: { value: 'Stanford' } });
+
+      // Go to next step
+      fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+      // Wait for step 2 content to appear
+      await waitFor(() => {
+        expect(screen.getByText(/when is your application due/i)).toBeInTheDocument();
+      });
+
+      // Go back
+      fireEvent.click(screen.getByRole('button', { name: /back/i }));
+
+      // Wait for step 1 to appear again
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      });
+
+      expect(screen.getByLabelText(/college name/i)).toHaveValue('Stanford');
     });
   });
 
@@ -180,26 +214,21 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /add college/i }));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        fireEvent.change(nameInput, { target: { value: 'Yale' } });
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      });
 
-        // Navigate through all steps clicking Next
-        for (let i = 0; i < 5; i++) {
-          const nextButton = screen.getByRole('button', { name: /next/i });
-          fireEvent.click(nextButton);
-          await waitFor(() => {}, { timeout: 100 });
-        }
+      const nameInput = screen.getByLabelText(/college name/i);
+      fireEvent.change(nameInput, { target: { value: 'Yale' } });
 
-        // Final submit
-        await waitFor(() => {
-          const submitButton = screen.getByRole('button', { name: /(submit|add)/i });
-          fireEvent.click(submitButton);
-        });
+      // Navigate to final step
+      await navigateToStep(5);
 
-        await waitFor(() => {
-          expect(createCollege).toHaveBeenCalled();
-        });
+      // Final submit (button changes to "Submit" on last step)
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      await waitFor(() => {
+        expect(createCollege).toHaveBeenCalled();
       });
     });
 
@@ -226,27 +255,23 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button'));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        expect(nameInput).toHaveValue('Princeton');
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      });
 
-        fireEvent.change(nameInput, { target: { value: 'Princeton University' } });
+      const nameInput = screen.getByLabelText(/college name/i);
+      expect(nameInput).toHaveValue('Princeton');
 
-        // Navigate through steps
-        for (let i = 0; i < 5; i++) {
-          const nextButton = screen.getByRole('button', { name: /next/i });
-          fireEvent.click(nextButton);
-          await waitFor(() => {}, { timeout: 100 });
-        }
+      fireEvent.change(nameInput, { target: { value: 'Princeton University' } });
 
-        await waitFor(() => {
-          const submitButton = screen.getByRole('button', { name: /(submit|save)/i });
-          fireEvent.click(submitButton);
-        });
+      // Navigate to final step
+      await navigateToStep(5);
 
-        await waitFor(() => {
-          expect(updateCollege).toHaveBeenCalledWith('123', expect.any(Object));
-        });
+      // Final submit
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      await waitFor(() => {
+        expect(updateCollege).toHaveBeenCalledWith('123', expect.any(Object));
       });
     });
 
@@ -257,23 +282,21 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /add college/i }));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        fireEvent.change(nameInput, { target: { value: 'Columbia' } });
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      });
 
-        // Navigate and submit
-        for (let i = 0; i < 5; i++) {
-          fireEvent.click(screen.getByRole('button', { name: /next/i }));
-          await waitFor(() => {}, { timeout: 100 });
-        }
+      const nameInput = screen.getByLabelText(/college name/i);
+      fireEvent.change(nameInput, { target: { value: 'Columbia' } });
 
-        await waitFor(() => {
-          fireEvent.click(screen.getByRole('button', { name: /(submit|add)/i }));
-        });
+      // Navigate to final step
+      await navigateToStep(5);
 
-        await waitFor(() => {
-          expect(toast.success).toHaveBeenCalledWith('College added!');
-        });
+      // Final submit
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith('College added!');
       });
     });
 
@@ -284,23 +307,21 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /add college/i }));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        fireEvent.change(nameInput, { target: { value: 'Brown' } });
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      });
 
-        // Navigate and submit
-        for (let i = 0; i < 5; i++) {
-          fireEvent.click(screen.getByRole('button', { name: /next/i }));
-          await waitFor(() => {}, { timeout: 100 });
-        }
+      const nameInput = screen.getByLabelText(/college name/i);
+      fireEvent.change(nameInput, { target: { value: 'Brown' } });
 
-        await waitFor(() => {
-          fireEvent.click(screen.getByRole('button', { name: /(submit|add)/i }));
-        });
+      // Navigate to final step
+      await navigateToStep(5);
 
-        await waitFor(() => {
-          expect(toast.error).toHaveBeenCalledWith('Database error');
-        });
+      // Final submit
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('Database error');
       });
     });
 
@@ -312,23 +333,21 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /add college/i }));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        fireEvent.change(nameInput, { target: { value: 'Dartmouth' } });
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      });
 
-        // Navigate and submit
-        for (let i = 0; i < 5; i++) {
-          fireEvent.click(screen.getByRole('button', { name: /next/i }));
-          await waitFor(() => {}, { timeout: 100 });
-        }
+      const nameInput = screen.getByLabelText(/college name/i);
+      fireEvent.change(nameInput, { target: { value: 'Dartmouth' } });
 
-        await waitFor(() => {
-          fireEvent.click(screen.getByRole('button', { name: /(submit|add)/i }));
-        });
+      // Navigate to final step
+      await navigateToStep(5);
 
-        await waitFor(() => {
-          expect(onSuccess).toHaveBeenCalled();
-        });
+      // Final submit
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      await waitFor(() => {
+        expect(onSuccess).toHaveBeenCalled();
       });
     });
   });
@@ -424,24 +443,22 @@ describe('CollegeFormNew', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /add college/i }));
 
-      await waitFor(async () => {
-        const nameInput = screen.getByLabelText(/college name/i);
-        fireEvent.change(nameInput, { target: { value: 'Duke' } });
+      await waitFor(() => {
+        expect(screen.getByLabelText(/college name/i)).toBeInTheDocument();
+      });
 
-        // Submit
-        for (let i = 0; i < 5; i++) {
-          fireEvent.click(screen.getByRole('button', { name: /next/i }));
-          await waitFor(() => {}, { timeout: 100 });
-        }
+      const nameInput = screen.getByLabelText(/college name/i);
+      fireEvent.change(nameInput, { target: { value: 'Duke' } });
 
-        await waitFor(() => {
-          fireEvent.click(screen.getByRole('button', { name: /(submit|add)/i }));
-        });
+      // Navigate to final step
+      await navigateToStep(5);
 
-        // Dialog should close
-        await waitFor(() => {
-          expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-        });
+      // Final submit
+      fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+
+      // Dialog should close
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       });
     });
   });
