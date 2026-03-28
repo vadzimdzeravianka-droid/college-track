@@ -30,7 +30,7 @@ jest.mock('@/components/ui/card', () => ({
 }));
 
 jest.mock('@/components/ui/button', () => {
-  const { Slot } = require('@radix-ui/react-slot');
+  const { Slot } = jest.requireActual('@radix-ui/react-slot');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Button = ({ children, asChild, ...props }: any) => {
     const Comp = asChild ? Slot : 'button';
@@ -97,7 +97,7 @@ const mockCollege = {
 };
 
 describe('CollegeDetailPage - Button asChild Pattern', () => {
-  const { getCollegeById } = require('@/actions/college');
+  const { getCollegeById } = jest.requireActual('@/actions/college');
 
   beforeEach(() => {
     jest.clearAllMocks();
