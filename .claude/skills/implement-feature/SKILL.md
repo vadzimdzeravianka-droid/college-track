@@ -20,6 +20,10 @@ Implement features autonomously with test-driven development, comprehensive cove
 - User asks to "implement" a ticket
 - Triggered automatically by workflow orchestration
 
+## Important: Subagent Context
+
+When running as a subagent (via Agent tool), focus on implementation deliverables (code, tests, coverage) rather than workflow operations (git commits, ticket movement). Save all outputs to the specified output directory even if bash/git operations fail or are not approved.
+
 ## Implementation Philosophy
 
 **Test-Driven Development (TDD)**:
@@ -348,9 +352,11 @@ Go through each acceptance criterion in ticket:
 
 If any criterion not met, continue implementing.
 
-### Step 10: Create Git Commit
+**Subagent Context**: If outputs need to be saved to a specific directory (e.g., when running as a subagent via Agent tool), copy all implementation files, test results, and coverage reports to that directory before attempting any git or workflow operations. This ensures deliverables are preserved even if subsequent steps fail.
 
-Create atomic commit with conventional commit message:
+### Step 10: Create Git Commit (Optional)
+
+**Note**: Git commits are typically handled outside the implementation workflow. If running interactively and user requests commit, create atomic commit with conventional commit message:
 
 ```bash
 git add .
@@ -365,7 +371,11 @@ Tests: 95% coverage
 Closes: EXPORT-CSV-20260326"
 ```
 
-### Step 11: Move Ticket to QA
+If running in a subagent context or without explicit user request, skip this step and document the commit message in outputs instead.
+
+### Step 11: Move Ticket to QA (Optional)
+
+**Note**: Ticket movement is typically handled by workflow orchestration. If running interactively and user requests ticket movement:
 
 ```bash
 mv .claude/workflows/tickets/in-progress/[ticket-id].md .claude/workflows/tickets/qa/[ticket-id].md
@@ -376,6 +386,8 @@ git commit -m "chore([ticket-id]): move ticket to QA stage
 
 Implementation complete, ready for validation."
 ```
+
+If running in a subagent context or without explicit user request, skip this step and include ticket movement instructions in outputs instead.
 
 **Note**: If on feature branch, commits stay on branch. The validate-quality skill will handle merging to main after all gates pass.
 

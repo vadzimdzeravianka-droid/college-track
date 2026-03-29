@@ -1,0 +1,117 @@
+{
+  "skill_name": "implement-feature",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "hey can you implement the DATE-FORMAT-UTIL-TEST ticket? it's in the ready folder. should be straightforward, just a utility function with tests",
+      "expected_output": "Implements formatRelativeDate function in lib/utils.ts using TDD (tests first, then implementation). Achieves 90%+ coverage, passes linter, moves ticket to QA. Follows red-green-refactor cycle.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Followed TDD approach (wrote tests before implementation)",
+          "type": "methodology"
+        },
+        {
+          "text": "Achieved 90%+ test coverage",
+          "type": "quality"
+        },
+        {
+          "text": "All tests pass",
+          "type": "correctness"
+        },
+        {
+          "text": "No linter errors",
+          "type": "quality"
+        },
+        {
+          "text": "Provided implementation documentation (code, tests, coverage reports)",
+          "type": "completeness"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need you to implement STATUS-PILL-COMPONENT-TEST from the tickets/ready folder. Make sure you write the tests first (TDD) and get full coverage on all the color variants and size props",
+      "expected_output": "Creates StatusPill component with TypeScript props, writes comprehensive React Testing Library tests covering all status colors and size variants, achieves 90%+ coverage, no lint errors, moves to QA.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Followed TDD approach (tests before implementation)",
+          "type": "methodology"
+        },
+        {
+          "text": "Achieved 90%+ test coverage for component",
+          "type": "quality"
+        },
+        {
+          "text": "Tests cover all status color variants (pending, in-progress, completed, failed)",
+          "type": "completeness"
+        },
+        {
+          "text": "Tests cover size variants (sm, md, lg)",
+          "type": "completeness"
+        },
+        {
+          "text": "Component has TypeScript types defined",
+          "type": "quality"
+        },
+        {
+          "text": "All tests pass",
+          "type": "correctness"
+        },
+        {
+          "text": "No linter errors",
+          "type": "quality"
+        },
+        {
+          "text": "Provided comprehensive test documentation",
+          "type": "completeness"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "theres a ticket called API-STATS-ENDPOINT-TEST in ready/ can you implement it? this one has both unit and integration tests so make sure you cover database errors too",
+      "expected_output": "Creates Next.js API route at app/api/stats/colleges/route.ts with Prisma aggregations, writes both unit and integration tests including error handling, achieves 90%+ coverage, handles edge cases, moves to QA.",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Followed TDD approach (tests before implementation)",
+          "type": "methodology"
+        },
+        {
+          "text": "Achieved 90%+ test coverage",
+          "type": "quality"
+        },
+        {
+          "text": "Tests include database error handling",
+          "type": "completeness"
+        },
+        {
+          "text": "Tests include edge cases (empty data, missing fields)",
+          "type": "completeness"
+        },
+        {
+          "text": "API returns correct HTTP status codes (200 success, 500 error)",
+          "type": "correctness"
+        },
+        {
+          "text": "API response matches expected JSON schema",
+          "type": "correctness"
+        },
+        {
+          "text": "All tests pass",
+          "type": "correctness"
+        },
+        {
+          "text": "No linter errors",
+          "type": "quality"
+        },
+        {
+          "text": "Provided comprehensive implementation documentation",
+          "type": "completeness"
+        }
+      ]
+    }
+  ]
+}
