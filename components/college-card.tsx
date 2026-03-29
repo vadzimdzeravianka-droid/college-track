@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge, CategoryBadge, StrategyBadge } from "@/components/status-badge";
 import { cn, getUrgencyLevel, getUrgencyMessage, formatDate, getDaysUntilDeadline, formatCurrency, getGroupedCosts, hasCostData, getDataCompleteness } from "@/lib/utils";
 import Link from "next/link";
-import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle2, KeyRound, AlertTriangle, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle, KeyRound, AlertTriangle, AlertCircle } from "lucide-react";
 
 type College = {
   id: string;
@@ -77,7 +77,6 @@ export function CollegeCard({ college }: { college: College }) {
   const checklistProgress = getChecklistProgress(college.checklist);
   const costData = hasCostData(college) ? getGroupedCosts(college) : null;
 
-  // Calculate data completeness with useMemo for performance
   const dataCompleteness = useMemo(
     () => getDataCompleteness(college),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,9 +103,9 @@ export function CollegeCard({ college }: { college: College }) {
     switch (dataCompleteness.status) {
       case "complete":
       case "good":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
       case "warning":
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+        return <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />;
       case "alert":
         return <AlertCircle className="h-5 w-5 text-destructive" />;
     }
@@ -118,11 +117,11 @@ export function CollegeCard({ college }: { college: College }) {
       : 0;
 
     if (percentage === 100) {
-      return <CheckCircle2 className={`${size} text-green-500`} />;
+      return <CheckCircle className={`${size} text-green-600 dark:text-green-400`} />;
     } else if (percentage >= 75) {
-      return <CheckCircle2 className={`${size} text-green-500`} />;
+      return <CheckCircle className={`${size} text-green-600 dark:text-green-400`} />;
     } else if (percentage >= 40) {
-      return <AlertTriangle className={`${size} text-yellow-500`} />;
+      return <AlertTriangle className={`${size} text-yellow-600 dark:text-yellow-400`} />;
     } else {
       return <AlertCircle className={`${size} text-destructive`} />;
     }
