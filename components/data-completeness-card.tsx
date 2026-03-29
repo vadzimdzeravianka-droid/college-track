@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDataCompleteness, type DataCompleteness } from "@/lib/utils";
 import {
-  CheckCircle2,
+  CheckCircle,
   AlertTriangle,
   AlertCircle,
   MapPin,
@@ -50,9 +50,9 @@ function getStatusIcon(status: DataCompleteness["status"]) {
   switch (status) {
     case "complete":
     case "good":
-      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      return <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />;
     case "warning":
-      return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      return <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />;
     case "alert":
       return <AlertCircle className="h-4 w-4 text-destructive" />;
   }
