@@ -1,0 +1,172 @@
+{
+  "skill_name": "groom-requirement",
+  "evals": [
+    {
+      "id": 1,
+      "name": "simple-sorting-feature",
+      "prompt": "groom sorting-feature requirement",
+      "expected_output": "Detailed specification with implementation approaches, edge cases, and acceptance criteria",
+      "files": [".claude/workflows/requirements/inbox/sorting-feature.md"],
+      "assertions": [
+        {
+          "text": "Read and extracted core objective from vague requirement",
+          "type": "methodology"
+        },
+        {
+          "text": "Generated 2-3 distinct implementation approaches",
+          "type": "quality"
+        },
+        {
+          "text": "Each approach includes pros, cons, and token estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Recommended one approach with clear reasoning",
+          "type": "quality"
+        },
+        {
+          "text": "Identified edge cases (validation, state, errors, security, performance)",
+          "type": "quality"
+        },
+        {
+          "text": "Defined specific, testable acceptance criteria",
+          "type": "correctness"
+        },
+        {
+          "text": "Analyzed codebase to identify affected files",
+          "type": "methodology"
+        },
+        {
+          "text": "Provided token budget estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Saved groomed requirement to groomed/ directory",
+          "type": "completeness"
+        },
+        {
+          "text": "Original request preserved unchanged in output",
+          "type": "correctness"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "medium-bulk-actions",
+      "prompt": "groom bulk-actions requirement",
+      "expected_output": "Detailed specification for bulk operations with state management considerations",
+      "files": [".claude/workflows/requirements/inbox/bulk-actions.md"],
+      "assertions": [
+        {
+          "text": "Read and extracted core objective from vague requirement",
+          "type": "methodology"
+        },
+        {
+          "text": "Generated 2-3 distinct implementation approaches",
+          "type": "quality"
+        },
+        {
+          "text": "Each approach includes pros, cons, and token estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Recommended one approach with clear reasoning",
+          "type": "quality"
+        },
+        {
+          "text": "Identified edge cases (validation, state, errors, security, performance)",
+          "type": "quality"
+        },
+        {
+          "text": "Addressed concurrency and transaction concerns for bulk operations",
+          "type": "critical"
+        },
+        {
+          "text": "Defined specific, testable acceptance criteria",
+          "type": "correctness"
+        },
+        {
+          "text": "Analyzed codebase to identify affected files",
+          "type": "methodology"
+        },
+        {
+          "text": "Provided token budget estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Saved groomed requirement to groomed/ directory",
+          "type": "completeness"
+        },
+        {
+          "text": "Original request preserved unchanged in output",
+          "type": "correctness"
+        },
+        {
+          "text": "Considered UX patterns for selection and feedback",
+          "type": "quality"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "complex-deadline-reminders",
+      "prompt": "groom deadline-reminders requirement",
+      "expected_output": "Detailed specification for notification system with delivery mechanisms and scheduling",
+      "files": [".claude/workflows/requirements/inbox/deadline-reminders.md"],
+      "assertions": [
+        {
+          "text": "Read and extracted core objective from vague requirement",
+          "type": "methodology"
+        },
+        {
+          "text": "Generated 2-3 distinct implementation approaches",
+          "type": "quality"
+        },
+        {
+          "text": "Each approach includes pros, cons, and token estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Recommended one approach with clear reasoning",
+          "type": "quality"
+        },
+        {
+          "text": "Identified edge cases (validation, state, errors, security, performance)",
+          "type": "quality"
+        },
+        {
+          "text": "Addressed notification delivery mechanisms (email, in-app, etc.)",
+          "type": "critical"
+        },
+        {
+          "text": "Considered scheduling and timing logic for reminders",
+          "type": "critical"
+        },
+        {
+          "text": "Defined specific, testable acceptance criteria",
+          "type": "correctness"
+        },
+        {
+          "text": "Analyzed codebase to identify affected files",
+          "type": "methodology"
+        },
+        {
+          "text": "Identified external dependencies (email service, scheduler)",
+          "type": "completeness"
+        },
+        {
+          "text": "Provided token budget estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Saved groomed requirement to groomed/ directory",
+          "type": "completeness"
+        },
+        {
+          "text": "Original request preserved unchanged in output",
+          "type": "correctness"
+        }
+      ]
+    }
+  ]
+}
