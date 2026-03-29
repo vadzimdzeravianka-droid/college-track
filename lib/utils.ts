@@ -163,7 +163,6 @@ export function getDaysUntilDeadline(deadline: Date): number {
   return daysUntil;
 }
 
-// Cost utility types
 type CostValue = number | { toNumber: () => number } | null | undefined;
 
 type CollegeWithCosts = {
@@ -241,13 +240,11 @@ export function getGroupedCosts(college: CollegeWithCosts): {
   const personal = toNumber(college.costPersonal);
   const other = toNumber(college.costOther);
 
-  // Calculate tuition + fees
   const tuitionAndFees =
     tuition !== null || fees !== null
       ? (tuition ?? 0) + (fees ?? 0)
       : null;
 
-  // Room & board is standalone
   const roomAndBoard = roomBoard;
 
   // Other combines books + personal + other
@@ -256,7 +253,6 @@ export function getGroupedCosts(college: CollegeWithCosts): {
       ? (books ?? 0) + (personal ?? 0) + (other ?? 0)
       : null;
 
-  // Total is sum of all non-null components
   const total = calculateTotalCost(college);
 
   return {
@@ -283,7 +279,6 @@ export function hasCostData(college: CollegeWithCosts): boolean {
   );
 }
 
-// Data completeness tracking types
 export type DataCompletenessStatus = "complete" | "good" | "warning" | "alert";
 
 export interface DataCategory {
@@ -306,7 +301,6 @@ export interface DataCompleteness {
   status: DataCompletenessStatus;
 }
 
-// Data category definitions
 const DATA_CATEGORIES = {
   basic: {
     name: "Basic Info",
@@ -387,7 +381,6 @@ export function getDataCompleteness(
   let totalCompleted = 0;
   let totalFields = 0;
 
-  // Calculate completeness for each category
   for (const [_categoryKey, categoryDef] of Object.entries(DATA_CATEGORIES)) {
     const completed = categoryDef.fields.filter((field) =>
       isFieldComplete(college[field.key])
