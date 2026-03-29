@@ -5,19 +5,69 @@
       "id": 1,
       "prompt": "hey can you check PR comments on #4? i think there might be some feedback i need to address",
       "expected_output": "Fetches both general comments (gh pr view) AND line-specific comments (gh api), analyzes each using 5 Whys, implements fixes where appropriate, posts replies, reports what was done",
-      "files": []
+      "files": [],
+      "assertions": [
+        {
+          "text": "Fetched both general comments (gh pr view --comments) AND line-specific review comments (gh api)",
+          "type": "command_executed"
+        },
+        {
+          "text": "Applied 5 Whys analysis to understand current implementation before making changes",
+          "type": "methodology"
+        },
+        {
+          "text": "Did not miss any comments (checked both conversation thread and code review comments)",
+          "type": "completeness"
+        },
+        {
+          "text": "Either implemented fixes, provided reasoned push-back, or suggested alternatives based on best practices",
+          "type": "decision_quality"
+        }
+      ]
     },
     {
       "id": 2,
-      "prompt": "check the PR comments",
-      "expected_output": "Same as eval 1 - comprehensive check of both comment types with thoughtful analysis",
-      "files": []
+      "prompt": "can you address the review feedback on PR #2? want to make sure we haven't missed anything before merging",
+      "expected_output": "Checks both comment types even if one is empty, handles absence of line-specific comments gracefully, addresses all general comments with proper analysis",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Checked both comment types even if one is empty",
+          "type": "thoroughness"
+        },
+        {
+          "text": "Handled absence of line-specific comments gracefully (no errors, clear reporting)",
+          "type": "error_handling"
+        },
+        {
+          "text": "Addressed all general comments with proper analysis",
+          "type": "completeness"
+        }
+      ]
     },
     {
       "id": 3,
-      "prompt": "i merged PR #2 and #3 but still have comments on PR #4 that need addressing. can you handle those review comments?",
-      "expected_output": "Focuses on PR #4, fetches both types of comments, uses 5 Whys to decide whether to implement/push back/suggest alternatives, takes appropriate actions",
-      "files": []
+      "prompt": "please respond to all comments on the open PRs - want to clear the backlog",
+      "expected_output": "Lists all open PRs, processes comments for each PR, fetches both comment types for each, provides clear summary of what was done across all PRs",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Identified all open PRs (gh pr list)",
+          "type": "discovery"
+        },
+        {
+          "text": "Processed comments for each PR (did not stop after first PR)",
+          "type": "completeness"
+        },
+        {
+          "text": "Fetched both comment types for each PR",
+          "type": "thoroughness"
+        },
+        {
+          "text": "Provided clear summary of which PRs were processed and what was done",
+          "type": "reporting"
+        }
+      ]
     }
   ]
 }
