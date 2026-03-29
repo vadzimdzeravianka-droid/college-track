@@ -1,0 +1,23 @@
+{
+  "skill_name": "respond-to-pr-comments",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "hey can you check PR comments on #4? i think there might be some feedback i need to address",
+      "expected_output": "Fetches both general comments (gh pr view) AND line-specific comments (gh api), analyzes each using 5 Whys, implements fixes where appropriate, posts replies, reports what was done",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "check the PR comments",
+      "expected_output": "Same as eval 1 - comprehensive check of both comment types with thoughtful analysis",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "i merged PR #2 and #3 but still have comments on PR #4 that need addressing. can you handle those review comments?",
+      "expected_output": "Focuses on PR #4, fetches both types of comments, uses 5 Whys to decide whether to implement/push back/suggest alternatives, takes appropriate actions",
+      "files": []
+    }
+  ]
+}
