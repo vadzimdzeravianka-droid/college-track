@@ -43,4 +43,10 @@ next-env.d.ts
 prisma/.env
 
 # Skill evaluation workspaces (keep local for reference)
-*-workspace/iteration-*/eval-*/
+*-workspace/
+
+# Test implementations from skill evaluation (not project code)
+app/api/stats/
+components/status-pill.tsx
+components/__tests__/status-pill.test.tsx
+lib/__tests__/utils.date.test.ts
