@@ -1,0 +1,160 @@
+{
+  "skill_name": "validate-quality",
+  "evals": [
+    {
+      "id": 1,
+      "name": "component-validation",
+      "prompt": "validate VALIDATE-COLLEGE-CARD-TEST",
+      "expected_output": "Validation report showing all gates passed for college-card component",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Ran unit tests (Gate 1)",
+          "type": "completeness"
+        },
+        {
+          "text": "Checked test coverage with 90% threshold (Gate 2)",
+          "type": "correctness"
+        },
+        {
+          "text": "Ran linter (Gate 3)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran type checking (Gate 4)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran build verification (Gate 5)",
+          "type": "completeness"
+        },
+        {
+          "text": "Checked for E2E tests (Gate 6)",
+          "type": "completeness"
+        },
+        {
+          "text": "Validated acceptance criteria (Gate 7)",
+          "type": "completeness"
+        },
+        {
+          "text": "Generated comprehensive validation report",
+          "type": "quality"
+        },
+        {
+          "text": "Reported pass/fail decision clearly",
+          "type": "correctness"
+        },
+        {
+          "text": "Included coverage metrics in report",
+          "type": "quality"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "auth-e2e-validation",
+      "prompt": "validate VALIDATE-AUTH-FLOW-TEST",
+      "expected_output": "Validation report with E2E test results for authentication flow",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Ran unit tests (Gate 1)",
+          "type": "completeness"
+        },
+        {
+          "text": "Checked test coverage (Gate 2)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran linter (Gate 3)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran type checking (Gate 4)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran build verification (Gate 5)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran E2E tests with Playwright (Gate 6)",
+          "type": "critical"
+        },
+        {
+          "text": "E2E test results included in report",
+          "type": "critical"
+        },
+        {
+          "text": "Validated acceptance criteria (Gate 7)",
+          "type": "completeness"
+        },
+        {
+          "text": "Generated comprehensive validation report",
+          "type": "quality"
+        },
+        {
+          "text": "Reported pass/fail decision clearly",
+          "type": "correctness"
+        },
+        {
+          "text": "Mentioned E2E screenshots or artifacts location",
+          "type": "quality"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "actions-validation",
+      "prompt": "validate VALIDATE-COLLEGE-ACTIONS-TEST",
+      "expected_output": "Validation report for server actions with unit and E2E test results",
+      "files": [],
+      "assertions": [
+        {
+          "text": "Ran unit tests (Gate 1)",
+          "type": "completeness"
+        },
+        {
+          "text": "Checked test coverage with 90% threshold (Gate 2)",
+          "type": "correctness"
+        },
+        {
+          "text": "Ran linter (Gate 3)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran type checking (Gate 4)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran build verification (Gate 5)",
+          "type": "completeness"
+        },
+        {
+          "text": "Ran E2E tests (Gate 6)",
+          "type": "critical"
+        },
+        {
+          "text": "Validated acceptance criteria (Gate 7)",
+          "type": "completeness"
+        },
+        {
+          "text": "Generated comprehensive validation report",
+          "type": "quality"
+        },
+        {
+          "text": "Reported pass/fail decision clearly",
+          "type": "correctness"
+        },
+        {
+          "text": "Included coverage metrics for actions/college.ts",
+          "type": "quality"
+        },
+        {
+          "text": "Verified auto-status progression logic",
+          "type": "critical"
+        }
+      ]
+    }
+  ]
+}

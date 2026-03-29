@@ -1,0 +1,92 @@
+{
+  "skill_name": "validate-quality",
+  "iteration": 1,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "pass_rate": 1.0,
+      "avg_time_seconds": 1039.3,
+      "std_time_seconds": 529.7,
+      "avg_tokens": 52051,
+      "std_tokens": 15656,
+      "eval_results": [
+        {
+          "eval_id": 1,
+          "eval_name": "component-validation",
+          "passed": 10,
+          "total": 10,
+          "pass_rate": 1.0,
+          "time_seconds": 431.7,
+          "tokens": 33694
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "auth-e2e-validation",
+          "passed": 11,
+          "total": 11,
+          "pass_rate": 1.0,
+          "time_seconds": 1331.9,
+          "tokens": 51784
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "actions-validation",
+          "passed": 11,
+          "total": 11,
+          "pass_rate": 1.0,
+          "time_seconds": 1354.3,
+          "tokens": 70676
+        }
+      ]
+    },
+    {
+      "name": "without_skill",
+      "pass_rate": 0.969,
+      "avg_time_seconds": 1153.7,
+      "std_time_seconds": 114.0,
+      "avg_tokens": 39364,
+      "std_tokens": 4842,
+      "eval_results": [
+        {
+          "eval_id": 1,
+          "eval_name": "component-validation",
+          "passed": 10,
+          "total": 10,
+          "pass_rate": 1.0,
+          "time_seconds": 1061.9,
+          "tokens": 43420
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "auth-e2e-validation",
+          "passed": 11,
+          "total": 11,
+          "pass_rate": 1.0,
+          "time_seconds": 1110.1,
+          "tokens": 33829
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "actions-validation",
+          "passed": 10,
+          "total": 11,
+          "pass_rate": 0.91,
+          "time_seconds": 1289.2,
+          "tokens": 40842
+        }
+      ]
+    }
+  ],
+  "delta": {
+    "pass_rate": "+3.1%",
+    "time": "-114.4s (-9.9%)",
+    "tokens": "+12687 (+32.2%)"
+  },
+  "notes": [
+    "With-skill achieved 100% pass rate vs 96.9% without-skill",
+    "With-skill was 9.9% faster on average (more efficient execution)",
+    "With-skill used 32% more tokens for comprehensive reporting",
+    "Without-skill failed 1 assertion in eval-3 (auto-status progression verification)",
+    "Both configurations successfully executed all 7 validation gates across all tests"
+  ]
+}
