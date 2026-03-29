@@ -48,6 +48,8 @@ const mockCollege = {
   major: 'Computer Science',
   portalUrl: 'https://portal.mit.edu',
   portalUser: 'student@mit.edu',
+  portalPassword: null,
+  notes: null,
   costTuition: 60000,
   costRoomBoard: 15000,
   costFees: 2000,
@@ -339,6 +341,8 @@ describe('CollegeCard', () => {
         major: null,
         portalUrl: null,
         portalUser: null,
+        portalPassword: null,
+        notes: null,
         checklist: null,
       };
 
@@ -409,11 +413,20 @@ describe('CollegeCard', () => {
       expect(costColumn).toHaveStyle({ width: 'var(--college-card-cost)' });
     });
 
-    it('should apply CSS custom property for progress column width', () => {
-      const { container } = render(<CollegeCard college={mockCollege} />);
+    it('should apply CSS custom property for checklist column width', () => {
+      const { container, getByText } = render(<CollegeCard college={mockCollege} />);
+      const checklistLabel = getByText('checklist');
+      const checklistColumn = checklistLabel.closest('[style*="--college-card-checklist"]');
+      expect(checklistColumn).toHaveStyle({ width: 'var(--college-card-checklist)' });
+    });
+
+    it('should show data completeness column when percentage < 100%', () => {
+      const incompleteCollege = { ...mockCollege, location: null };
+      const { container } = render(<CollegeCard college={incompleteCollege} />);
       const desktopLayout = container.querySelector('.hidden.md\\:flex.items-stretch');
-      const progressColumn = desktopLayout?.querySelector('.gap-3');
-      expect(progressColumn).toHaveStyle({ width: 'var(--college-card-progress)' });
+      const allColumns = desktopLayout?.querySelectorAll('.border-l');
+      expect(allColumns).toBeTruthy();
+      expect(allColumns!.length).toBeGreaterThan(3);
     });
 
     it('should apply truncate class and title attribute to college name', () => {

@@ -6,6 +6,7 @@ import { ChecklistForm } from "@/components/checklist-form";
 import { StatusActions } from "@/components/status-actions";
 import { PortalCredentials } from "@/components/portal-credentials";
 import { CollegeEditButton } from "@/components/college-edit-button";
+import { DataCompletenessCard } from "@/components/data-completeness-card";
 import { formatDate, getUrgencyLevel, getUrgencyMessage, cn, formatCurrency, hasCostData } from "@/lib/utils";
 import { ArrowLeft, Calendar, MapPin, GraduationCap, Trash2, AlertCircle, AlertTriangle } from "lucide-react";
 import Link from "next/link";
@@ -112,6 +113,7 @@ export default async function CollegeDetailPage({
                 <ChecklistForm checklist={college.checklist} collegeId={college.id} disabled={isChecklistDisabled} />
               </CardContent>
             </Card>
+            <DataCompletenessCard college={college} />
             {(college.status === "SUBMITTED" || college.status === "WAITLISTED" || college.status === "ACCEPTED" || college.status === "DECLINED") && (
               <Card>
                 <CardHeader>
@@ -293,6 +295,7 @@ export default async function CollegeDetailPage({
                 <ChecklistForm checklist={college.checklist} collegeId={college.id} disabled={isChecklistDisabled} />
               </CardContent>
             </Card>
+            <DataCompletenessCard college={college} />
             {(college.status === "SUBMITTED" || college.status === "WAITLISTED" || college.status === "ACCEPTED" || college.status === "DECLINED") && (
               <Card className="sticky top-4">
                 <CardHeader>

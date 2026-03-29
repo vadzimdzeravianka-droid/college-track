@@ -163,7 +163,6 @@ export function getDaysUntilDeadline(deadline: Date): number {
   return daysUntil;
 }
 
-// Cost utility types
 type CostValue = number | { toNumber: () => number } | null | undefined;
 
 type CollegeWithCosts = {
@@ -241,13 +240,11 @@ export function getGroupedCosts(college: CollegeWithCosts): {
   const personal = toNumber(college.costPersonal);
   const other = toNumber(college.costOther);
 
-  // Calculate tuition + fees
   const tuitionAndFees =
     tuition !== null || fees !== null
       ? (tuition ?? 0) + (fees ?? 0)
       : null;
 
-  // Room & board is standalone
   const roomAndBoard = roomBoard;
 
   // Other combines books + personal + other
@@ -256,7 +253,6 @@ export function getGroupedCosts(college: CollegeWithCosts): {
       ? (books ?? 0) + (personal ?? 0) + (other ?? 0)
       : null;
 
-  // Total is sum of all non-null components
   const total = calculateTotalCost(college);
 
   return {
@@ -281,4 +277,144 @@ export function hasCostData(college: CollegeWithCosts): boolean {
     toNumber(college.costPersonal) !== null ||
     toNumber(college.costOther) !== null
   );
+}
+
+export type DataCompletenessStatus = "complete" | "good" | "warning" | "alert";
+
+export interface DataCategory {
+  name: string;
+  completed: number;
+  total: number;
+  percentage: number;
+  status: DataCompletenessStatus;
+  icon: string;
+  missingFields: string[];
+}
+
+export interface DataCompleteness {
+  categories: DataCategory[];
+  overall: {
+    completed: number;
+    total: number;
+    percentage: number;
+  };
+  status: DataCompletenessStatus;
+}
+
+const DATA_CATEGORIES = {
+  basic: {
+    name: "Basic Info",
+    fields: [
+      { key: "location", label: "Location" },
+      { key: "major", label: "Major" },
+    ],
+    icon: "MapPin",
+  },
+  deadlines: {
+    name: "Deadlines",
+    fields: [
+      { key: "deadlineApp", label: "Application Deadline" },
+      { key: "deadlineFinaid", label: "Financial Aid Deadline" },
+    ],
+    icon: "Calendar",
+  },
+  portal: {
+    name: "Portal Access",
+    fields: [
+      { key: "portalUrl", label: "Portal URL" },
+      { key: "portalUser", label: "Username" },
+      { key: "portalPassword", label: "Password" },
+    ],
+    icon: "KeyRound",
+  },
+  cost: {
+    name: "Cost Info",
+    fields: [
+      { key: "costTuition", label: "Tuition" },
+      { key: "costRoomBoard", label: "Room & Board" },
+      { key: "costFees", label: "Fees" },
+      { key: "costBooks", label: "Books" },
+      { key: "costPersonal", label: "Personal" },
+      { key: "costOther", label: "Other" },
+      { key: "isInState", label: "Residency" },
+    ],
+    icon: "DollarSign",
+  },
+  notes: {
+    name: "Notes",
+    fields: [{ key: "notes", label: "Notes" }],
+    icon: "FileText",
+  },
+} as const;
+
+/**
+ * Check if a field value is complete (has data)
+ * - null/undefined = incomplete
+ * - empty string = incomplete
+ * - zero/false = complete (valid data)
+ */
+function isFieldComplete(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string" && value.trim() === "") return false;
+  // Numbers (including 0) and booleans (including false) are valid data
+  return true;
+}
+
+/**
+ * Get completion status based on percentage thresholds
+ */
+function getCompletenessStatus(percentage: number): DataCompletenessStatus {
+  if (percentage === 100) return "complete";
+  if (percentage >= 75) return "good";
+  if (percentage >= 40) return "warning";
+  return "alert";
+}
+
+/**
+ * Calculate data completeness for a college
+ * Returns overall progress and per-category breakdown
+ */
+export function getDataCompleteness(
+  college: Record<string, unknown>
+): DataCompleteness {
+  const categories: DataCategory[] = [];
+  let totalCompleted = 0;
+  let totalFields = 0;
+
+  for (const [_categoryKey, categoryDef] of Object.entries(DATA_CATEGORIES)) {
+    const completed = categoryDef.fields.filter((field) =>
+      isFieldComplete(college[field.key])
+    ).length;
+    const total = categoryDef.fields.length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const missingFields = categoryDef.fields
+      .filter((field) => !isFieldComplete(college[field.key]))
+      .map((field) => field.label);
+
+    categories.push({
+      name: categoryDef.name,
+      completed,
+      total,
+      percentage,
+      status: getCompletenessStatus(percentage),
+      icon: categoryDef.icon,
+      missingFields,
+    });
+
+    totalCompleted += completed;
+    totalFields += total;
+  }
+
+  const overallPercentage =
+    totalFields > 0 ? Math.round((totalCompleted / totalFields) * 100) : 0;
+
+  return {
+    categories,
+    overall: {
+      completed: totalCompleted,
+      total: totalFields,
+      percentage: overallPercentage,
+    },
+    status: getCompletenessStatus(overallPercentage),
+  };
 }

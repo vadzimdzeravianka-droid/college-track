@@ -1,10 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge, CategoryBadge, StrategyBadge } from "@/components/status-badge";
-import { cn, getUrgencyLevel, getUrgencyMessage, formatDate, getDaysUntilDeadline, formatCurrency, getGroupedCosts, hasCostData } from "@/lib/utils";
+import { cn, getUrgencyLevel, getUrgencyMessage, formatDate, getDaysUntilDeadline, formatCurrency, getGroupedCosts, hasCostData, getDataCompleteness } from "@/lib/utils";
 import Link from "next/link";
-import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle2, KeyRound, AlertTriangle, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, GraduationCap, DollarSign, CheckCircle, KeyRound, AlertTriangle, AlertCircle } from "lucide-react";
 
 type College = {
   id: string;
@@ -18,6 +19,7 @@ type College = {
   major: string | null;
   portalUrl: string | null;
   portalUser: string | null;
+  portalPassword: string | null;
   costTuition?: number | { toNumber: () => number } | null;
   costRoomBoard?: number | { toNumber: () => number } | null;
   costFees?: number | { toNumber: () => number } | null;
@@ -25,6 +27,7 @@ type College = {
   costPersonal?: number | { toNumber: () => number } | null;
   costOther?: number | { toNumber: () => number } | null;
   isInState?: boolean | null;
+  notes: string | null;
   checklist?: {
     lorTeacher: boolean;
     transcriptSent: boolean;
@@ -74,6 +77,56 @@ export function CollegeCard({ college }: { college: College }) {
   const checklistProgress = getChecklistProgress(college.checklist);
   const costData = hasCostData(college) ? getGroupedCosts(college) : null;
 
+  const dataCompleteness = useMemo(
+    () => getDataCompleteness(college),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      college.location,
+      college.major,
+      college.deadlineApp,
+      college.deadlineFinaid,
+      college.portalUrl,
+      college.portalUser,
+      college.portalPassword,
+      college.costTuition,
+      college.costRoomBoard,
+      college.costFees,
+      college.costBooks,
+      college.costPersonal,
+      college.costOther,
+      college.isInState,
+      college.notes,
+    ]
+  );
+
+  const getDataCompletenessIcon = () => {
+    switch (dataCompleteness.status) {
+      case "complete":
+      case "good":
+        return <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />;
+      case "warning":
+        return <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />;
+      case "alert":
+        return <AlertCircle className="h-5 w-5 text-destructive" />;
+    }
+  };
+
+  const getChecklistIcon = (size: string = "h-5 w-5") => {
+    const percentage = checklistProgress.total > 0
+      ? Math.round((checklistProgress.completed / checklistProgress.total) * 100)
+      : 0;
+
+    if (percentage === 100) {
+      return <CheckCircle className={`${size} text-green-600 dark:text-green-400`} />;
+    } else if (percentage >= 75) {
+      return <CheckCircle className={`${size} text-green-600 dark:text-green-400`} />;
+    } else if (percentage >= 40) {
+      return <AlertTriangle className={`${size} text-yellow-600 dark:text-yellow-400`} />;
+    } else {
+      return <AlertCircle className={`${size} text-destructive`} />;
+    }
+  };
+
   const getBorderClass = () => {
     if (urgencyLevel === "red") return "border-2 border-destructive";
     if (urgencyLevel === "yellow") return "border-2 border-yellow-500";
@@ -121,6 +174,12 @@ export function CollegeCard({ college }: { college: College }) {
               <CategoryBadge category={college.category} />
               <StrategyBadge strategy={college.strategy} />
             </div>
+            {hasPortalCredentials && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
+                <KeyRound className="h-3.5 w-3.5" />
+                <span>Portal saved</span>
+              </div>
+            )}
             {urgencyMessage && (
               <div className={cn(
                 "mt-3 text-xs p-2 rounded",
@@ -202,19 +261,26 @@ export function CollegeCard({ college }: { college: College }) {
                 </div>
               )}
             </div>
-            <div className="flex items-center justify-between pt-3 border-t">
-              <div className="flex items-center gap-1.5 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">
+            <div className="pt-3 border-t space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-sm">
+                  {getDataCompletenessIcon()}
+                  <span className="text-muted-foreground">Data:</span>
+                </div>
+                <span className="text-sm font-medium">
+                  {dataCompleteness.overall.completed}/{dataCompleteness.overall.total} (
+                  {dataCompleteness.overall.percentage}%)
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-sm">
+                  {getChecklistIcon("h-4 w-4")}
+                  <span className="text-muted-foreground">Checklist:</span>
+                </div>
+                <span className="text-sm font-medium">
                   {checklistProgress.completed}/{checklistProgress.total}
                 </span>
               </div>
-              {hasPortalCredentials && (
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <KeyRound className="h-3.5 w-3.5" />
-                  <span>Portal saved</span>
-                </div>
-              )}
             </div>
           </CardContent>
         </div>
@@ -232,6 +298,12 @@ export function CollegeCard({ college }: { college: College }) {
               <CategoryBadge category={college.category} />
               <StrategyBadge strategy={college.strategy} />
             </div>
+            {hasPortalCredentials && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
+                <KeyRound className="h-3.5 w-3.5" />
+                <span>Portal saved</span>
+              </div>
+            )}
             {urgencyMessage && (
               <div className={cn(
                 "text-xs p-2 rounded mt-auto",
@@ -327,21 +399,28 @@ export function CollegeCard({ college }: { college: College }) {
             </div>
           )}
 
-          {/* Right: Progress */}
-          <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center gap-3" style={{ width: 'var(--college-card-progress)' }}>
+          {/* Data Completeness - Only show when < 100% */}
+          {dataCompleteness.overall.percentage < 100 && (
+            <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center" style={{ width: 'var(--college-card-data)' }}>
+              <div className="flex flex-col items-center gap-1">
+                {getDataCompletenessIcon()}
+                <span className="text-sm font-medium">
+                  {dataCompleteness.overall.completed}/{dataCompleteness.overall.total}
+                </span>
+                <span className="text-xs text-muted-foreground">data</span>
+              </div>
+            </div>
+          )}
+
+          {/* Checklist Progress */}
+          <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center" style={{ width: 'var(--college-card-checklist)' }}>
             <div className="flex flex-col items-center gap-1">
-              <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+              {getChecklistIcon()}
               <span className="text-sm font-medium">
                 {checklistProgress.completed}/{checklistProgress.total}
               </span>
-              <span className="text-xs text-muted-foreground">complete</span>
+              <span className="text-xs text-muted-foreground">checklist</span>
             </div>
-            {hasPortalCredentials && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <KeyRound className="h-3.5 w-3.5" />
-                <span>Portal</span>
-              </div>
-            )}
           </div>
         </div>
       </Card>

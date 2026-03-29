@@ -18,6 +18,8 @@ type College = {
   major: string | null;
   portalUrl: string | null;
   portalUser: string | null;
+  portalPassword: string | null;
+  notes: string | null;
   checklist?: {
     lorTeacher: boolean;
     transcriptSent: boolean;

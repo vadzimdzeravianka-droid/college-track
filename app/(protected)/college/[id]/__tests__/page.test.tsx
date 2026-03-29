@@ -69,6 +69,23 @@ jest.mock('@/lib/utils', () => ({
   cn: (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' '),
   formatCurrency: jest.fn((amount: number) => `$${amount.toLocaleString()}`),
   hasCostData: jest.fn(() => false),
+  getDataCompleteness: jest.fn(() => ({
+    overall: { completed: 5, total: 10, percentage: 50 },
+    basic: { completed: 2, total: 2, percentage: 100 },
+    deadlines: { completed: 1, total: 2, percentage: 50 },
+    portal: { completed: 2, total: 3, percentage: 67 },
+    cost: { completed: 0, total: 7, percentage: 0 },
+    notes: { completed: 0, total: 1, percentage: 0 },
+    status: 'warning' as const,
+    missing: ['deadlineFinaid', 'cost fields', 'notes'],
+    categories: [
+      { name: 'Basic Info', completed: 2, total: 2, percentage: 100, status: 'complete' as const, icon: 'check', missingFields: [] },
+      { name: 'Deadlines', completed: 1, total: 2, percentage: 50, status: 'warning' as const, icon: 'alert', missingFields: ['deadlineFinaid'] },
+      { name: 'Portal Access', completed: 2, total: 3, percentage: 67, status: 'warning' as const, icon: 'key', missingFields: ['portalPassword'] },
+      { name: 'Cost Data', completed: 0, total: 7, percentage: 0, status: 'alert' as const, icon: 'dollar', missingFields: ['all cost fields'] },
+      { name: 'Notes', completed: 0, total: 1, percentage: 0, status: 'alert' as const, icon: 'note', missingFields: ['notes'] }
+    ]
+  })),
 }));
 
 const mockCollege = {
