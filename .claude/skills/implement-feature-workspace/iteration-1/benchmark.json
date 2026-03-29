@@ -1,0 +1,92 @@
+{
+  "skill_name": "implement-feature",
+  "configurations": [
+    {
+      "name": "with_skill",
+      "pass_rate": 0.565,
+      "avg_time_seconds": 255.9,
+      "std_time_seconds": 35.9,
+      "avg_tokens": 42331,
+      "std_tokens": 3964,
+      "eval_results": [
+        {
+          "eval_id": 1,
+          "eval_name": "date-util",
+          "passed": 4,
+          "total": 6,
+          "pass_rate": 0.67,
+          "time_seconds": 289.7,
+          "tokens": 44428
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "component",
+          "passed": 7,
+          "total": 8,
+          "pass_rate": 0.875,
+          "time_seconds": 260.1,
+          "tokens": 37873
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "api-endpoint",
+          "passed": 0,
+          "total": 9,
+          "pass_rate": 0.0,
+          "time_seconds": 218.0,
+          "tokens": 44693,
+          "note": "Run failed - no outputs produced"
+        }
+      ]
+    },
+    {
+      "name": "without_skill",
+      "pass_rate": 0.565,
+      "avg_time_seconds": 237.9,
+      "std_time_seconds": 162.0,
+      "avg_tokens": 43141,
+      "std_tokens": 20529,
+      "eval_results": [
+        {
+          "eval_id": 1,
+          "eval_name": "date-util",
+          "passed": 4,
+          "total": 6,
+          "pass_rate": 0.67,
+          "time_seconds": 340.7,
+          "tokens": 58958
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "component",
+          "passed": 0,
+          "total": 8,
+          "pass_rate": 0.0,
+          "time_seconds": 28.7,
+          "tokens": 18246,
+          "note": "Stuck on permission prompt - no outputs"
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "api-endpoint",
+          "passed": 7,
+          "total": 9,
+          "pass_rate": 0.78,
+          "time_seconds": 344.4,
+          "tokens": 52218
+        }
+      ]
+    }
+  ],
+  "delta": {
+    "pass_rate": "+0%",
+    "time": "+18.0s (+7.6%)",
+    "tokens": "-810 (-1.9%)"
+  },
+  "notes": [
+    "Both configurations had 1 complete failure (0% pass rate)",
+    "With skill: failed on complex API endpoint task",
+    "Without skill: failed on medium React component task",
+    "Reliability issue: Skill doesn't consistently help across different task types"
+  ]
+}

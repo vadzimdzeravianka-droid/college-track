@@ -1,0 +1,91 @@
+{
+  "skill_name": "implement-feature",
+  "iteration": 2,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "pass_rate": 0.864,
+      "avg_time_seconds": 229.6,
+      "std_time_seconds": 15.7,
+      "avg_tokens": 45183,
+      "std_tokens": 9218,
+      "eval_results": [
+        {
+          "eval_id": 1,
+          "eval_name": "date-util",
+          "passed": 4,
+          "total": 5,
+          "pass_rate": 0.80,
+          "time_seconds": 213.9,
+          "tokens": 55371
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "component",
+          "passed": 8,
+          "total": 8,
+          "pass_rate": 1.00,
+          "time_seconds": 245.2,
+          "tokens": 37583
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "api-endpoint",
+          "passed": 8,
+          "total": 9,
+          "pass_rate": 0.89,
+          "time_seconds": 229.8,
+          "tokens": 42595
+        }
+      ]
+    },
+    {
+      "name": "without_skill",
+      "pass_rate": 0.864,
+      "avg_time_seconds": 181.1,
+      "std_time_seconds": 67.9,
+      "avg_tokens": 35352,
+      "std_tokens": 6675,
+      "eval_results": [
+        {
+          "eval_id": 1,
+          "eval_name": "date-util",
+          "passed": 4,
+          "total": 5,
+          "pass_rate": 0.80,
+          "time_seconds": 262.7,
+          "tokens": 41057
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "component",
+          "passed": 8,
+          "total": 8,
+          "pass_rate": 1.00,
+          "time_seconds": 135.2,
+          "tokens": 27849
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "api-endpoint",
+          "passed": 8,
+          "total": 9,
+          "pass_rate": 0.89,
+          "time_seconds": 145.4,
+          "tokens": 37149
+        }
+      ]
+    }
+  ],
+  "delta": {
+    "pass_rate": "+0%",
+    "time": "+48.5s (+26.8%)",
+    "tokens": "+9831 (+27.8%)"
+  },
+  "notes": [
+    "Both configurations achieved identical 86.4% pass rate",
+    "All 3 tests succeeded in both configurations (100% reliability)",
+    "TDD assertions failed in both configs due to code pre-existing in codebase",
+    "With-skill is slower and uses more tokens, but provides more comprehensive documentation"
+  ]
+}
