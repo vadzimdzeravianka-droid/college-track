@@ -112,6 +112,22 @@ export function CollegeCard({ college }: { college: College }) {
     }
   };
 
+  const getChecklistIcon = (size: string = "h-5 w-5") => {
+    const percentage = checklistProgress.total > 0
+      ? Math.round((checklistProgress.completed / checklistProgress.total) * 100)
+      : 0;
+
+    if (percentage === 100) {
+      return <CheckCircle2 className={`${size} text-green-500`} />;
+    } else if (percentage >= 75) {
+      return <CheckCircle2 className={`${size} text-green-500`} />;
+    } else if (percentage >= 40) {
+      return <AlertTriangle className={`${size} text-yellow-500`} />;
+    } else {
+      return <AlertCircle className={`${size} text-destructive`} />;
+    }
+  };
+
   const getBorderClass = () => {
     if (urgencyLevel === "red") return "border-2 border-destructive";
     if (urgencyLevel === "yellow") return "border-2 border-yellow-500";
@@ -259,7 +275,7 @@ export function CollegeCard({ college }: { college: College }) {
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                  {getChecklistIcon("h-4 w-4")}
                   <span className="text-muted-foreground">Checklist:</span>
                 </div>
                 <span className="text-sm font-medium">
@@ -400,7 +416,7 @@ export function CollegeCard({ college }: { college: College }) {
           {/* Checklist Progress */}
           <div className="flex-shrink-0 p-6 border-l flex flex-col justify-center items-center" style={{ width: 'var(--college-card-checklist)' }}>
             <div className="flex flex-col items-center gap-1">
-              <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+              {getChecklistIcon()}
               <span className="text-sm font-medium">
                 {checklistProgress.completed}/{checklistProgress.total}
               </span>
