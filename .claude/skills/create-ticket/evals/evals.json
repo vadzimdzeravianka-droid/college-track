@@ -1,0 +1,160 @@
+{
+  "skill_name": "create-ticket",
+  "evals": [
+    {
+      "id": 1,
+      "name": "simple-bugfix-ticket",
+      "prompt": "create ticket for bug-pointer-cursor requirement",
+      "expected_output": "Structured ticket with subtasks for fixing cursor behavior",
+      "files": [".claude/workflows/requirements/groomed/bug-pointer-cursor.md"],
+      "assertions": [
+        {
+          "text": "Created ticket file in .claude/workflows/tickets/ready/",
+          "type": "completeness"
+        },
+        {
+          "text": "Ticket includes semantic ID in format [TYPE]-[NAME]-[DATE]",
+          "type": "correctness"
+        },
+        {
+          "text": "Analyzed codebase to identify affected files",
+          "type": "methodology"
+        },
+        {
+          "text": "Broke requirement into 3-5 subtasks",
+          "type": "quality"
+        },
+        {
+          "text": "Each subtask has complexity rating and token estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Defined test strategy (unit/integration/E2E)",
+          "type": "quality"
+        },
+        {
+          "text": "Copied acceptance criteria from groomed requirement",
+          "type": "correctness"
+        },
+        {
+          "text": "Token budget matches groomed requirement estimate",
+          "type": "correctness"
+        },
+        {
+          "text": "All file paths are valid (verified with codebase)",
+          "type": "correctness"
+        },
+        {
+          "text": "Ticket is actionable and ready for implementation",
+          "type": "quality"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "medium-feature-ticket",
+      "prompt": "create ticket for data-completeness requirement",
+      "expected_output": "Structured ticket with subtasks for data completeness tracker",
+      "files": [".claude/workflows/requirements/groomed/data-completeness.md"],
+      "assertions": [
+        {
+          "text": "Created ticket file in .claude/workflows/tickets/ready/",
+          "type": "completeness"
+        },
+        {
+          "text": "Ticket includes semantic ID in format [TYPE]-[NAME]-[DATE]",
+          "type": "correctness"
+        },
+        {
+          "text": "Analyzed codebase to identify affected files",
+          "type": "methodology"
+        },
+        {
+          "text": "Broke requirement into 3-5 subtasks",
+          "type": "quality"
+        },
+        {
+          "text": "Each subtask has complexity rating and token estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Subtasks follow logical dependency order",
+          "type": "quality"
+        },
+        {
+          "text": "Defined test strategy (unit/integration/E2E)",
+          "type": "quality"
+        },
+        {
+          "text": "Copied acceptance criteria from groomed requirement",
+          "type": "correctness"
+        },
+        {
+          "text": "Token budget matches groomed requirement estimate",
+          "type": "correctness"
+        },
+        {
+          "text": "Identified files to create vs files to modify",
+          "type": "completeness"
+        },
+        {
+          "text": "All file paths are valid (verified with codebase)",
+          "type": "correctness"
+        },
+        {
+          "text": "Subtasks are independently testable",
+          "type": "quality"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "layout-fix-ticket",
+      "prompt": "create ticket for fix-width requirement",
+      "expected_output": "Structured ticket with subtasks for width/layout fixes",
+      "files": [".claude/workflows/requirements/groomed/fix-width.md"],
+      "assertions": [
+        {
+          "text": "Created ticket file in .claude/workflows/tickets/ready/",
+          "type": "completeness"
+        },
+        {
+          "text": "Ticket includes semantic ID in format [TYPE]-[NAME]-[DATE]",
+          "type": "correctness"
+        },
+        {
+          "text": "Analyzed codebase to identify affected files",
+          "type": "methodology"
+        },
+        {
+          "text": "Broke requirement into 3-5 subtasks",
+          "type": "quality"
+        },
+        {
+          "text": "Each subtask has complexity rating and token estimate",
+          "type": "completeness"
+        },
+        {
+          "text": "Defined test strategy (unit/integration/E2E)",
+          "type": "quality"
+        },
+        {
+          "text": "Copied acceptance criteria from groomed requirement",
+          "type": "correctness"
+        },
+        {
+          "text": "Token budget matches groomed requirement estimate",
+          "type": "correctness"
+        },
+        {
+          "text": "All file paths are valid (verified with codebase)",
+          "type": "correctness"
+        },
+        {
+          "text": "Ticket is actionable and ready for implementation",
+          "type": "quality"
+        }
+      ]
+    }
+  ]
+}

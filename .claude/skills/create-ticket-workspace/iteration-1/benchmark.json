@@ -1,0 +1,94 @@
+{
+  "skill_name": "create-ticket",
+  "iteration": 1,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "pass_rate": 0.844,
+      "avg_time_seconds": 411.4,
+      "std_time_seconds": 149.9,
+      "avg_tokens": 52099,
+      "std_tokens": 6160,
+      "eval_results": [
+        {
+          "eval_id": 1,
+          "eval_name": "simple-bugfix-ticket",
+          "passed": 9,
+          "total": 10,
+          "pass_rate": 0.90,
+          "time_seconds": 518.4,
+          "tokens": 50741
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "medium-feature-ticket",
+          "passed": 9,
+          "total": 12,
+          "pass_rate": 0.75,
+          "time_seconds": 228.8,
+          "tokens": 58891
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "layout-fix-ticket",
+          "passed": 9,
+          "total": 10,
+          "pass_rate": 0.90,
+          "time_seconds": 487.1,
+          "tokens": 46664
+        }
+      ]
+    },
+    {
+      "name": "without_skill",
+      "pass_rate": 0.719,
+      "avg_time_seconds": 188.8,
+      "std_time_seconds": 24.1,
+      "avg_tokens": 46151,
+      "std_tokens": 7779,
+      "eval_results": [
+        {
+          "eval_id": 1,
+          "eval_name": "simple-bugfix-ticket",
+          "passed": 7,
+          "total": 10,
+          "pass_rate": 0.70,
+          "time_seconds": 213.7,
+          "tokens": 40734
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "medium-feature-ticket",
+          "passed": 9,
+          "total": 12,
+          "pass_rate": 0.75,
+          "time_seconds": 187.2,
+          "tokens": 56070
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "layout-fix-ticket",
+          "passed": 7,
+          "total": 10,
+          "pass_rate": 0.70,
+          "time_seconds": 165.6,
+          "tokens": 41649
+        }
+      ]
+    }
+  ],
+  "delta": {
+    "pass_rate": "+12.5%",
+    "time": "+222.6s (+117.9%)",
+    "tokens": "+5948 (+12.9%)"
+  },
+  "notes": [
+    "With-skill achieved 84.4% pass rate vs 71.9% without-skill",
+    "With-skill was 118% slower (411s vs 189s)",
+    "With-skill used 13% more tokens for better quality",
+    "Without-skill failed on ticket placement (none in ready/ directory)",
+    "Without-skill had inconsistent ID formats across all 3 tests",
+    "With-skill better at semantic IDs, codebase analysis, and structure",
+    "Both configurations struggled with token estimate accuracy"
+  ]
+}
