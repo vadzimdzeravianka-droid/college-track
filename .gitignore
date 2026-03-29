@@ -41,3 +41,6 @@ next-env.d.ts
 
 # prisma
 prisma/.env
+
+# Skill evaluation workspaces (keep local for reference)
+*-workspace/iteration-*/eval-*/
