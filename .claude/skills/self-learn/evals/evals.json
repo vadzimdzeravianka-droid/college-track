@@ -1,0 +1,112 @@
+{
+  "skill_name": "self-learn",
+  "evals": [
+    {
+      "id": 1,
+      "name": "analyze-5-tickets",
+      "prompt": "analyze the last 5 completed tickets and identify improvement opportunities",
+      "expected_output": "Learning report with token efficiency metrics, success rate analysis, and skill improvement proposals",
+      "assertions": [
+        {
+          "text": "Analyzed at least 5 completed tickets from .claude/workflows/tickets/done/",
+          "type": "completeness"
+        },
+        {
+          "text": "Calculated token efficiency metrics (estimated vs actual)",
+          "type": "completeness"
+        },
+        {
+          "text": "Measured success rate (passed first attempt / total validated)",
+          "type": "completeness"
+        },
+        {
+          "text": "Identified 2-5 improvement opportunities",
+          "type": "quality"
+        },
+        {
+          "text": "Provided actionable skill improvement proposals",
+          "type": "quality"
+        },
+        {
+          "text": "Generated learning report in .claude/workflows/learning/reports/",
+          "type": "correctness"
+        },
+        {
+          "text": "Updated metrics.json with learning analysis",
+          "type": "correctness"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "pattern-recognition",
+      "prompt": "identify patterns in recent ticket execution and suggest specific skill improvements",
+      "expected_output": "Pattern analysis with concrete skill update recommendations",
+      "assertions": [
+        {
+          "text": "Read and analyzed ticket execution metadata (timing, token usage, success)",
+          "type": "completeness"
+        },
+        {
+          "text": "Identified recurring patterns (common failures, inefficiencies, bottlenecks)",
+          "type": "critical"
+        },
+        {
+          "text": "Mapped patterns to specific skill improvement opportunities",
+          "type": "critical"
+        },
+        {
+          "text": "Provided concrete skill update recommendations with expected impact",
+          "type": "quality"
+        },
+        {
+          "text": "Prioritized improvements by impact vs effort",
+          "type": "quality"
+        },
+        {
+          "text": "Documented patterns in .claude/workflows/learning/patterns/",
+          "type": "correctness"
+        }
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "skill-improvement-proposal",
+      "prompt": "based on recent workflow performance, generate a skill improvement proposal with A/B testing plan",
+      "expected_output": "Detailed improvement proposal with evaluation methodology",
+      "assertions": [
+        {
+          "text": "Analyzed workflow metrics to identify improvement opportunity",
+          "type": "completeness"
+        },
+        {
+          "text": "Generated specific skill improvement proposal (which skill, what change)",
+          "type": "critical"
+        },
+        {
+          "text": "Defined success criteria for improvement (metrics to track)",
+          "type": "critical"
+        },
+        {
+          "text": "Created A/B testing plan (test cases, with-skill vs without-skill)",
+          "type": "critical"
+        },
+        {
+          "text": "Estimated expected impact (time, tokens, success rate)",
+          "type": "quality"
+        },
+        {
+          "text": "Provided implementation steps and rollback plan",
+          "type": "quality"
+        },
+        {
+          "text": "Documented proposal in structured format",
+          "type": "correctness"
+        }
+      ],
+      "files": []
+    }
+  ]
+}
