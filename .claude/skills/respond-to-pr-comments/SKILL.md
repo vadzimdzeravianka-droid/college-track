@@ -161,22 +161,62 @@ If you decided to implement:
 
 ### 3B: Post Reply to GitHub
 
-For all decisions (implement, push back, suggest), post a reply:
+**CRITICAL:** Use the correct reply method based on comment type:
 
-**For line-specific comments:**
+**For line-specific/inline code review comments (reply in thread + resolve):**
+
+1. First, reply to the specific comment thread using its comment ID:
 ```bash
-gh pr comment {pr_number} --body "✅ Fixed in commit [sha]:
-[Explanation of what you changed and why]"
+# Reply in thread (NOT a general PR comment)
+gh api repos/{owner}/{repo}/pulls/{pr_number}/comments/{comment_id}/replies \
+  -X POST \
+  -f body="✅ Fixed in commit [sha]: [Explanation]"
 ```
 
-**For general comments:**
+2. Then resolve the thread using GraphQL:
+```bash
+# Get thread ID first
+gh api graphql -f query='
+{
+  repository(owner: "{owner}", name: "{repo}") {
+    pullRequest(number: {pr_number}) {
+      reviewThreads(first: 50) {
+        nodes {
+          id
+          isResolved
+          comments(first: 1) {
+            nodes {
+              body
+              path
+            }
+          }
+        }
+      }
+    }
+  }
+}'
+
+# Resolve the thread
+gh api graphql -f query='
+mutation {
+  resolveReviewThread(input: {threadId: "{thread_node_id}"}) {
+    thread {
+      isResolved
+    }
+  }
+}'
+```
+
+**For general PR conversation comments:**
 ```bash
 gh pr comment {pr_number} --body "[Your response]"
 ```
 
-### 3C: Mark as Resolved (if applicable)
+### 3C: Verify Thread Resolution
 
-After implementing and replying, GitHub may not auto-resolve. If the comment thread should be closed, mention it in your reply or ask the reviewer to mark it resolved.
+After replying and resolving:
+- Re-query the review threads to confirm `isResolved: true`
+- If resolution failed, the thread may require reviewer permissions
 
 ---
 
@@ -273,8 +313,16 @@ Good: Understand why commenter suggested it, verify it aligns with project stand
 
 ### ❌ Checking only general comments
 Many line-specific code reviews are missed this way. Always check BOTH:
-- `gh pr view --json comments`
-- `gh api repos/.../pulls/{pr}/comments`
+- `gh pr view --json comments` (general conversation)
+- `gh api repos/.../pulls/{pr}/comments` (inline code review)
+
+### ❌ Using `gh pr comment` for inline comments
+Bad: `gh pr comment {pr} --body "Fixed"` → Creates orphan general comment
+Good: `gh api .../comments/{id}/replies` → Replies in the correct thread
+
+### ❌ Not resolving threads after fixing
+Bad: Reply to comment but leave thread unresolved
+Good: Reply in thread + resolve via GraphQL `resolveReviewThread` mutation
 
 ### ❌ Ignoring comment context
 A comment about "add tests" on line 50 might not mean "add tests to line 50". Understand what the commenter actually wants.
@@ -291,8 +339,8 @@ Always run tests after implementing comment feedback. Broken tests are embarrass
 
 When user says "check PR comments":
 
-- [ ] Fetch general conversation comments
-- [ ] Fetch line-specific code review comments
+- [ ] Fetch general conversation comments (`gh pr view --json comments`)
+- [ ] Fetch line-specific code review comments (`gh api repos/.../pulls/{pr}/comments`)
 - [ ] For each comment:
   - [ ] 5 Whys on current implementation
   - [ ] 5 Whys on the comment
@@ -302,8 +350,10 @@ When user says "check PR comments":
   - [ ] Make code changes if needed
   - [ ] Run tests
   - [ ] Commit with clear message
-  - [ ] Post reply to GitHub
-- [ ] Verify no comments missed
+  - [ ] **Inline comments:** Reply in thread via `/comments/{id}/replies` API + resolve thread via GraphQL
+  - [ ] **General comments:** Reply via `gh pr comment`
+- [ ] Verify no comments missed (re-fetch both types)
+- [ ] Verify threads are resolved (`isResolved: true`)
 - [ ] Report to user what was done
 
 ---
