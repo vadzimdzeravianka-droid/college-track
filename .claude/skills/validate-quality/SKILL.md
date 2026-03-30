@@ -2,7 +2,7 @@
 name: validate-quality
 description: Comprehensive QA validation including tests, E2E, coverage, linting, and acceptance criteria verification. Auto-commits if all pass. Use when ticket is in QA stage.
 license: MIT
-compatibility: Requires npm, jest, Chrome MCP for E2E testing
+compatibility: Requires npm, jest, Playwright for E2E testing
 metadata:
   version: "1.0.0"
   author: autonomous-workflow
@@ -538,74 +538,31 @@ Save metrics to `.claude/workflows/metrics.json`:
 
 ## E2E Test Examples
 
-### Example 1: Export Button Click
+### E2E Test Patterns
+
+E2E tests use Playwright. See `e2e/` directory for existing patterns:
 
 ```typescript
-async function testExportButton() {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+// Example from e2e/auth.spec.ts
+import { test, expect } from '@playwright/test';
 
-  await page.goto('http://localhost:3000/dashboard');
+test('should login successfully', async ({ page }) => {
+  const passkey = process.env.APP_PASSKEY;
 
-  // Login
-  await page.type('input[name="passkey"]', process.env.APP_PASSKEY);
+  await page.goto('/login');
+  await page.fill('input#passkey', passkey!);
   await page.click('button[type="submit"]');
-  await page.waitForNavigation();
 
-  // Click export button
-  await page.click('[data-testid="export-button"]');
-
-  // Wait for download
-  const downloadPath = await page.evaluate(() => {
-    return new Promise((resolve) => {
-      const link = document.querySelector('a[download]');
-      if (link) resolve(link.getAttribute('download'));
-    });
-  });
-
-  await browser.close();
-
-  return downloadPath.includes('colleges-export');
-}
+  await page.waitForURL('/dashboard', { timeout: 10000 });
+  await expect(page.locator('text=College Application Tracker')).toBeVisible();
+});
 ```
 
-### Example 2: Form Submission
-
-```typescript
-async function testCollegeCreation() {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  await page.goto('http://localhost:3000/dashboard');
-  await page.type('input[name="passkey"]', process.env.APP_PASSKEY);
-  await page.click('button[type="submit"]');
-  await page.waitForNavigation();
-
-  // Open add college dialog
-  await page.click('[data-testid="add-college-btn"]');
-
-  // Fill form
-  await page.type('[name="name"]', 'Test University');
-  await page.select('[name="category"]', 'MATCH');
-  await page.select('[name="strategy"]', 'RD');
-
-  // Submit
-  await page.click('button[type="submit"]');
-
-  // Wait for card to appear
-  await page.waitForSelector('[data-testid="college-card"]');
-
-  // Verify
-  const collegeName = await page.$eval(
-    '[data-testid="college-card"]',
-    el => el.textContent
-  );
-
-  await browser.close();
-
-  return collegeName.includes('Test University');
-}
-```
+**Reference existing tests**:
+- `e2e/auth.spec.ts` - Authentication flows
+- `e2e/college-crud.spec.ts` - College CRUD operations
+- `e2e/checklist.spec.ts` - Checklist updates
+- `e2e/helpers.ts` - Reusable test helpers
 
 ## Gotchas
 
@@ -653,14 +610,19 @@ open coverage/lcov-report/index.html
 
 ### E2E Failures
 
-1. Run E2E with headful browser:
-```typescript
-puppeteer.launch({ headless: false, slowMo: 50 })
+1. Run E2E with UI mode:
+```bash
+npm run test:e2e:ui
 ```
 
-2. Check screenshots in validation report
+2. Run in headed mode to see browser:
+```bash
+npm run test:e2e:headed
+```
 
-3. Verify server is running during E2E
+3. Check screenshots in validation report
+
+4. Verify server is running during E2E
 
 ## Self-Learning Integration
 

@@ -2,52 +2,25 @@
 
 ## Setup (One-Time)
 
-### 1. Install Chrome MCP for E2E Testing
+### 1. E2E Testing
 
+E2E testing uses Playwright, which is already configured in the project:
 ```bash
-npm install -g @modelcontextprotocol/server-puppeteer
+npm run test:e2e        # Run E2E tests
+npm run test:e2e:ui     # Run with UI mode
+npm run test:e2e:headed # Run in headed mode
 ```
 
-Add to `~/.claude/mcp_settings.json`:
-```json
-{
-  "mcpServers": {
-    "puppeteer": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
-    }
-  }
-}
-```
+### 2. Verify Dependencies
 
-### 2. Verify skill-creator Plugin
-
-Check `~/.claude/settings.json` includes:
-```json
-{
-  "enabledPlugins": {
-    "skill-creator@claude-plugins-official": true
-  }
-}
+Ensure all dependencies are installed:
+```bash
+npm install
 ```
 
 ### 3. Configure Permissions (Optional)
 
-For full automation, add to `~/.claude/settings.json`:
-```json
-{
-  "permissions": {
-    "autoApprove": [
-      "Read:.claude/**",
-      "Write:.claude/**",
-      "Bash:npm test",
-      "Bash:npm run lint",
-      "Bash:git status",
-      "Bash:git commit"
-    ]
-  }
-}
-```
+For full automation, configure Claude Code permissions as needed.
 
 ## Usage
 
@@ -234,10 +207,9 @@ Token breakdown:
 
 ## Support
 
-- Review `AUTONOMOUS_WORKFLOW_DESIGN.md` for architecture details
 - Check individual skill docs in `.claude/skills/*/SKILL.md`
-- See agent definitions in `.claude/agents/*.md`
 - Review CLAUDE.md for project-specific patterns
+- See historical design in `.claude/archive/DESIGN_LEGACY.md`
 
 ## Success Metrics
 

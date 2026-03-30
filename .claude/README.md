@@ -34,13 +34,7 @@ Your Requirement → Autonomous Processing → Production Code + Tests
 
 ### 1. One-Time Setup
 
-```bash
-# Install Chrome MCP for E2E testing
-npm install -g @modelcontextprotocol/server-puppeteer
-
-# Verify skill-creator plugin (should already be enabled)
-grep "skill-creator" ~/.claude/settings.json
-```
+E2E testing uses Playwright (already configured in the project).
 
 See [QUICK_START.md](QUICK_START.md) for detailed setup instructions.
 
@@ -87,9 +81,6 @@ Review the commit in git log!
 .claude/
 ├── README.md                    # This file
 ├── QUICK_START.md               # Getting started guide
-├── AUTONOMOUS_WORKFLOW_DESIGN.md  # Full architecture documentation
-├── IMPLEMENTATION_ROADMAP.md    # 4-week rollout plan
-├── CLAUDE.md                    # Project architecture (exists in root)
 │
 ├── workflows/                   # Workflow execution area
 │   ├── requirements/
@@ -103,6 +94,7 @@ Review the commit in git log!
 │   │   └── done/               # ✅ Completed
 │   ├── validation-reports/     # QA validation outputs
 │   ├── learning/               # Self-learning data
+│   ├── code-reviews/           # Code review reports
 │   └── metrics.json            # Performance metrics
 │
 ├── skills/                      # Custom skills (agentskills.io format)
@@ -110,17 +102,14 @@ Review the commit in git log!
 │   ├── create-ticket/          # Ticket creation
 │   ├── implement-feature/      # TDD implementation
 │   ├── validate-quality/       # QA validation
-│   └── self-learn/             # Continuous improvement
+│   ├── self-learn/             # Continuous improvement
+│   └── code-review/            # Code review agents
 │
-├── agents/                      # Agent definitions
-│   ├── requirements-groomer.md
-│   ├── ticket-creator.md
-│   ├── implementation-agent.md
-│   ├── qa-validator.md
-│   └── learning-agent.md
+├── templates/                   # Templates for users
+│   └── requirement_template.md
 │
-└── templates/                   # Templates for users
-    └── requirement_template.md
+└── archive/                     # Historical documentation
+    └── DESIGN_LEGACY.md
 ```
 
 ## Key Documents
@@ -128,10 +117,9 @@ Review the commit in git log!
 | Document | Purpose | When to Read |
 |----------|---------|--------------|
 | [QUICK_START.md](QUICK_START.md) | Get started quickly | First time user |
-| [AUTONOMOUS_WORKFLOW_DESIGN.md](AUTONOMOUS_WORKFLOW_DESIGN.md) | Full architecture | Understanding system design |
-| [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md) | 4-week rollout plan | Planning deployment |
 | [skills/*/SKILL.md](skills/) | Individual skill docs | Debugging specific stage |
-| [agents/*.md](agents/) | Agent definitions | Understanding agent roles |
+| [workflows/CODE_REVIEW_AGENTS.md](workflows/CODE_REVIEW_AGENTS.md) | Code review system design | Understanding review agents |
+| [workflows/FEATURE_BRANCH_WORKFLOW.md](workflows/FEATURE_BRANCH_WORKFLOW.md) | Git workflow | Understanding branch strategy |
 
 ## Workflow Modes
 
@@ -271,19 +259,17 @@ head -n 10 skills/[skill-name]/SKILL.md
 - Time saved: ~3.5 hours per feature
 - At 50 features/month: 175 hours saved for $11 cost
 
-## Rollout Plan
+## Workflow Phases
 
-| Phase | Duration | Focus | Success Criteria |
-|-------|----------|-------|------------------|
-| **Phase 1** | Week 1 | Foundation | All skills tested manually |
-| **Phase 2** | Week 2 | Automation | 3 features end-to-end |
-| **Phase 3** | Week 3 | E2E Testing | QA failure rate < 15% |
-| **Phase 4** | Week 4 | Self-Learning | 1+ skill improved by 10%+ |
-| **Phase 5** | Ongoing | Production | 85%+ success rate |
+| Phase | Focus | Status |
+|-------|-------|--------|
+| **Foundation** | Skills tested manually | ✅ Complete |
+| **Automation** | End-to-end workflow | ✅ Complete |
+| **E2E Testing** | Playwright integration | ✅ Complete |
+| **Self-Learning** | Eval-driven improvement | ✅ Complete |
+| **Production** | Ongoing optimization | 🔄 Active |
 
-**Current Phase**: Ready for Phase 1
-
-See [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md) for detailed plan.
+**Current Status**: Production use with continuous improvement
 
 ## Architecture Highlights
 
@@ -327,30 +313,28 @@ This workflow integrates seamlessly with your Next.js project:
 ## Next Steps
 
 1. **Read** [QUICK_START.md](QUICK_START.md)
-2. **Complete** one-time setup (Chrome MCP)
-3. **Try** your first feature (start simple!)
-4. **Review** outputs and commits
-5. **Iterate** with 2-3 more features
-6. **Enable** self-learning after 5 features
-7. **Scale** to full autonomy
+2. **Try** your first feature (start simple!)
+3. **Review** outputs and commits
+4. **Iterate** with 2-3 more features
+5. **Enable** self-learning after 5 features
+6. **Scale** to full autonomy
 
 ## Support
 
 **Documentation**:
 - Main docs: This directory's markdown files
 - Skill docs: `skills/*/SKILL.md`
-- Agent docs: `agents/*.md`
 - Project architecture: `../CLAUDE.md` (root)
 
 **Debugging**:
 - Check validation reports: `workflows/validation-reports/`
 - View execution patterns: `workflows/learning/patterns/`
 - Review metrics: `workflows/metrics.json`
+- Code reviews: `workflows/code-reviews/`
 
 **Questions**:
-- Architecture: See [AUTONOMOUS_WORKFLOW_DESIGN.md](AUTONOMOUS_WORKFLOW_DESIGN.md)
-- Rollout: See [IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 - Skill-specific: See `skills/[skill-name]/SKILL.md`
+- Historical design: See `archive/DESIGN_LEGACY.md`
 
 ---
 
