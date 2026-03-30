@@ -1,0 +1,116 @@
+{
+  "skill_name": "code-review",
+  "evals": [
+    {
+      "id": 1,
+      "name": "eslint-config-review",
+      "prompt": "review CONFIG-ESLINT-20260327 ticket",
+      "expected_output": "Comprehensive review from 10 agents for ESLint configuration changes",
+      "files": [".claude/workflows/tickets/done/CONFIG-ESLINT-20260327.md"],
+      "assertions": [
+        {
+          "text": "Ran all 10 review agents (security, quality, architecture, reusability, tests, ui/ux, performance, mobile, typescript, best-practices)",
+          "type": "completeness"
+        },
+        {
+          "text": "Generated consolidated review report",
+          "type": "completeness"
+        },
+        {
+          "text": "Provided clear APPROVE/REQUEST_CHANGES/REJECT decision",
+          "type": "correctness"
+        },
+        {
+          "text": "Identified relevant issues or confirmed code quality",
+          "type": "quality"
+        },
+        {
+          "text": "Provided actionable recommendations",
+          "type": "quality"
+        },
+        {
+          "text": "Review focused on actual changes, not entire codebase",
+          "type": "correctness"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "urgency-logic-review",
+      "prompt": "review URGENCY-ABSOLUTE-THRESHOLDS-20260327 ticket",
+      "expected_output": "Comprehensive review from 10 agents for urgency calculation logic changes",
+      "files": [".claude/workflows/tickets/done/URGENCY-ABSOLUTE-THRESHOLDS-20260327.md"],
+      "assertions": [
+        {
+          "text": "Ran all 10 review agents (security, quality, architecture, reusability, tests, ui/ux, performance, mobile, typescript, best-practices)",
+          "type": "completeness"
+        },
+        {
+          "text": "Generated consolidated review report",
+          "type": "completeness"
+        },
+        {
+          "text": "Provided clear APPROVE/REQUEST_CHANGES/REJECT decision",
+          "type": "correctness"
+        },
+        {
+          "text": "Evaluated business logic correctness",
+          "type": "critical"
+        },
+        {
+          "text": "Checked test coverage for logic changes",
+          "type": "critical"
+        },
+        {
+          "text": "Identified edge cases or missing validation",
+          "type": "quality"
+        },
+        {
+          "text": "Provided actionable recommendations",
+          "type": "quality"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "test-coverage-review",
+      "prompt": "review TESTING-COVERAGE-20260327 ticket",
+      "expected_output": "Comprehensive review from 10 agents for massive test coverage improvement",
+      "files": [".claude/workflows/tickets/done/TESTING-COVERAGE-20260327.md"],
+      "assertions": [
+        {
+          "text": "Ran all 10 review agents (security, quality, architecture, reusability, tests, ui/ux, performance, mobile, typescript, best-practices)",
+          "type": "completeness"
+        },
+        {
+          "text": "Generated consolidated review report",
+          "type": "completeness"
+        },
+        {
+          "text": "Provided clear APPROVE/REQUEST_CHANGES/REJECT decision",
+          "type": "correctness"
+        },
+        {
+          "text": "Evaluated test quality and coverage comprehensively",
+          "type": "critical"
+        },
+        {
+          "text": "Checked for test best practices (mocking, async handling, isolation)",
+          "type": "critical"
+        },
+        {
+          "text": "Verified tests actually test behavior, not implementation",
+          "type": "quality"
+        },
+        {
+          "text": "Identified any missing test scenarios",
+          "type": "quality"
+        },
+        {
+          "text": "Provided actionable recommendations for improvement",
+          "type": "quality"
+        }
+      ]
+    }
+  ]
+}
