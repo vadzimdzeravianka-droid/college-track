@@ -37,6 +37,142 @@ Independent, comprehensive code review that runs after feature completion. Uses 
 
 See full implementation in `.claude/workflows/CODE_REVIEW_AGENTS.md`
 
+### Pre-Review Verification Phase
+
+Before running review agents, execute automated checks on changed files to catch obvious issues:
+
+#### Step 1: Identify Changed Files
+
+```bash
+# Get list of changed files in current branch vs main
+CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only main...HEAD 2>/dev/null || git diff --name-only --cached)
+
+# Filter for relevant file types
+CHANGED_TS_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(ts|tsx|js|jsx)$' || true)
+CHANGED_TEST_FILES=$(echo "$CHANGED_FILES" | grep -E '\.test\.(ts|tsx|js|jsx)$' || true)
+CHANGED_NON_TEST=$(echo "$CHANGED_TS_FILES" | grep -v -E '\.test\.' || true)
+
+echo "📋 Changed files: $(echo "$CHANGED_FILES" | wc -l | tr -d ' ')"
+echo "📋 TypeScript/JS files: $(echo "$CHANGED_TS_FILES" | wc -l | tr -d ' ')"
+echo "📋 Test files: $(echo "$CHANGED_TEST_FILES" | wc -l | tr -d ' ')"
+```
+
+#### Step 2: Run Fast Verification Checks
+
+Run linting and type checks ONLY on changed files:
+
+```bash
+VERIFICATION_ISSUES=""
+
+# Lint changed files only (fast)
+if [ -n "$CHANGED_TS_FILES" ]; then
+  echo "🔍 Running ESLint on changed files..."
+  if npx eslint $CHANGED_TS_FILES --max-warnings 0 > /tmp/lint-results.txt 2>&1; then
+    echo "✅ Linting passed on changed files"
+  else
+    echo "⚠️  Linting errors found in changed files"
+    cat /tmp/lint-results.txt
+    VERIFICATION_ISSUES="true"
+  fi
+fi
+
+# Type check (full project, but fast)
+echo "🔍 Running TypeScript type check..."
+if npx tsc --noEmit > /tmp/type-results.txt 2>&1; then
+  echo "✅ Type check passed"
+else
+  echo "⚠️  Type errors found"
+  cat /tmp/type-results.txt | grep error
+  VERIFICATION_ISSUES="true"
+fi
+
+# Run tests for changed files (if test files exist)
+if [ -n "$CHANGED_TEST_FILES" ] || [ -n "$CHANGED_NON_TEST" ]; then
+  echo "🔍 Running tests for changed files..."
+  if [ -n "$CHANGED_NON_TEST" ]; then
+    if npm test -- --findRelatedTests $CHANGED_NON_TEST --passWithNoTests > /tmp/test-results.txt 2>&1; then
+      echo "✅ Tests passed for changed files"
+    else
+      echo "⚠️  Test failures detected"
+      cat /tmp/test-results.txt | tail -20
+      VERIFICATION_ISSUES="true"
+    fi
+  fi
+fi
+```
+
+#### Step 3: Report Verification Results
+
+Include verification results in consolidated report under "Verification" section:
+
+```markdown
+## Verification Results
+
+**Linting**: ${LINT_STATUS}
+**Type Checking**: ${TYPE_STATUS}
+**Tests**: ${TEST_STATUS}
+
+[Detailed output if issues found]
+```
+
+If verification fails, treat as CRITICAL issues in final decision.
+
+### Complexity Detection & Agent Selection
+
+Detect change complexity to determine which agents to run:
+
+#### Complexity Indicators
+
+```bash
+# Count changed files and lines
+CHANGED_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
+CHANGED_LINES=$(git diff --stat origin/main...HEAD | tail -1 | awk '{print $4+$6}')
+
+# Detect file types and locations
+HAS_CONFIG=$(echo "$CHANGED_FILES" | grep -E '\.(config|json)$|eslint|tsconfig|playwright' || true)
+HAS_COMPONENTS=$(echo "$CHANGED_FILES" | grep 'components/' || true)
+HAS_ACTIONS=$(echo "$CHANGED_FILES" | grep 'actions/' || true)
+HAS_TESTS=$(echo "$CHANGED_FILES" | grep -E '\.test\.|__tests__|e2e/' || true)
+HAS_SCHEMA=$(echo "$CHANGED_FILES" | grep 'schema' || true)
+HAS_API=$(echo "$CHANGED_FILES" | grep 'api/' || true)
+HAS_LIB=$(echo "$CHANGED_FILES" | grep 'lib/' || true)
+
+# Count directories affected
+DIR_COUNT=$(echo "$CHANGED_FILES" | xargs -n1 dirname | sort -u | wc -l | tr -d ' ')
+
+# Classify complexity
+if [ $CHANGED_COUNT -le 5 ] && [ -n "$HAS_CONFIG" ] && [ -z "$HAS_COMPONENTS" ] && [ -z "$HAS_API" ]; then
+  COMPLEXITY="SIMPLE"
+  AGENTS=(security architecture best-practices)  # 3 agents
+  echo "📊 Complexity: SIMPLE (config/docs only)"
+
+elif [ $CHANGED_COUNT -le 15 ] && [ $DIR_COUNT -le 3 ]; then
+  COMPLEXITY="MEDIUM"
+  AGENTS=(security quality architecture tests typescript best-practices)  # 6 agents
+  echo "📊 Complexity: MEDIUM (focused feature)"
+
+else
+  COMPLEXITY="COMPLEX"
+  AGENTS=(security quality architecture reusability tests ui-ux performance mobile typescript best-practices)  # All 10
+  echo "📊 Complexity: COMPLEX (major change)"
+fi
+
+echo "🔧 Running ${#AGENTS[@]} review agents: ${AGENTS[*]}"
+```
+
+#### Agent Selection Rules
+
+| Complexity | File Count | Directories | Agents | Use Cases |
+|------------|------------|-------------|---------|-----------|
+| **SIMPLE** | ≤5 files | 1-2 dirs | 3-4 agents | Config changes, docs, simple refactors |
+| **MEDIUM** | ≤15 files | ≤3 dirs | 6-7 agents | Feature additions, API updates, multi-file changes |
+| **COMPLEX** | >15 files | >3 dirs | All 10 agents | Architecture changes, major features, cross-cutting |
+
+**Agent Priority Tiers**:
+- **Tier 1** (Always run): security, architecture, best-practices
+- **Tier 2** (Medium+): quality, tests, typescript
+- **Tier 3** (Complex only): reusability, ui-ux, performance, mobile
+
 ### Quick Execution
 
 ```bash
