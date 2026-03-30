@@ -21,6 +21,61 @@ Transform high-level user requirements into detailed, actionable specifications 
 
 ## Process
 
+### Step 0: Classify Requirement Complexity
+
+Before grooming, detect complexity to determine appropriate depth and skip unnecessary work:
+
+```bash
+# Read requirement file
+INPUT_FILE="$1"  # Path to requirement in inbox/
+REQ_CONTENT=$(cat "$INPUT_FILE")
+
+# Token estimation (rough: word count * 1.5)
+TOKEN_EST=$(echo "$REQ_CONTENT" | wc -w | awk '{print int($1 * 1.5)}')
+
+# Detect requirement type by keywords
+TYPE=""
+if echo "$REQ_CONTENT" | grep -qi "config\|eslint\|tsconfig\|playwright\|build"; then
+  TYPE="config"
+elif echo "$REQ_CONTENT" | grep -qi "sort\|filter\|search\|export\|import\|list"; then
+  TYPE="simple_feature"
+elif echo "$REQ_CONTENT" | grep -qi "notification\|schedule\|webhook\|email\|cron\|queue"; then
+  TYPE="complex_infrastructure"
+elif echo "$REQ_CONTENT" | grep -qi "auth\|login\|permission\|security"; then
+  TYPE="security"
+fi
+
+# Classify complexity based on token estimate and type
+if [ "$TYPE" = "config" ] || [ $TOKEN_EST -lt 15000 ]; then
+  COMPLEXITY="SIMPLE"
+  APPROACHES_COUNT=2
+  EDGE_CASE_DEPTH="template"
+  SKIP_WEBFETCH="true"
+  echo "📊 Complexity: SIMPLE (config or <15K tokens)"
+
+elif [ $TOKEN_EST -lt 40000 ]; then
+  COMPLEXITY="MEDIUM"
+  APPROACHES_COUNT=2
+  EDGE_CASE_DEPTH="systematic"
+  SKIP_WEBFETCH="conditional"  # Check cache first
+  echo "📊 Complexity: MEDIUM (15-40K tokens)"
+
+else
+  COMPLEXITY="COMPLEX"
+  APPROACHES_COUNT=3
+  EDGE_CASE_DEPTH="comprehensive"
+  SKIP_WEBFETCH="false"  # Always research
+  echo "📊 Complexity: COMPLEX (>40K tokens or infrastructure)"
+fi
+
+echo "🔧 Approaches: $APPROACHES_COUNT, Edge cases: $EDGE_CASE_DEPTH, WebFetch: $SKIP_WEBFETCH"
+```
+
+**Complexity Thresholds**:
+- **SIMPLE**: Config changes, documentation, <15K tokens estimated
+- **MEDIUM**: Standard features, UI updates, 15-40K tokens
+- **COMPLEX**: Infrastructure, security, integrations, >40K tokens
+
 ### Step 1: Read and Analyze Original Requirement
 
 Read the requirement file from `inbox/` directory. Extract:
@@ -28,38 +83,181 @@ Read the requirement file from `inbox/` directory. Extract:
 - **Explicit constraints**: Any mentioned deadlines, technologies, or limitations
 - **Implicit assumptions**: What the user might be assuming but didn't state
 
-### Step 2: Research Best Practices
+### Step 2: Research Best Practices (CONDITIONAL)
 
-Use WebFetch to research relevant best practices for the type of feature requested. Focus on:
-- Next.js 15 App Router patterns
-- React 19 best practices
-- Prisma ORM patterns
-- Testing strategies for this type of feature
+**Only run WebFetch if:**
+- Complexity is MEDIUM or COMPLEX
+- Feature type is NOVEL (not cached)
+- No similar requirement found in memory
+
+```bash
+if [ "$SKIP_WEBFETCH" = "true" ]; then
+  echo "⏭️  Skipping WebFetch (simple requirement, using cached patterns)"
+
+  # Use cached patterns and CLAUDE.md instead
+  BEST_PRACTICES="Use patterns from CLAUDE.md:
+- Next.js 15 App Router with Server Actions
+- React 19 Server Components
+- Prisma ORM with proper types
+- 90%+ test coverage
+- Tailwind CSS 4 for styling"
+
+elif [ "$SKIP_WEBFETCH" = "conditional" ]; then
+  # Check cache first
+  CACHE_FILE=".claude/workflows/learning/patterns/best-practices-cache.json"
+
+  # Ensure cache file exists
+  if [ ! -f "$CACHE_FILE" ]; then
+    echo '{}' > "$CACHE_FILE"
+  fi
+
+  # Detect feature type for cache lookup
+  FEATURE_TYPE="$TYPE"  # From Step 0
+
+  # Try to get cached best practices
+  CACHED=$(jq -r ".\"$FEATURE_TYPE\" // empty" "$CACHE_FILE" 2>/dev/null)
+
+  if [ -n "$CACHED" ] && [ "$CACHED" != "null" ]; then
+    echo "📦 Using cached best practices for $FEATURE_TYPE"
+    BEST_PRACTICES="$CACHED"
+  else
+    echo "🌐 Fetching best practices (novel feature type: $FEATURE_TYPE)..."
+
+    # Use WebFetch to research
+    # Focus on: Next.js 15, React 19, Prisma, testing strategies
+    # [Existing WebFetch logic here]
+
+    # Cache results for future use
+    ESCAPED_PRACTICES=$(echo "$BEST_PRACTICES" | jq -Rs .)
+    jq ".\"$FEATURE_TYPE\" = $ESCAPED_PRACTICES" "$CACHE_FILE" > tmp.json && mv tmp.json "$CACHE_FILE"
+    echo "💾 Cached best practices for future $FEATURE_TYPE requirements"
+  fi
+
+else
+  # COMPLEX: Always research (novel infrastructure/security patterns)
+  echo "🌐 Researching best practices (complex requirement)..."
+  # [Existing WebFetch logic]
+fi
+```
 
 **Do not** waste time on generic advice. Look for specific patterns applicable to this codebase.
 
-### Step 3: Brainstorm Implementation Approaches
+**Cache location**: `.claude/workflows/learning/patterns/best-practices-cache.json`
 
-Generate 2-3 distinct implementation approaches. For each:
-- **Description**: How would this work?
-- **Pros**: Why is this good?
-- **Cons**: What are the trade-offs?
-- **Token estimate**: Rough estimate of implementation complexity
+### Steps 3-4: Parallel Analysis (Implementation Approaches + Edge Cases)
 
-Choose approaches that balance:
-- Code maintainability
-- Performance
-- Token efficiency
-- Alignment with existing codebase patterns
+Run approach brainstorming and edge case identification **in parallel** to save time:
 
-### Step 4: Identify Edge Cases
+```bash
+# Run both steps concurrently
+(
+  # Step 3: Brainstorm implementation approaches
+  echo "🧠 Brainstorming $APPROACHES_COUNT approach(es)..."
 
-Think through edge cases that the user might not have considered:
-- **Data validation**: What invalid inputs could break this?
-- **State management**: What happens with concurrent updates?
-- **Error handling**: What could go wrong?
-- **Security**: Are there injection risks, authorization issues?
-- **Performance**: Will this scale with 100+ colleges?
+  # Generate approaches based on APPROACHES_COUNT
+  # For each approach:
+  # - Description: How it works
+  # - Pros/Cons: Trade-offs
+  # - Token estimate: Implementation complexity
+  #
+  # Balance: maintainability, performance, token efficiency, codebase alignment
+
+  # Save to temporary file
+  cat > /tmp/approaches-$$.md << 'EOF'
+[Generated approaches based on $APPROACHES_COUNT]
+EOF
+) &
+APPROACHES_PID=$!
+
+(
+  # Step 4: Identify edge cases
+  echo "🔍 Identifying edge cases (depth: $EDGE_CASE_DEPTH)..."
+
+  if [ "$EDGE_CASE_DEPTH" = "template" ]; then
+    # Use template for SIMPLE requirements
+    cat > /tmp/edge-cases-$$.md << 'EOF'
+### Data Validation
+- Empty/null inputs
+- Invalid data types
+
+### Security
+- Authorization checks
+- Input sanitization
+
+### Performance
+- Acceptable for <100 records
+EOF
+
+  elif [ "$EDGE_CASE_DEPTH" = "systematic" ]; then
+    # Systematic analysis for MEDIUM requirements
+    cat > /tmp/edge-cases-$$.md << 'EOF'
+### Data Validation
+- [Specific invalid inputs for this feature]
+- [Boundary conditions]
+
+### State Management
+- [Concurrent update scenarios]
+
+### Error Handling
+- [Failure modes]
+
+### Security
+- [Injection risks]
+- [Authorization requirements]
+
+### Performance
+- [Scaling considerations for 100+ colleges]
+EOF
+
+  else
+    # Comprehensive analysis for COMPLEX requirements
+    cat > /tmp/edge-cases-$$.md << 'EOF'
+### Data Validation
+- [Comprehensive input validation scenarios]
+- [Data type edge cases]
+- [Boundary and limit conditions]
+
+### State Management
+- [Concurrent updates and race conditions]
+- [State consistency across components]
+
+### Error Handling
+- [All failure modes and recovery]
+- [Graceful degradation]
+
+### Security
+- [Injection risks (SQL, XSS, etc.)]
+- [Authorization and authentication]
+- [Data exposure and privacy]
+
+### Performance
+- [Scaling with data size]
+- [Database query optimization]
+- [Caching strategies]
+
+### Reliability
+- [Retry logic for failures]
+- [Monitoring and alerting]
+EOF
+  fi
+) &
+EDGE_CASES_PID=$!
+
+# Wait for both parallel processes to complete
+wait $APPROACHES_PID
+wait $EDGE_CASES_PID
+
+# Read results
+APPROACHES=$(cat /tmp/approaches-$$.md)
+EDGE_CASES=$(cat /tmp/edge-cases-$$.md)
+
+# Clean up temp files
+rm -f /tmp/approaches-$$.md /tmp/edge-cases-$$.md
+
+echo "✅ Parallel analysis complete"
+```
+
+**Time Savings**: Running Steps 3-4 in parallel saves ~2-3 minutes compared to sequential execution.
 
 ### Step 5: Define Acceptance Criteria
 
@@ -90,7 +288,63 @@ If similar requirements were handled before:
 
 ### Step 7: Write Groomed Requirement
 
-Save to `.claude/workflows/requirements/groomed/[original-filename]` with this structure:
+Output format depends on complexity:
+
+#### For SIMPLE/MEDIUM Requirements: Streamlined Single-File Format
+
+Save to `.claude/workflows/requirements/groomed/[original-filename]`:
+
+```markdown
+# Requirement: [Descriptive Title]
+
+## Original Request
+[User's original text, unchanged]
+
+## Groomed Specification
+
+[Concise detailed specification with context]
+
+**Complexity**: ${COMPLEXITY}
+**Token Budget**: ~[X]K tokens
+
+### Context
+- **Affected areas**: [List files/components that will change]
+- **Dependencies**: [Any new packages needed]
+- **Related features**: [Existing features this builds on]
+
+### Implementation Approach
+
+[Single recommended approach for SIMPLE, 2 approaches for MEDIUM]
+
+**Recommended**: [Approach name] because [brief reasoning]
+
+**Token Estimate**: ~[X]K tokens
+
+### Edge Cases & Validation
+
+${EDGE_CASES}
+
+### Acceptance Criteria
+
+- [ ] [Specific testable criterion 1]
+- [ ] [Specific testable criterion 2]
+- [ ] All tests pass with 90%+ coverage
+- [ ] No linter errors
+
+### Test Scenarios
+
+1. **Happy path**: [Description]
+2. **Edge case**: [Description]
+3. **Error case**: [Description]
+
+### References
+- [Link to relevant CLAUDE.md sections]
+- [Link to similar past features if applicable]
+```
+
+#### For COMPLEX Requirements: Comprehensive Structured Format
+
+Save to `.claude/workflows/requirements/groomed/[original-filename]` with full structure:
 
 ```markdown
 # Requirement: [Descriptive Title]
@@ -187,10 +441,13 @@ Before finalizing, verify:
 
 ## Gotchas
 
-- **Don't over-engineer**: Match detail level to complexity. Simple features don't need exhaustive analysis.
+- **Don't over-engineer**: Complexity detection (Step 0) automatically matches depth to requirement. Trust it, but use judgment if edge cases warrant deeper analysis.
 - **Don't repeat CLAUDE.md**: Reference it, don't copy its content.
 - **Don't ignore memory**: Past mistakes documented in feedback memories are critical.
-- **Don't guess best practices**: Use WebFetch to verify current patterns, especially for Next.js 15.
+- **Don't force WebFetch**: For SIMPLE requirements (config, <15K tokens), skip WebFetch entirely. Use CLAUDE.md and cached patterns.
+- **Don't misclassify complexity**: When in doubt about SIMPLE vs MEDIUM, err on the side of MEDIUM (safer to over-analyze than under-analyze).
+- **Check cache first**: Before WebFetch on MEDIUM requirements, always check `.claude/workflows/learning/patterns/best-practices-cache.json` for cached results.
+- **Manual override**: If requirement seems misclassified, manually adjust COMPLEXITY variable and proceed accordingly.
 
 ## Example Usage
 
