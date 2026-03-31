@@ -3,19 +3,21 @@
  */
 
 // Polyfill Web APIs before importing Next.js modules
+/* eslint-disable no-undef */
 import { TextDecoder, TextEncoder } from "util";
-global.TextDecoder = TextDecoder as typeof global.TextDecoder;
-global.TextEncoder = TextEncoder as typeof global.TextEncoder;
+(global as typeof globalThis).TextDecoder = TextDecoder as typeof global.TextDecoder;
+(global as typeof globalThis).TextEncoder = TextEncoder as typeof global.TextEncoder;
 
 // Mock Next.js server before route import to avoid Request/Response issues
 jest.mock("next/server", () => ({
   NextResponse: {
-    json: (body: unknown, init?: ResponseInit) => ({
+    json: (body: unknown, init?: { status?: number }) => ({
       status: init?.status || 200,
       json: async () => body,
     }),
   },
 }));
+/* eslint-enable no-undef */
 
 import { POST } from "../route";
 import { db } from "@/lib/db";

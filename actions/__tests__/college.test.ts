@@ -36,8 +36,6 @@ jest.mock('@/lib/auth', () => ({
   getCurrentUserId: jest.fn().mockResolvedValue('test-user-123'),
 }));
 
-const TEST_USER_ID = 'test-user-123';
-
 const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('Server Actions - college.ts', () => {
