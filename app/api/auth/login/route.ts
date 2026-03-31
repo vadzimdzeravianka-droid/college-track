@@ -14,15 +14,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid passkey" }, { status: 401 });
     }
 
-    // Find user by verifying passkey against each hashed passkey
-    let authenticatedUser = null;
-    for (const user of users) {
-      const isValid = await verifyPasskey(passkey, user.hashedPasskey);
-      if (isValid) {
-        authenticatedUser = user;
-        break;
-      }
-    }
+    // Verify passkey against all users in constant time to prevent timing attacks
+    const verificationPromises = users.map(async (user) => ({
+      user,
+      isValid: await verifyPasskey(passkey, user.hashedPasskey),
+    }));
+    const results = await Promise.all(verificationPromises);
+    const authenticatedUser = results.find((r) => r.isValid)?.user || null;
 
     if (!authenticatedUser) {
       return NextResponse.json({ error: "Invalid passkey" }, { status: 401 });
