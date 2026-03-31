@@ -13,7 +13,10 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed-users": "ts-node lib/seed-users.ts",
+    "hash-passkey": "./scripts/hash-passkey.sh",
+    "migrate-add-users": "ts-node scripts/migrate-add-users.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -29,6 +32,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -48,6 +52,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/bcrypt": "^6.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
