@@ -16,6 +16,7 @@ jest.mock('@/lib/db', () => ({
     college: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
@@ -30,6 +31,14 @@ jest.mock('@/lib/db', () => ({
 jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));
+
+// Mock auth to return test user ID
+jest.mock('@/lib/auth', () => ({
+  requireAuth: jest.fn().mockResolvedValue('test-user-123'),
+  getCurrentUserId: jest.fn().mockResolvedValue('test-user-123'),
+}));
+
+const TEST_USER_ID = 'test-user-123';
 
 // Mock console.error to avoid noise in test output
 const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
