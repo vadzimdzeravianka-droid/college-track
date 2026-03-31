@@ -1,3 +1,22 @@
+/**
+ * @jest-environment node
+ */
+
+// Polyfill Web APIs before importing Next.js modules
+import { TextDecoder, TextEncoder } from "util";
+global.TextDecoder = TextDecoder as typeof global.TextDecoder;
+global.TextEncoder = TextEncoder as typeof global.TextEncoder;
+
+// Mock Next.js server before route import to avoid Request/Response issues
+jest.mock("next/server", () => ({
+  NextResponse: {
+    json: (body: unknown, init?: ResponseInit) => ({
+      status: init?.status || 200,
+      json: async () => body,
+    }),
+  },
+}));
+
 import { POST } from "../route";
 import { db } from "@/lib/db";
 import { hashPasskey } from "@/lib/auth";
