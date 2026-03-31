@@ -126,12 +126,18 @@ npm run create-user "arseni" "Arseni123"
 # Create with custom env file
 npm run create-user "test-user" "test123" ".env"
 
+# Passkey with special characters (use single quotes!)
+npm run create-user 'arseni' 'Arseni123!'
+npm run create-user 'mom' 'My$ecr3t!'
+
 # What it does:
 # 1. Hashes passkey with bcrypt
 # 2. Checks if passkey already exists (prevents duplicates)
 # 3. Creates user if passkey is unique
 # 4. FAILS if passkey already used by another user
 ```
+
+**💡 Tip**: Use **single quotes** for passkeys with special characters (`!`, `$`, `\`, etc.) to prevent shell interpretation.
 
 **Why this matters**: Bcrypt generates different hashes for the same passkey (unique salts), so database `@unique` constraint on `hashedPasskey` doesn't prevent duplicate passkeys. The `create-user` script verifies passkey uniqueness at the application level.
 

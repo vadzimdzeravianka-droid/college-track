@@ -18,7 +18,16 @@ npm run create-user "arseni" "Arseni123"
 
 # Create user with custom env file
 npm run create-user "test-user" "test123" ".env"
+
+# Passkey with special characters (use single quotes!)
+npm run create-user 'arseni' 'Arseni123!'
+npm run create-user 'mom' 'My$ecr3t!'
+
+# Alternative: escape special characters
+npm run create-user "arseni" "Arseni123\!"
 ```
+
+**💡 Tip**: Use **single quotes** for passkeys with special characters (`!`, `$`, `\`, etc.) to prevent shell interpretation.
 
 ### What It Does
 
