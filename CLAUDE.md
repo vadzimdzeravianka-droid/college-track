@@ -109,39 +109,55 @@ npx prisma db push
 npx prisma studio
 
 # User Management
-npm run seed-users              # Seed initial 3 users (test123, Arseni123, AnyOtherPasscode1)
-npm run hash-passkey <passkey>  # Generate bcrypt hash for a passkey
-npm run migrate-add-users       # Data migration: create default user and assign colleges
+npm run create-user <username> <passkey>  # ✅ RECOMMENDED: Create user with uniqueness check
+npm run seed-users                        # Seed initial 3 users (test123, Arseni123, AnyOtherPasscode1)
+npm run hash-passkey <passkey>            # Generate bcrypt hash for a passkey
+npm run migrate-add-users                 # Data migration: create default user and assign colleges
 ```
 
-### Managing User Passkeys
+### Creating/Managing Users (Recommended Method)
 
-To update or add user passkeys:
+**Use `create-user` for all user creation** - it ensures passkey uniqueness:
+
+```bash
+# Create new user
+npm run create-user "arseni" "Arseni123"
+
+# Create with custom env file
+npm run create-user "test-user" "test123" ".env"
+
+# What it does:
+# 1. Hashes passkey with bcrypt
+# 2. Checks if passkey already exists (prevents duplicates)
+# 3. Creates user if passkey is unique
+# 4. FAILS if passkey already used by another user
+```
+
+**Why this matters**: Bcrypt generates different hashes for the same passkey (unique salts), so database `@unique` constraint on `hashedPasskey` doesn't prevent duplicate passkeys. The `create-user` script verifies passkey uniqueness at the application level.
+
+### Alternative Methods (Legacy/Optional)
 
 **Option 1: Prisma Studio (GUI)**
 ```bash
 npx prisma studio
 # Navigate to 'users' table
 # Edit hashedPasskey field directly
-# Use `npm run hash-passkey <new-passkey>` to generate new hash
+# ⚠️ Warning: Doesn't check for duplicate passkeys
 ```
 
 **Option 2: Generate Hash and Update Manually**
 ```bash
-# 1. Generate hash
-export PASSKEY_HASH_SECRET="your-secret-from-env"
 npm run hash-passkey "newPasscode123"
-
-# 2. Copy the hash output
-# 3. Update in Prisma Studio or via SQL:
-#    UPDATE users SET hashed_passkey = '<hash>' WHERE name = 'User Name';
+# Copy the hash output
+# Update in Prisma Studio
+# ⚠️ Warning: Doesn't check for duplicate passkeys
 ```
 
-**Option 3: Update Seed Script**
+**Option 3: Seed Script (Development)**
 ```bash
-# 1. Edit lib/seed-users.ts with new users/passkeys
-# 2. Run: npm run seed-users
-# 3. Script will upsert (create or update) users
+npm run seed-users
+# Creates 3 hardcoded users
+# ⚠️ Warning: Doesn't check for duplicate passkeys
 ```
 
 ## Environment Setup

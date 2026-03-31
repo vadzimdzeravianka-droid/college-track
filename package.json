@@ -14,9 +14,10 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "postinstall": "prisma generate",
-    "seed-users": "ts-node lib/seed-users.ts",
+    "create-user": "tsx scripts/create-user.ts",
+    "seed-users": "tsx lib/seed-users.ts",
     "hash-passkey": "./scripts/hash-passkey.sh",
-    "migrate-add-users": "ts-node scripts/migrate-add-users.ts"
+    "migrate-add-users": "tsx scripts/migrate-add-users.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -65,6 +66,7 @@
     "prisma": "^6.6.0",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.0",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
