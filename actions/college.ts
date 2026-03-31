@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { CollegeSchema, ChecklistSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/auth";
 import * as z from "zod";
 
 // Helper to convert Decimal to number for Client Components
@@ -21,7 +22,10 @@ function serializeCollege(college: any): any {
 
 export async function getColleges() {
   try {
+    const userId = await requireAuth();
+
     const colleges = await db.college.findMany({
+      where: { userId },
       include: {
         checklist: true,
       },
@@ -45,12 +49,15 @@ export async function getColleges() {
 
 export async function getCollegeById(id: string) {
   try {
-    const college = await db.college.findUnique({
-      where: { id },
+    const userId = await requireAuth();
+
+    const college = await db.college.findFirst({
+      where: { id, userId },
       include: {
         checklist: true,
       },
     });
+
     if (!college) {
       return { error: "College not found" };
     }
@@ -71,11 +78,13 @@ export async function createCollege(values: z.infer<typeof CollegeSchema>) {
   }
 
   try {
+    const userId = await requireAuth();
     const { deadlineApp, deadlineFinaid, ...rest } = validatedFields.data;
 
     const college = await db.college.create({
       data: {
         ...rest,
+        userId,
         deadlineApp: deadlineApp ? new Date(deadlineApp) : null,
         deadlineFinaid: deadlineFinaid ? new Date(deadlineFinaid) : null,
         checklist: {
@@ -103,6 +112,17 @@ export async function updateCollege(
   values: Partial<z.infer<typeof CollegeSchema>>
 ) {
   try {
+    const userId = await requireAuth();
+
+    // Verify ownership before updating
+    const existing = await db.college.findFirst({
+      where: { id, userId },
+    });
+
+    if (!existing) {
+      return { error: "College not found or unauthorized" };
+    }
+
     const { deadlineApp, deadlineFinaid, ...rest } = values;
 
     const college = await db.college.update({
@@ -127,6 +147,17 @@ export async function updateCollege(
 
 export async function deleteCollege(id: string) {
   try {
+    const userId = await requireAuth();
+
+    // Verify ownership before deleting
+    const existing = await db.college.findFirst({
+      where: { id, userId },
+    });
+
+    if (!existing) {
+      return { error: "College not found or unauthorized" };
+    }
+
     await db.college.delete({
       where: { id },
     });
@@ -143,6 +174,17 @@ export async function updateCollegeStatus(
   status: "NOT_STARTED" | "IN_PROGRESS" | "SUBMITTED" | "WAITLISTED" | "ACCEPTED" | "DECLINED"
 ) {
   try {
+    const userId = await requireAuth();
+
+    // Verify ownership before updating
+    const existing = await db.college.findFirst({
+      where: { id, userId },
+    });
+
+    if (!existing) {
+      return { error: "College not found or unauthorized" };
+    }
+
     const college = await db.college.update({
       where: { id },
       data: { status },
@@ -162,13 +204,16 @@ export async function updateChecklist(
   values: Partial<z.infer<typeof ChecklistSchema>>
 ) {
   try {
-    const college = await db.college.findUnique({
-      where: { id: collegeId },
+    const userId = await requireAuth();
+
+    // Verify ownership before updating checklist
+    const college = await db.college.findFirst({
+      where: { id: collegeId, userId },
       include: { checklist: true },
     });
 
     if (!college) {
-      return { error: "College not found" };
+      return { error: "College not found or unauthorized" };
     }
 
     let updatedChecklist;
