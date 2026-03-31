@@ -109,68 +109,15 @@ npx prisma db push
 npx prisma studio
 
 # User Management
-npm run create-user <username> <passkey>  # ✅ RECOMMENDED: Create user with uniqueness check
-npm run seed-users                        # Seed initial 3 users (test123, Arseni123, AnyOtherPasscode1)
-npm run hash-passkey <passkey>            # Generate bcrypt hash for a passkey
-npm run migrate-add-users                 # Data migration: create default user and assign colleges
+npm run create-user <username> <passkey>  # Create user with passkey uniqueness check
 ```
 
-### Creating/Managing Users (Recommended Method)
-
-**Use `create-user` for all user creation** - it ensures passkey uniqueness:
-
-```bash
-# Create new user
-npm run create-user "arseni" "Arseni123"
-
-# Create with custom env file
-npm run create-user "test-user" "test123" ".env"
-
-# Passkey with special characters (use single quotes!)
-npm run create-user 'arseni' 'Arseni123!'
-npm run create-user 'mom' 'My$ecr3t!'
-
-# What it does:
-# 1. Hashes passkey with bcrypt
-# 2. Checks if passkey already exists (prevents duplicates)
-# 3. Creates user if passkey is unique
-# 4. FAILS if passkey already used by another user
-```
-
-**💡 Tip**: Use **single quotes** for passkeys with special characters (`!`, `$`, `\`, etc.) to prevent shell interpretation.
-
-**Why this matters**: Bcrypt generates different hashes for the same passkey (unique salts), so database `@unique` constraint on `hashedPasskey` doesn't prevent duplicate passkeys. The `create-user` script verifies passkey uniqueness at the application level.
-
-### Alternative Methods (Legacy/Optional)
-
-**Option 1: Prisma Studio (GUI)**
-```bash
-npx prisma studio
-# Navigate to 'users' table
-# Edit hashedPasskey field directly
-# ⚠️ Warning: Doesn't check for duplicate passkeys
-```
-
-**Option 2: Generate Hash and Update Manually**
-```bash
-npm run hash-passkey "newPasscode123"
-# Copy the hash output
-# Update in Prisma Studio
-# ⚠️ Warning: Doesn't check for duplicate passkeys
-```
-
-**Option 3: Seed Script (Development)**
-```bash
-npm run seed-users
-# Creates 3 hardcoded users
-# ⚠️ Warning: Doesn't check for duplicate passkeys
-```
+See README.md for detailed user management instructions.
 
 ## Environment Setup
 
 Required environment variables in `.env.local`:
 - `POSTGRES_PRISMA_URL` - Supabase/PostgreSQL connection string
-- `APP_PASSKEY` - Default user passkey (used for migration)
 - `PASSKEY_HASH_SECRET` - Secret for password hashing (pepper). Generate with: `openssl rand -hex 32`
 
 ## Architecture

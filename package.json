@@ -14,10 +14,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "postinstall": "prisma generate",
-    "create-user": "tsx scripts/create-user.ts",
-    "seed-users": "tsx lib/seed-users.ts",
-    "hash-passkey": "./scripts/hash-passkey.sh",
-    "migrate-add-users": "tsx scripts/migrate-add-users.ts"
+    "create-user": "tsx scripts/create-user.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

@@ -10,7 +10,6 @@ import {
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
-// Mock dependencies
 jest.mock('@/lib/db', () => ({
   db: {
     college: {
@@ -32,7 +31,6 @@ jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));
 
-// Mock auth to return test user ID
 jest.mock('@/lib/auth', () => ({
   requireAuth: jest.fn().mockResolvedValue('test-user-123'),
   getCurrentUserId: jest.fn().mockResolvedValue('test-user-123'),
@@ -40,7 +38,6 @@ jest.mock('@/lib/auth', () => ({
 
 const TEST_USER_ID = 'test-user-123';
 
-// Mock console.error to avoid noise in test output
 const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('Server Actions - college.ts', () => {

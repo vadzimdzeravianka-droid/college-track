@@ -6,9 +6,8 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
 import * as z from "zod";
 
-// Helper to convert Decimal to number for Client Components
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeCollege(college: any): any {
+function convertDecimalFieldsForClient(college: any): any {
   return {
     ...college,
     costTuition: college.costTuition ? Number(college.costTuition) : college.costTuition,
@@ -34,10 +33,7 @@ export async function getColleges() {
       },
     });
 
-    // Serialize Decimal fields to numbers for Client Components
-    const serializedColleges = colleges.map(serializeCollege);
-
-    return { colleges: serializedColleges };
+    return { colleges: colleges.map(convertDecimalFieldsForClient) };
   } catch (error) {
     console.error("Get colleges error:", error);
     return {
@@ -62,10 +58,7 @@ export async function getCollegeById(id: string) {
       return { error: "College not found" };
     }
 
-    // Serialize Decimal fields to numbers for Client Components
-    const serializedCollege = serializeCollege(college);
-
-    return { college: serializedCollege };
+    return { college: convertDecimalFieldsForClient(college) };
   } catch (_error) {
     return { error: "Failed to fetch college" };
   }
@@ -114,7 +107,6 @@ export async function updateCollege(
   try {
     const userId = await requireAuth();
 
-    // Verify ownership before updating
     const existing = await db.college.findFirst({
       where: { id, userId },
     });
@@ -149,7 +141,6 @@ export async function deleteCollege(id: string) {
   try {
     const userId = await requireAuth();
 
-    // Verify ownership before deleting
     const existing = await db.college.findFirst({
       where: { id, userId },
     });
@@ -176,7 +167,6 @@ export async function updateCollegeStatus(
   try {
     const userId = await requireAuth();
 
-    // Verify ownership before updating
     const existing = await db.college.findFirst({
       where: { id, userId },
     });
@@ -206,7 +196,6 @@ export async function updateChecklist(
   try {
     const userId = await requireAuth();
 
-    // Verify ownership before updating checklist
     const college = await db.college.findFirst({
       where: { id: collegeId, userId },
       include: { checklist: true },
