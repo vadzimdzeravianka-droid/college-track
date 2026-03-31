@@ -107,13 +107,49 @@ npx prisma db push
 
 # Open Prisma Studio (database GUI)
 npx prisma studio
+
+# User Management
+npm run seed-users              # Seed initial 3 users (test123, Arseni123, AnyOtherPasscode1)
+npm run hash-passkey <passkey>  # Generate bcrypt hash for a passkey
+npm run migrate-add-users       # Data migration: create default user and assign colleges
+```
+
+### Managing User Passkeys
+
+To update or add user passkeys:
+
+**Option 1: Prisma Studio (GUI)**
+```bash
+npx prisma studio
+# Navigate to 'users' table
+# Edit hashedPasskey field directly
+# Use `npm run hash-passkey <new-passkey>` to generate new hash
+```
+
+**Option 2: Generate Hash and Update Manually**
+```bash
+# 1. Generate hash
+export PASSKEY_HASH_SECRET="your-secret-from-env"
+npm run hash-passkey "newPasscode123"
+
+# 2. Copy the hash output
+# 3. Update in Prisma Studio or via SQL:
+#    UPDATE users SET hashed_passkey = '<hash>' WHERE name = 'User Name';
+```
+
+**Option 3: Update Seed Script**
+```bash
+# 1. Edit lib/seed-users.ts with new users/passkeys
+# 2. Run: npm run seed-users
+# 3. Script will upsert (create or update) users
 ```
 
 ## Environment Setup
 
 Required environment variables in `.env.local`:
 - `POSTGRES_PRISMA_URL` - Supabase/PostgreSQL connection string
-- `APP_PASSKEY` - Shared passkey for authentication
+- `APP_PASSKEY` - Default user passkey (used for migration)
+- `PASSKEY_HASH_SECRET` - Secret for password hashing (pepper). Generate with: `openssl rand -hex 32`
 
 ## Architecture
 
@@ -127,19 +163,48 @@ Required environment variables in `.env.local`:
 
 ### Authentication Flow
 
+**Multi-User System with Password Hashing**:
+
 Middleware (`middleware.ts`) enforces authentication:
-1. Checks for `is_authorized=true` cookie
+1. Checks for `user_id` cookie (primary) or `is_authorized=true` (fallback)
 2. Redirects to `/login` if missing
 3. Public routes defined in `routes.ts`
 
-No user accounts - single shared passkey stored in environment variable.
+Login process (`app/api/auth/login/route.ts`):
+1. User submits passkey via login form
+2. Server queries all users from database
+3. Verifies passkey against each user's hashed passkey using bcrypt
+4. On match, sets `user_id` cookie with user's ID
+5. Also sets `is_authorized` cookie for backward compatibility
+
+Password security:
+- Passkeys hashed with **bcrypt** (salt rounds = 10)
+- Automatic unique salting per password
+- **Pepper** via `PASSKEY_HASH_SECRET` env var (additional security layer)
+- Timing-safe comparison via `bcrypt.compare`
+- Plain passkeys never stored or logged
+
+Helper functions (`lib/auth.ts`):
+- `hashPasskey(passkey)` - Hash a passkey with bcrypt and pepper
+- `verifyPasskey(passkey, hash)` - Verify passkey against hash
+- `getCurrentUserId()` - Get userId from cookie (returns null if not authenticated)
+- `requireAuth()` - Get userId or throw error (use in server actions)
+
+User management:
+- Users stored in database (`User` model) with hashed passkeys
+- Each user has isolated data (colleges filtered by userId)
+- Add users via Prisma Studio or seed script
+- Generate password hashes: `npm run hash-passkey <passkey>`
+
+**Important**: All server actions in `actions/college.ts` call `requireAuth()` and filter by `userId` to ensure data isolation.
 
 ### Data Layer
 
 **Database**: PostgreSQL (Supabase) via Prisma ORM
 
 Key models:
-- `College` - Main college application entity with all details (name, category, status, strategy, deadlines, portal credentials, notes)
+- `User` - User accounts with hashed passkeys (1-to-many with colleges)
+- `College` - Main college application entity with all details (name, category, status, strategy, deadlines, portal credentials, notes). Belongs to a user via `userId` foreign key.
 - `Checklist` - 1-to-1 relationship tracking application requirements (LOR, transcripts, test scores, essays, financial aid)
 
 Enums:
@@ -150,15 +215,18 @@ Enums:
 ### Server Actions Pattern
 
 All data mutations use Next.js Server Actions (`"use server"`) in `actions/college.ts`:
-- `getColleges()` - Fetch all colleges with checklists
-- `getCollegeById(id)` - Fetch single college
-- `createCollege(values)` - Create new college entry
-- `updateCollege(id, values)` - Update college
-- `deleteCollege(id)` - Delete college
-- `updateCollegeStatus(id, status)` - Quick status update
-- `updateChecklist(collegeId, values)` - Update checklist with auto-status progression
+- `getColleges()` - Fetch colleges for current user (filtered by userId)
+- `getCollegeById(id)` - Fetch single college (ownership verified)
+- `createCollege(values)` - Create new college entry (associated with current user)
+- `updateCollege(id, values)` - Update college (ownership verified)
+- `deleteCollege(id)` - Delete college (ownership verified)
+- `updateCollegeStatus(id, status)` - Quick status update (ownership verified)
+- `updateChecklist(collegeId, values)` - Update checklist with auto-status progression (ownership verified)
 
-**Important**: Server actions automatically revalidate paths using `revalidatePath()` after mutations.
+**Important**:
+- Server actions automatically revalidate paths using `revalidatePath()` after mutations
+- All actions call `requireAuth()` to get current userId
+- All queries filter by userId or verify ownership to ensure data isolation
 
 ### Form Validation
 
