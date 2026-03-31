@@ -75,13 +75,30 @@ Rate each subtask:
 
 Total should match groomed requirement's token estimate.
 
-### Step 6: Create Ticket File
+### Step 6: Generate Ticket ID and Create Ticket File
 
-Save to `.claude/workflows/tickets/ready/[ticket-id].md`:
+**Generate unique ticket ID**:
+```bash
+TICKET_ID=$(bash .claude/workflows/scripts/generate-ticket-id.sh)
+```
+
+This generates a sequential, lexicographically-sortable ID in format `T[5 alphanumeric]`:
+- Examples: T00000, T00001, ..., T0000Z, T00010, ..., TZZZZZ
+- Uses base36 encoding (0-9A-Z) for compact representation
+- Automatically increments from highest existing ticket ID
+- Ensures unique IDs even if multiple tickets created simultaneously
+
+**Create ticket filename**: `${TICKET_ID}-[short-feature-name].md`
+- Example: `T00000-csv-export.md`
+- Keep feature name short (2-4 words, kebab-case)
+- Place in `.claude/workflows/tickets/ready/`
+
+Save to `.claude/workflows/tickets/ready/${TICKET_ID}-[short-feature-name].md`:
 
 ```markdown
 # Ticket: [Feature Name]
 
+**Ticket ID**: ${TICKET_ID}
 **Status**: READY
 **Priority**: [HIGH/MEDIUM/LOW]
 **Estimated Tokens**: [X]K
@@ -200,12 +217,30 @@ Before saving, check:
 
 ## Ticket ID Format
 
-Use semantic ID: `[FEATURE-TYPE]-[SHORT-NAME]-[YYYYMMDD]`
+**Format**: `T[5 alphanumeric]-[short-feature-name].md`
+
+The ticket ID is generated automatically by `.claude/workflows/scripts/generate-ticket-id.sh`:
+- **Prefix**: `T` (for "Ticket")
+- **Sequential ID**: 5-character base36 (0-9, A-Z) that auto-increments
+- **Lexicographic sorting**: T00000 < T00001 < ... < T0000Z < T00010 < ... < TZZZZZ
+- **Capacity**: 60M+ unique IDs (36^5 = 60,466,176)
+
+**Filename format**: `${TICKET_ID}-[short-feature-name].md`
+- Feature name: 2-4 words, kebab-case, descriptive
+- Always run script to get next ID (never hardcode)
 
 Examples:
-- `EXPORT-CSV-20260326`
-- `FILTER-STATUS-20260327`
-- `BUGFIX-DATES-20260328`
+- `T00000-csv-export.md`
+- `T00001-status-filter.md`
+- `T00002-bugfix-dates.md`
+- `T0000Z-deadline-reminders.md`
+
+**Script usage**:
+```bash
+# Generate next ticket ID
+TICKET_ID=$(bash .claude/workflows/scripts/generate-ticket-id.sh)
+echo "Creating ticket: ${TICKET_ID}-my-feature.md"
+```
 
 ## Quality Checklist
 
@@ -227,10 +262,11 @@ Examples:
 
 **Input**: Groomed requirement for CSV export
 
-**Output**:
+**Output** (saved as `T00042-csv-export.md`):
 ```markdown
 # Ticket: CSV Export for Colleges
 
+**Ticket ID**: T00042
 **Status**: READY
 **Priority**: MEDIUM
 **Estimated Tokens**: 33K
@@ -417,7 +453,8 @@ Server-side CSV generation via new API route. Chosen for security (passwords sta
 Track ticket creation patterns in `.claude/workflows/learning/patterns/ticketing-[timestamp].json`:
 ```json
 {
-  "ticket_id": "EXPORT-CSV-20260326",
+  "ticket_id": "T00042",
+  "ticket_name": "csv-export",
   "subtask_count": 4,
   "estimated_tokens": 35000,
   "actual_tokens": 32000,
