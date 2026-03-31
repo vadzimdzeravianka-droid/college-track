@@ -18,7 +18,9 @@ jest.mock('@/lib/db', () => ({
       findFirst: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     },
     checklist: {
       update: jest.fn(),
@@ -277,26 +279,25 @@ describe('Server Actions - college.ts', () => {
 
   describe('updateCollege', () => {
     it('should update college with partial data', async () => {
-      const mockExistingCollege = { id: '1', name: 'MIT' };
       const mockUpdatedCollege = {
         id: '1',
         name: 'MIT Updated',
         checklist: { id: 'c1' },
       };
 
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockExistingCollege);
-      (db.college.update as jest.Mock).mockResolvedValue(mockUpdatedCollege);
+      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockUpdatedCollege);
 
       const result = await updateCollege('1', { name: 'MIT Updated' });
 
       expect(result.success).toBe('College updated!');
       expect(result.college).toBeDefined();
+      expect(db.college.updateMany).toHaveBeenCalledWith({
+        where: { id: '1', userId: 'test-user-123' },
+        data: { name: 'MIT Updated' },
+      });
       expect(db.college.findFirst).toHaveBeenCalledWith({
         where: { id: '1', userId: 'test-user-123' },
-      });
-      expect(db.college.update).toHaveBeenCalledWith({
-        where: { id: '1' },
-        data: { name: 'MIT Updated' },
         include: { checklist: true },
       });
       expect(revalidatePath).toHaveBeenCalledWith('/dashboard');
@@ -304,11 +305,10 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should update deadline dates', async () => {
-      const mockExistingCollege = { id: '1' };
       const mockUpdatedCollege = { id: '1', checklist: null };
 
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockExistingCollege);
-      (db.college.update as jest.Mock).mockResolvedValue(mockUpdatedCollege);
+      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockUpdatedCollege);
 
       const result = await updateCollege('1', {
         deadlineApp: '2024-12-01',
@@ -316,7 +316,7 @@ describe('Server Actions - college.ts', () => {
       });
 
       expect(result.success).toBe('College updated!');
-      expect(db.college.update).toHaveBeenCalledWith(
+      expect(db.college.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             deadlineApp: expect.any(Date),
@@ -327,7 +327,7 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should return error when college not found', async () => {
-      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
+      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
 
       const result = await updateCollege('nonexistent', { name: 'Test' });
 
@@ -335,7 +335,7 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should handle database errors', async () => {
-      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.college.updateMany as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await updateCollege('1', { name: 'Test' });
 
@@ -345,23 +345,19 @@ describe('Server Actions - college.ts', () => {
 
   describe('deleteCollege', () => {
     it('should delete college successfully', async () => {
-      const mockExistingCollege = { id: '1' };
-
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockExistingCollege);
-      (db.college.delete as jest.Mock).mockResolvedValue({ id: '1' });
+      (db.college.deleteMany as jest.Mock).mockResolvedValue({ count: 1 });
 
       const result = await deleteCollege('1');
 
       expect(result.success).toBe('College deleted!');
-      expect(db.college.findFirst).toHaveBeenCalledWith({
+      expect(db.college.deleteMany).toHaveBeenCalledWith({
         where: { id: '1', userId: 'test-user-123' },
       });
-      expect(db.college.delete).toHaveBeenCalledWith({ where: { id: '1' } });
       expect(revalidatePath).toHaveBeenCalledWith('/dashboard');
     });
 
     it('should return error when college not found', async () => {
-      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
+      (db.college.deleteMany as jest.Mock).mockResolvedValue({ count: 0 });
 
       const result = await deleteCollege('nonexistent');
 
@@ -369,7 +365,7 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should handle database errors', async () => {
-      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.college.deleteMany as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await deleteCollege('1');
 
@@ -379,26 +375,25 @@ describe('Server Actions - college.ts', () => {
 
   describe('updateCollegeStatus', () => {
     it('should update status successfully', async () => {
-      const mockExistingCollege = { id: '1', status: 'NOT_STARTED' };
       const mockUpdatedCollege = {
         id: '1',
         status: 'IN_PROGRESS',
         checklist: { id: 'c1' },
       };
 
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockExistingCollege);
-      (db.college.update as jest.Mock).mockResolvedValue(mockUpdatedCollege);
+      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockUpdatedCollege);
 
       const result = await updateCollegeStatus('1', 'IN_PROGRESS');
 
       expect(result.success).toBe('Status updated!');
       expect(result.college).toBeDefined();
+      expect(db.college.updateMany).toHaveBeenCalledWith({
+        where: { id: '1', userId: 'test-user-123' },
+        data: { status: 'IN_PROGRESS' },
+      });
       expect(db.college.findFirst).toHaveBeenCalledWith({
         where: { id: '1', userId: 'test-user-123' },
-      });
-      expect(db.college.update).toHaveBeenCalledWith({
-        where: { id: '1' },
-        data: { status: 'IN_PROGRESS' },
         include: { checklist: true },
       });
       expect(revalidatePath).toHaveBeenCalledWith('/college/1');
@@ -409,8 +404,8 @@ describe('Server Actions - college.ts', () => {
       const statuses = ['NOT_STARTED', 'IN_PROGRESS', 'SUBMITTED', 'WAITLISTED', 'ACCEPTED', 'DECLINED'] as const;
 
       for (const status of statuses) {
-        (db.college.findFirst as jest.Mock).mockResolvedValue({ id: '1', status: 'NOT_STARTED' });
-        (db.college.update as jest.Mock).mockResolvedValue({ id: '1', status, checklist: null });
+        (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
+        (db.college.findFirst as jest.Mock).mockResolvedValue({ id: '1', status, checklist: null });
 
         const result = await updateCollegeStatus('1', status);
 
@@ -420,7 +415,7 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should return error when college not found', async () => {
-      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
+      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
 
       const result = await updateCollegeStatus('1', 'SUBMITTED');
 
@@ -428,7 +423,7 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should handle database errors', async () => {
-      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.college.updateMany as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await updateCollegeStatus('1', 'SUBMITTED');
 

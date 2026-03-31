@@ -3,6 +3,13 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyPasskey } from "@/lib/auth";
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  maxAge: 30 * 24 * 60 * 60, // 30 days
+};
+
 export async function POST(request: Request) {
   try {
     const { passkey } = await request.json();
@@ -14,13 +21,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid passkey" }, { status: 401 });
     }
 
-    // Verify passkey against all users in constant time to prevent timing attacks
-    const verificationPromises = users.map(async (user) => ({
-      user,
-      isValid: await verifyPasskey(passkey, user.hashedPasskey),
-    }));
-    const results = await Promise.all(verificationPromises);
-    const authenticatedUser = results.find((r) => r.isValid)?.user || null;
+    // Find user by verifying passkey (bcrypt.compare is already timing-safe)
+    let authenticatedUser = null;
+    for (const user of users) {
+      const isValid = await verifyPasskey(passkey, user.hashedPasskey);
+      if (isValid) {
+        authenticatedUser = user;
+        break;
+      }
+    }
 
     if (!authenticatedUser) {
       return NextResponse.json({ error: "Invalid passkey" }, { status: 401 });
@@ -29,21 +38,8 @@ export async function POST(request: Request) {
     // Set cookies
     const cookieStore = await cookies();
 
-    // Set user_id cookie (new multi-user approach)
-    cookieStore.set("user_id", authenticatedUser.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-    });
-
-    // Also set is_authorized for backward compatibility during transition
-    cookieStore.set("is_authorized", "true", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-    });
+    cookieStore.set("user_id", authenticatedUser.id, COOKIE_OPTIONS);
+    cookieStore.set("is_authorized", "true", COOKIE_OPTIONS);
 
     return NextResponse.json({ success: true });
   } catch (error) {
