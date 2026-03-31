@@ -87,6 +87,7 @@ describe('Server Actions - college.ts', () => {
       expect(result.colleges?.[0].costTuition).toBe(50000);
       expect(result.colleges?.[1].costTuition).toBeNull();
       expect(db.college.findMany).toHaveBeenCalledWith({
+        where: { userId: 'test-user-123' },
         include: { checklist: true },
         orderBy: { deadlineApp: 'asc' },
       });
@@ -145,21 +146,21 @@ describe('Server Actions - college.ts', () => {
         checklist: { id: 'c1', lorTeacher: true },
       };
 
-      (db.college.findUnique as jest.Mock).mockResolvedValue(mockCollege);
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockCollege);
 
       const result = await getCollegeById('1');
 
       expect(result.college).toBeDefined();
       expect(result.college.name).toBe('MIT');
       expect(result.college.costTuition).toBe(50000);
-      expect(db.college.findUnique).toHaveBeenCalledWith({
-        where: { id: '1' },
+      expect(db.college.findFirst).toHaveBeenCalledWith({
+        where: { id: '1', userId: 'test-user-123' },
         include: { checklist: true },
       });
     });
 
     it('should return error when college not found', async () => {
-      (db.college.findUnique as jest.Mock).mockResolvedValue(null);
+      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await getCollegeById('nonexistent');
 
@@ -168,7 +169,7 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should handle database errors', async () => {
-      (db.college.findUnique as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await getCollegeById('1');
 
@@ -205,6 +206,7 @@ describe('Server Actions - college.ts', () => {
           category: 'REACH',
           status: 'NOT_STARTED',
           strategy: 'RD',
+          userId: 'test-user-123',
           deadlineApp: null,
           deadlineFinaid: null,
           checklist: { create: {} },
@@ -238,6 +240,7 @@ describe('Server Actions - college.ts', () => {
       expect(db.college.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
+            userId: 'test-user-123',
             deadlineApp: expect.any(Date),
             deadlineFinaid: expect.any(Date),
           }),
@@ -279,18 +282,23 @@ describe('Server Actions - college.ts', () => {
 
   describe('updateCollege', () => {
     it('should update college with partial data', async () => {
+      const mockExistingCollege = { id: '1', name: 'MIT' };
       const mockUpdatedCollege = {
         id: '1',
         name: 'MIT Updated',
         checklist: { id: 'c1' },
       };
 
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockExistingCollege);
       (db.college.update as jest.Mock).mockResolvedValue(mockUpdatedCollege);
 
       const result = await updateCollege('1', { name: 'MIT Updated' });
 
       expect(result.success).toBe('College updated!');
       expect(result.college).toBeDefined();
+      expect(db.college.findFirst).toHaveBeenCalledWith({
+        where: { id: '1', userId: 'test-user-123' },
+      });
       expect(db.college.update).toHaveBeenCalledWith({
         where: { id: '1' },
         data: { name: 'MIT Updated' },
@@ -301,7 +309,10 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should update deadline dates', async () => {
+      const mockExistingCollege = { id: '1' };
       const mockUpdatedCollege = { id: '1', checklist: null };
+
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockExistingCollege);
       (db.college.update as jest.Mock).mockResolvedValue(mockUpdatedCollege);
 
       const result = await updateCollege('1', {
@@ -320,10 +331,18 @@ describe('Server Actions - college.ts', () => {
       );
     });
 
-    it('should handle database errors', async () => {
-      (db.college.update as jest.Mock).mockRejectedValue(new Error('Not found'));
+    it('should return error when college not found', async () => {
+      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await updateCollege('nonexistent', { name: 'Test' });
+
+      expect(result.error).toBe('College not found or unauthorized');
+    });
+
+    it('should handle database errors', async () => {
+      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+      const result = await updateCollege('1', { name: 'Test' });
 
       expect(result.error).toBe('Failed to update college');
     });
@@ -331,19 +350,33 @@ describe('Server Actions - college.ts', () => {
 
   describe('deleteCollege', () => {
     it('should delete college successfully', async () => {
+      const mockExistingCollege = { id: '1' };
+
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockExistingCollege);
       (db.college.delete as jest.Mock).mockResolvedValue({ id: '1' });
 
       const result = await deleteCollege('1');
 
       expect(result.success).toBe('College deleted!');
+      expect(db.college.findFirst).toHaveBeenCalledWith({
+        where: { id: '1', userId: 'test-user-123' },
+      });
       expect(db.college.delete).toHaveBeenCalledWith({ where: { id: '1' } });
       expect(revalidatePath).toHaveBeenCalledWith('/dashboard');
     });
 
-    it('should handle database errors', async () => {
-      (db.college.delete as jest.Mock).mockRejectedValue(new Error('Not found'));
+    it('should return error when college not found', async () => {
+      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await deleteCollege('nonexistent');
+
+      expect(result.error).toBe('College not found or unauthorized');
+    });
+
+    it('should handle database errors', async () => {
+      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
+
+      const result = await deleteCollege('1');
 
       expect(result.error).toBe('Failed to delete college');
     });
@@ -351,18 +384,23 @@ describe('Server Actions - college.ts', () => {
 
   describe('updateCollegeStatus', () => {
     it('should update status successfully', async () => {
+      const mockExistingCollege = { id: '1', status: 'NOT_STARTED' };
       const mockUpdatedCollege = {
         id: '1',
         status: 'IN_PROGRESS',
         checklist: { id: 'c1' },
       };
 
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockExistingCollege);
       (db.college.update as jest.Mock).mockResolvedValue(mockUpdatedCollege);
 
       const result = await updateCollegeStatus('1', 'IN_PROGRESS');
 
       expect(result.success).toBe('Status updated!');
       expect(result.college).toBeDefined();
+      expect(db.college.findFirst).toHaveBeenCalledWith({
+        where: { id: '1', userId: 'test-user-123' },
+      });
       expect(db.college.update).toHaveBeenCalledWith({
         where: { id: '1' },
         data: { status: 'IN_PROGRESS' },
@@ -376,6 +414,7 @@ describe('Server Actions - college.ts', () => {
       const statuses = ['NOT_STARTED', 'IN_PROGRESS', 'SUBMITTED', 'WAITLISTED', 'ACCEPTED', 'DECLINED'] as const;
 
       for (const status of statuses) {
+        (db.college.findFirst as jest.Mock).mockResolvedValue({ id: '1', status: 'NOT_STARTED' });
         (db.college.update as jest.Mock).mockResolvedValue({ id: '1', status, checklist: null });
 
         const result = await updateCollegeStatus('1', status);
@@ -385,8 +424,16 @@ describe('Server Actions - college.ts', () => {
       }
     });
 
+    it('should return error when college not found', async () => {
+      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
+
+      const result = await updateCollegeStatus('1', 'SUBMITTED');
+
+      expect(result.error).toBe('College not found or unauthorized');
+    });
+
     it('should handle database errors', async () => {
-      (db.college.update as jest.Mock).mockRejectedValue(new Error('Update failed'));
+      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await updateCollegeStatus('1', 'SUBMITTED');
 
@@ -412,7 +459,7 @@ describe('Server Actions - college.ts', () => {
     };
 
     it('should update existing checklist', async () => {
-      (db.college.findUnique as jest.Mock).mockResolvedValue(mockCollege);
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockCollege);
       (db.checklist.update as jest.Mock).mockResolvedValue({
         ...mockCollege.checklist,
         lorTeacher: true,
@@ -422,6 +469,10 @@ describe('Server Actions - college.ts', () => {
       const result = await updateChecklist('1', { lorTeacher: true });
 
       expect(result.success).toBe('Checklist updated!');
+      expect(db.college.findFirst).toHaveBeenCalledWith({
+        where: { id: '1', userId: 'test-user-123' },
+        include: { checklist: true },
+      });
       expect(db.checklist.update).toHaveBeenCalledWith({
         where: { collegeId: '1' },
         data: { lorTeacher: true },
@@ -429,7 +480,7 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should create checklist if it does not exist', async () => {
-      (db.college.findUnique as jest.Mock).mockResolvedValue({
+      (db.college.findFirst as jest.Mock).mockResolvedValue({
         ...mockCollege,
         checklist: null,
       });
@@ -450,7 +501,7 @@ describe('Server Actions - college.ts', () => {
 
     describe('Auto-status progression', () => {
       it('should progress from NOT_STARTED to IN_PROGRESS on first update', async () => {
-        (db.college.findUnique as jest.Mock).mockResolvedValue(mockCollege);
+        (db.college.findFirst as jest.Mock).mockResolvedValue(mockCollege);
         (db.checklist.update as jest.Mock).mockResolvedValue({
           ...mockCollege.checklist,
           lorTeacher: true,
@@ -469,7 +520,7 @@ describe('Server Actions - college.ts', () => {
       });
 
       it('should progress from IN_PROGRESS to SUBMITTED when all items complete', async () => {
-        (db.college.findUnique as jest.Mock).mockResolvedValue({
+        (db.college.findFirst as jest.Mock).mockResolvedValue({
           ...mockCollege,
           status: 'IN_PROGRESS',
         });
@@ -495,7 +546,7 @@ describe('Server Actions - college.ts', () => {
       });
 
       it('should revert from SUBMITTED to IN_PROGRESS when item unchecked', async () => {
-        (db.college.findUnique as jest.Mock).mockResolvedValue({
+        (db.college.findFirst as jest.Mock).mockResolvedValue({
           id: '1',
           status: 'SUBMITTED',
           checklist: {
@@ -525,7 +576,7 @@ describe('Server Actions - college.ts', () => {
       });
 
       it('should not change status for WAITLISTED', async () => {
-        (db.college.findUnique as jest.Mock).mockResolvedValue({
+        (db.college.findFirst as jest.Mock).mockResolvedValue({
           ...mockCollege,
           status: 'WAITLISTED',
         });
@@ -540,7 +591,7 @@ describe('Server Actions - college.ts', () => {
       });
 
       it('should not change status for ACCEPTED', async () => {
-        (db.college.findUnique as jest.Mock).mockResolvedValue({
+        (db.college.findFirst as jest.Mock).mockResolvedValue({
           ...mockCollege,
           status: 'ACCEPTED',
         });
@@ -555,7 +606,7 @@ describe('Server Actions - college.ts', () => {
       });
 
       it('should not change status for DECLINED', async () => {
-        (db.college.findUnique as jest.Mock).mockResolvedValue({
+        (db.college.findFirst as jest.Mock).mockResolvedValue({
           ...mockCollege,
           status: 'DECLINED',
         });
@@ -570,7 +621,7 @@ describe('Server Actions - college.ts', () => {
       });
 
       it('should handle 0 essays (all complete when essayCount is 0)', async () => {
-        (db.college.findUnique as jest.Mock).mockResolvedValue({
+        (db.college.findFirst as jest.Mock).mockResolvedValue({
           id: '1',
           status: 'IN_PROGRESS',
           checklist: {
@@ -597,15 +648,15 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should return error when college not found', async () => {
-      (db.college.findUnique as jest.Mock).mockResolvedValue(null);
+      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await updateChecklist('nonexistent', { lorTeacher: true });
 
-      expect(result.error).toBe('College not found');
+      expect(result.error).toBe('College not found or unauthorized');
     });
 
     it('should handle database errors', async () => {
-      (db.college.findUnique as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await updateChecklist('1', { lorTeacher: true });
 
@@ -613,7 +664,7 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should revalidate paths after update', async () => {
-      (db.college.findUnique as jest.Mock).mockResolvedValue(mockCollege);
+      (db.college.findFirst as jest.Mock).mockResolvedValue(mockCollege);
       (db.checklist.update as jest.Mock).mockResolvedValue({
         ...mockCollege.checklist,
         lorTeacher: true,
