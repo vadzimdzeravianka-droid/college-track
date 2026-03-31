@@ -13,6 +13,15 @@
 
 import { PrismaClient } from "@prisma/client";
 import { hashPasskey } from "../lib/auth";
+import * as dotenv from "dotenv";
+
+// Load .env.local if not already loaded
+if (!process.env.PASSKEY_HASH_SECRET || !process.env.APP_PASSKEY) {
+  const result = dotenv.config({ path: ".env.local" });
+  if (result.parsed) {
+    console.log("📁 Loaded environment variables from .env.local");
+  }
+}
 
 const prisma = new PrismaClient();
 
@@ -23,11 +32,14 @@ async function migrateAddUsers() {
   // Step 1: Verify environment variables
   if (!process.env.APP_PASSKEY) {
     console.error("❌ Error: APP_PASSKEY environment variable is required");
+    console.log("   Add it to .env.local");
     process.exit(1);
   }
 
   if (!process.env.PASSKEY_HASH_SECRET) {
     console.error("❌ Error: PASSKEY_HASH_SECRET environment variable is required");
+    console.log("   Add it to .env.local:");
+    console.log("   echo \"PASSKEY_HASH_SECRET=$(openssl rand -hex 32)\" >> .env.local");
     process.exit(1);
   }
 

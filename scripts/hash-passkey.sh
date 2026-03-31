@@ -14,15 +14,21 @@ fi
 
 PASSKEY="$1"
 
+# Auto-load .env.local if it exists and PASSKEY_HASH_SECRET not set
+if [ -z "$PASSKEY_HASH_SECRET" ] && [ -f ".env.local" ]; then
+  echo "📁 Loading PASSKEY_HASH_SECRET from .env.local..."
+  export $(grep -E "^PASSKEY_HASH_SECRET=" .env.local | xargs)
+fi
+
 # Check if PASSKEY_HASH_SECRET is set
 if [ -z "$PASSKEY_HASH_SECRET" ]; then
   echo "❌ Error: PASSKEY_HASH_SECRET environment variable is not set"
   echo ""
-  echo "Please set it in your shell:"
-  echo "  export PASSKEY_HASH_SECRET='your-secret-here'"
+  echo "Please add it to .env.local:"
+  echo "  echo \"PASSKEY_HASH_SECRET=\$(openssl rand -hex 32)\" >> .env.local"
   echo ""
-  echo "Or source from .env.local:"
-  echo "  source .env.local && export PASSKEY_HASH_SECRET"
+  echo "Or set it in your shell:"
+  echo "  export PASSKEY_HASH_SECRET='your-secret-here'"
   echo ""
   echo "Generate a secret with: openssl rand -hex 32"
   exit 1
