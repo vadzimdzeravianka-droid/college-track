@@ -107,13 +107,18 @@ npx prisma db push
 
 # Open Prisma Studio (database GUI)
 npx prisma studio
+
+# User Management
+npm run create-user <username> <passkey>  # Create user with passkey uniqueness check
 ```
+
+See README.md for detailed user management instructions.
 
 ## Environment Setup
 
 Required environment variables in `.env.local`:
 - `POSTGRES_PRISMA_URL` - Supabase/PostgreSQL connection string
-- `APP_PASSKEY` - Shared passkey for authentication
+- `PASSKEY_HASH_SECRET` - Secret for password hashing (pepper). Generate with: `openssl rand -hex 32`
 
 ## Architecture
 
@@ -127,19 +132,48 @@ Required environment variables in `.env.local`:
 
 ### Authentication Flow
 
+**Multi-User System with Password Hashing**:
+
 Middleware (`middleware.ts`) enforces authentication:
-1. Checks for `is_authorized=true` cookie
+1. Checks for `user_id` cookie (primary) or `is_authorized=true` (fallback)
 2. Redirects to `/login` if missing
 3. Public routes defined in `routes.ts`
 
-No user accounts - single shared passkey stored in environment variable.
+Login process (`app/api/auth/login/route.ts`):
+1. User submits passkey via login form
+2. Server queries all users from database
+3. Verifies passkey against each user's hashed passkey using bcrypt
+4. On match, sets `user_id` cookie with user's ID
+5. Also sets `is_authorized` cookie for backward compatibility
+
+Password security:
+- Passkeys hashed with **bcrypt** (salt rounds = 10)
+- Automatic unique salting per password
+- **Pepper** via `PASSKEY_HASH_SECRET` env var (additional security layer)
+- Timing-safe comparison via `bcrypt.compare`
+- Plain passkeys never stored or logged
+
+Helper functions (`lib/auth.ts`):
+- `hashPasskey(passkey)` - Hash a passkey with bcrypt and pepper
+- `verifyPasskey(passkey, hash)` - Verify passkey against hash
+- `getCurrentUserId()` - Get userId from cookie (returns null if not authenticated)
+- `requireAuth()` - Get userId or throw error (use in server actions)
+
+User management:
+- Users stored in database (`User` model) with hashed passkeys
+- Each user has isolated data (colleges filtered by userId)
+- Add users via Prisma Studio or seed script
+- Generate password hashes: `npm run hash-passkey <passkey>`
+
+**Important**: All server actions in `actions/college.ts` call `requireAuth()` and filter by `userId` to ensure data isolation.
 
 ### Data Layer
 
 **Database**: PostgreSQL (Supabase) via Prisma ORM
 
 Key models:
-- `College` - Main college application entity with all details (name, category, status, strategy, deadlines, portal credentials, notes)
+- `User` - User accounts with hashed passkeys (1-to-many with colleges)
+- `College` - Main college application entity with all details (name, category, status, strategy, deadlines, portal credentials, notes). Belongs to a user via `userId` foreign key.
 - `Checklist` - 1-to-1 relationship tracking application requirements (LOR, transcripts, test scores, essays, financial aid)
 
 Enums:
@@ -150,15 +184,18 @@ Enums:
 ### Server Actions Pattern
 
 All data mutations use Next.js Server Actions (`"use server"`) in `actions/college.ts`:
-- `getColleges()` - Fetch all colleges with checklists
-- `getCollegeById(id)` - Fetch single college
-- `createCollege(values)` - Create new college entry
-- `updateCollege(id, values)` - Update college
-- `deleteCollege(id)` - Delete college
-- `updateCollegeStatus(id, status)` - Quick status update
-- `updateChecklist(collegeId, values)` - Update checklist with auto-status progression
+- `getColleges()` - Fetch colleges for current user (filtered by userId)
+- `getCollegeById(id)` - Fetch single college (ownership verified)
+- `createCollege(values)` - Create new college entry (associated with current user)
+- `updateCollege(id, values)` - Update college (ownership verified)
+- `deleteCollege(id)` - Delete college (ownership verified)
+- `updateCollegeStatus(id, status)` - Quick status update (ownership verified)
+- `updateChecklist(collegeId, values)` - Update checklist with auto-status progression (ownership verified)
 
-**Important**: Server actions automatically revalidate paths using `revalidatePath()` after mutations.
+**Important**:
+- Server actions automatically revalidate paths using `revalidatePath()` after mutations
+- All actions call `requireAuth()` to get current userId
+- All queries filter by userId or verify ownership to ensure data isolation
 
 ### Form Validation
 

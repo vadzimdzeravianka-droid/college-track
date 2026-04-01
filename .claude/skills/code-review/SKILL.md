@@ -208,6 +208,108 @@ echo "🔍 Running 10 code review agents..."
 - 🟡 REQUEST CHANGES (1-3 critical, 3-10 warnings)
 - ❌ REJECT (4+ critical, major violations)
 
+## GitHub PR Integration
+
+After generating the consolidated report, automatically publish inline comments to the PR:
+
+### Step 1: Check for Open PR
+
+```bash
+PR_NUMBER=$(gh pr list --head $(git branch --show-current) --json number --jq '.[0].number')
+
+if [ -z "$PR_NUMBER" ]; then
+  echo "⚠️  No open PR found for current branch - skipping GitHub integration"
+  echo "📄 Review report saved locally: .claude/workflows/code-reviews/$TICKET_ID/report.md"
+  exit 0
+fi
+
+echo "✅ Found PR #$PR_NUMBER - publishing review comments..."
+```
+
+### Step 2: Extract Critical Issues for Inline Comments
+
+Parse the consolidated report to extract critical/warning issues with file paths and line numbers:
+
+```bash
+# Example format from report:
+# **File:** `app/api/auth/login/route.ts:23`
+# **Severity:** CRITICAL
+# **Issue:** Timing attack vulnerability
+
+# Extract into JSON payload for GitHub API
+```
+
+### Step 3: Publish Review via GitHub API
+
+```bash
+COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid --jq '.headRefOid')
+REPO=$(gh repo view --json owner,name --jq '"\(.owner.login)/\(.name)"')
+
+# Create review payload
+cat << EOF > /tmp/review-payload.json
+{
+  "commit_id": "$COMMIT_SHA",
+  "body": "$(cat report-summary.md)",
+  "event": "COMMENT",
+  "comments": [
+    {
+      "path": "app/api/auth/login/route.ts",
+      "line": 23,
+      "body": "### 🔒 **CRITICAL: Issue Title**\n\n**Issue:** Description\n\n**Fix:** Code example"
+    }
+  ]
+}
+EOF
+
+# Submit review
+gh api \
+  --method POST \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /repos/$REPO/pulls/$PR_NUMBER/reviews \
+  --input /tmp/review-payload.json
+
+echo "✅ Review published to PR #$PR_NUMBER"
+echo "🔗 View at: $(gh pr view $PR_NUMBER --json url --jq '.url')"
+```
+
+### Review Comment Format
+
+**Critical Issues:**
+```markdown
+### 🔒 **CRITICAL: [Issue Title]**
+
+**Issue:** [Description]
+
+**Current code:**
+```typescript
+[code snippet]
+```
+
+**Fix:**
+```typescript
+[corrected code]
+```
+
+**Impact:** [Security/functionality impact]
+```
+
+**Warnings:**
+```markdown
+### ⚠️ **[Issue Title]**
+
+**Issue:** [Description]
+
+**Recommendation:** [Fix suggestion]
+```
+
+### Notes
+
+- Use `"event": "COMMENT"` instead of `"REQUEST_CHANGES"` for own PRs (GitHub limitation)
+- Only post inline comments for CRITICAL and HIGH PRIORITY warnings
+- Limit to top 10 issues to avoid overwhelming the PR
+- Include link to full consolidated report in review body
+
 ## Example
 
 ```bash

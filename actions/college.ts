@@ -3,25 +3,28 @@
 import { db } from "@/lib/db";
 import { CollegeSchema, ChecklistSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/auth";
 import * as z from "zod";
 
-// Helper to convert Decimal to number for Client Components
+const COST_FIELDS = ['costTuition', 'costRoomBoard', 'costFees', 'costBooks', 'costPersonal', 'costOther'] as const;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeCollege(college: any): any {
-  return {
-    ...college,
-    costTuition: college.costTuition ? Number(college.costTuition) : college.costTuition,
-    costRoomBoard: college.costRoomBoard ? Number(college.costRoomBoard) : college.costRoomBoard,
-    costFees: college.costFees ? Number(college.costFees) : college.costFees,
-    costBooks: college.costBooks ? Number(college.costBooks) : college.costBooks,
-    costPersonal: college.costPersonal ? Number(college.costPersonal) : college.costPersonal,
-    costOther: college.costOther ? Number(college.costOther) : college.costOther,
-  };
+function convertDecimalFieldsForClient(college: any): any {
+  const converted = { ...college };
+  for (const field of COST_FIELDS) {
+    if (converted[field] != null) {
+      converted[field] = Number(converted[field]);
+    }
+  }
+  return converted;
 }
 
 export async function getColleges() {
   try {
+    const userId = await requireAuth();
+
     const colleges = await db.college.findMany({
+      where: { userId },
       include: {
         checklist: true,
       },
@@ -30,10 +33,7 @@ export async function getColleges() {
       },
     });
 
-    // Serialize Decimal fields to numbers for Client Components
-    const serializedColleges = colleges.map(serializeCollege);
-
-    return { colleges: serializedColleges };
+    return { colleges: colleges.map(convertDecimalFieldsForClient) };
   } catch (error) {
     console.error("Get colleges error:", error);
     return {
@@ -45,20 +45,20 @@ export async function getColleges() {
 
 export async function getCollegeById(id: string) {
   try {
-    const college = await db.college.findUnique({
-      where: { id },
+    const userId = await requireAuth();
+
+    const college = await db.college.findFirst({
+      where: { id, userId },
       include: {
         checklist: true,
       },
     });
+
     if (!college) {
       return { error: "College not found" };
     }
 
-    // Serialize Decimal fields to numbers for Client Components
-    const serializedCollege = serializeCollege(college);
-
-    return { college: serializedCollege };
+    return { college: convertDecimalFieldsForClient(college) };
   } catch (_error) {
     return { error: "Failed to fetch college" };
   }
@@ -71,11 +71,13 @@ export async function createCollege(values: z.infer<typeof CollegeSchema>) {
   }
 
   try {
+    const userId = await requireAuth();
     const { deadlineApp, deadlineFinaid, ...rest } = validatedFields.data;
 
     const college = await db.college.create({
       data: {
         ...rest,
+        userId,
         deadlineApp: deadlineApp ? new Date(deadlineApp) : null,
         deadlineFinaid: deadlineFinaid ? new Date(deadlineFinaid) : null,
         checklist: {
@@ -103,37 +105,52 @@ export async function updateCollege(
   values: Partial<z.infer<typeof CollegeSchema>>
 ) {
   try {
+    const userId = await requireAuth();
     const { deadlineApp, deadlineFinaid, ...rest } = values;
 
-    const college = await db.college.update({
-      where: { id },
+    const result = await db.college.updateMany({
+      where: { id, userId },
       data: {
         ...rest,
         deadlineApp: deadlineApp ? new Date(deadlineApp) : undefined,
         deadlineFinaid: deadlineFinaid ? new Date(deadlineFinaid) : undefined,
       },
-      include: {
-        checklist: true,
-      },
+    });
+
+    if (result.count === 0) {
+      return { error: "College not found or unauthorized" };
+    }
+
+    const college = await db.college.findFirst({
+      where: { id, userId },
+      include: { checklist: true },
     });
 
     revalidatePath("/dashboard");
     revalidatePath(`/college/${id}`);
     return { success: "College updated!", college };
-  } catch (_error) {
+  } catch (error) {
+    console.error("Update college error:", error);
     return { error: "Failed to update college" };
   }
 }
 
 export async function deleteCollege(id: string) {
   try {
-    await db.college.delete({
-      where: { id },
+    const userId = await requireAuth();
+
+    const result = await db.college.deleteMany({
+      where: { id, userId },
     });
+
+    if (result.count === 0) {
+      return { error: "College not found or unauthorized" };
+    }
 
     revalidatePath("/dashboard");
     return { success: "College deleted!" };
-  } catch (_error) {
+  } catch (error) {
+    console.error("Delete college error:", error);
     return { error: "Failed to delete college" };
   }
 }
@@ -143,16 +160,27 @@ export async function updateCollegeStatus(
   status: "NOT_STARTED" | "IN_PROGRESS" | "SUBMITTED" | "WAITLISTED" | "ACCEPTED" | "DECLINED"
 ) {
   try {
-    const college = await db.college.update({
-      where: { id },
+    const userId = await requireAuth();
+
+    const result = await db.college.updateMany({
+      where: { id, userId },
       data: { status },
+    });
+
+    if (result.count === 0) {
+      return { error: "College not found or unauthorized" };
+    }
+
+    const college = await db.college.findFirst({
+      where: { id, userId },
       include: { checklist: true },
     });
 
     revalidatePath(`/college/${id}`);
     revalidatePath("/dashboard");
     return { success: "Status updated!", college };
-  } catch (_error) {
+  } catch (error) {
+    console.error("Update status error:", error);
     return { error: "Failed to update status" };
   }
 }
@@ -162,13 +190,15 @@ export async function updateChecklist(
   values: Partial<z.infer<typeof ChecklistSchema>>
 ) {
   try {
-    const college = await db.college.findUnique({
-      where: { id: collegeId },
+    const userId = await requireAuth();
+
+    const college = await db.college.findFirst({
+      where: { id: collegeId, userId },
       include: { checklist: true },
     });
 
     if (!college) {
-      return { error: "College not found" };
+      return { error: "College not found or unauthorized" };
     }
 
     let updatedChecklist;

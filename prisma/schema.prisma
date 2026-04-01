@@ -28,8 +28,20 @@ enum Strategy {
   RD    // Regular Decision
 }
 
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  hashedPasskey String    @unique @map("hashed_passkey")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  colleges      College[]
+
+  @@map("users")
+}
+
 model College {
   id              String    @id @default(uuid())
+  userId          String    @map("user_id")
   name            String
   category        Category
   status          Status    @default(NOT_STARTED)
@@ -52,8 +64,10 @@ model College {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   checklist       Checklist?
 
+  @@index([userId])
   @@map("colleges")
 }
 

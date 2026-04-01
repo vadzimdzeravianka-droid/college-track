@@ -13,9 +13,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Check for user_id cookie (new multi-user approach)
+  const userId = request.cookies.get("user_id")?.value;
+
+  // Fallback to is_authorized for backward compatibility during transition
   const isAuthorized = request.cookies.get("is_authorized")?.value === "true";
 
-  if (!isAuthorized) {
+  if (!userId && !isAuthorized) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

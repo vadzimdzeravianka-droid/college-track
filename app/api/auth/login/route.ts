@@ -1,23 +1,49 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { verifyPasskey } from "@/lib/auth";
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  maxAge: 30 * 24 * 60 * 60, // 30 days
+};
 
 export async function POST(request: Request) {
   try {
     const { passkey } = await request.json();
 
-    if (passkey === process.env.APP_PASSKEY) {
-      const cookieStore = await cookies();
-      cookieStore.set("is_authorized", "true", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-      });
-      return NextResponse.json({ success: true });
+    // Get all users from database
+    const users = await db.user.findMany();
+
+    if (users.length === 0) {
+      return NextResponse.json({ error: "Invalid passkey" }, { status: 401 });
     }
 
-    return NextResponse.json({ error: "Invalid passkey" }, { status: 401 });
-  } catch (_error) {
+    // Find user by verifying passkey (bcrypt.compare is already timing-safe)
+    let authenticatedUser = null;
+    for (const user of users) {
+      const isValid = await verifyPasskey(passkey, user.hashedPasskey);
+      if (isValid) {
+        authenticatedUser = user;
+        break;
+      }
+    }
+
+    if (!authenticatedUser) {
+      return NextResponse.json({ error: "Invalid passkey" }, { status: 401 });
+    }
+
+    // Set cookies
+    const cookieStore = await cookies();
+
+    cookieStore.set("user_id", authenticatedUser.id, COOKIE_OPTIONS);
+    cookieStore.set("is_authorized", "true", COOKIE_OPTIONS);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Login error:", error);
     return NextResponse.json({ error: "Failed to authenticate" }, { status: 500 });
   }
 }
