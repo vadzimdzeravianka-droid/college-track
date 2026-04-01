@@ -143,7 +143,7 @@ async function createUser() {
 
       console.log(`✅ Updated user: ${username}`);
       console.log(`   User ID: ${existingUsername.id}`);
-      console.log(`   Passkey: ${passkey}`);
+      console.log(`   Passkey: [REDACTED - use your passkey to login]`);
       console.log("");
       console.log("🎉 User updated successfully!");
     } else {
@@ -161,7 +161,7 @@ async function createUser() {
       console.log("📝 User Details:");
       console.log(`   Name:     ${newUser.name}`);
       console.log(`   ID:       ${newUser.id}`);
-      console.log(`   Passkey:  ${passkey}`);
+      console.log(`   Passkey:  [REDACTED - use your passkey to login]`);
       console.log(`   Created:  ${newUser.createdAt.toISOString()}`);
       console.log("");
       console.log("🎉 You can now login with these credentials!");
