@@ -108,22 +108,17 @@ export async function updateCollege(
     const userId = await requireAuth();
     const { deadlineApp, deadlineFinaid, ...rest } = values;
 
-    const result = await db.college.updateMany({
-      where: { id, userId },
-      data: {
-        ...rest,
-        deadlineApp: deadlineApp ? new Date(deadlineApp) : undefined,
-        deadlineFinaid: deadlineFinaid ? new Date(deadlineFinaid) : undefined,
-      },
-    });
-
-    if (result.count === 0) {
-      return { error: "College not found or unauthorized" };
-    }
-
-    const college = await db.college.findFirst({
-      where: { id, userId },
-      include: { checklist: true },
+    // Wrap in transaction and use single update call (optimized from updateMany + findFirst)
+    const college = await db.$transaction(async (tx) => {
+      return await tx.college.update({
+        where: { id, userId },
+        data: {
+          ...rest,
+          deadlineApp: deadlineApp ? new Date(deadlineApp) : undefined,
+          deadlineFinaid: deadlineFinaid ? new Date(deadlineFinaid) : undefined,
+        },
+        include: { checklist: true },
+      });
     });
 
     revalidatePath("/dashboard");
@@ -162,18 +157,13 @@ export async function updateCollegeStatus(
   try {
     const userId = await requireAuth();
 
-    const result = await db.college.updateMany({
-      where: { id, userId },
-      data: { status },
-    });
-
-    if (result.count === 0) {
-      return { error: "College not found or unauthorized" };
-    }
-
-    const college = await db.college.findFirst({
-      where: { id, userId },
-      include: { checklist: true },
+    // Wrap in transaction and use single update call (optimized from updateMany + findFirst)
+    const college = await db.$transaction(async (tx) => {
+      return await tx.college.update({
+        where: { id, userId },
+        data: { status },
+        include: { checklist: true },
+      });
     });
 
     revalidatePath(`/college/${id}`);

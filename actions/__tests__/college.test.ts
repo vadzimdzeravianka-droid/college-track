@@ -279,26 +279,30 @@ describe('Server Actions - college.ts', () => {
   });
 
   describe('updateCollege', () => {
-    it('should update college with partial data', async () => {
+    it('should update college with partial data using transaction', async () => {
       const mockUpdatedCollege = {
         id: '1',
         name: 'MIT Updated',
         checklist: { id: 'c1' },
       };
 
-      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockUpdatedCollege);
+      const mockTx = {
+        college: {
+          update: jest.fn().mockResolvedValue(mockUpdatedCollege),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await updateCollege('1', { name: 'MIT Updated' });
 
       expect(result.success).toBe('College updated!');
       expect(result.college).toBeDefined();
-      expect(db.college.updateMany).toHaveBeenCalledWith({
+      expect(mockTx.college.update).toHaveBeenCalledWith({
         where: { id: '1', userId: 'test-user-123' },
         data: { name: 'MIT Updated' },
-      });
-      expect(db.college.findFirst).toHaveBeenCalledWith({
-        where: { id: '1', userId: 'test-user-123' },
         include: { checklist: true },
       });
       expect(revalidatePath).toHaveBeenCalledWith('/dashboard');
@@ -308,8 +312,15 @@ describe('Server Actions - college.ts', () => {
     it('should update deadline dates', async () => {
       const mockUpdatedCollege = { id: '1', checklist: null };
 
-      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockUpdatedCollege);
+      const mockTx = {
+        college: {
+          update: jest.fn().mockResolvedValue(mockUpdatedCollege),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await updateCollege('1', {
         deadlineApp: '2024-12-01',
@@ -317,7 +328,7 @@ describe('Server Actions - college.ts', () => {
       });
 
       expect(result.success).toBe('College updated!');
-      expect(db.college.updateMany).toHaveBeenCalledWith(
+      expect(mockTx.college.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             deadlineApp: expect.any(Date),
@@ -328,15 +339,23 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should return error when college not found', async () => {
-      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
+      const mockTx = {
+        college: {
+          update: jest.fn().mockRejectedValue(new Error('Record to update not found.')),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await updateCollege('nonexistent', { name: 'Test' });
 
-      expect(result.error).toBe('College not found or unauthorized');
+      expect(result.error).toBe('Failed to update college');
     });
 
     it('should handle database errors', async () => {
-      (db.college.updateMany as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.$transaction as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await updateCollege('1', { name: 'Test' });
 
@@ -382,19 +401,23 @@ describe('Server Actions - college.ts', () => {
         checklist: { id: 'c1' },
       };
 
-      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockUpdatedCollege);
+      const mockTx = {
+        college: {
+          update: jest.fn().mockResolvedValue(mockUpdatedCollege),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await updateCollegeStatus('1', 'IN_PROGRESS');
 
       expect(result.success).toBe('Status updated!');
       expect(result.college).toBeDefined();
-      expect(db.college.updateMany).toHaveBeenCalledWith({
+      expect(mockTx.college.update).toHaveBeenCalledWith({
         where: { id: '1', userId: 'test-user-123' },
         data: { status: 'IN_PROGRESS' },
-      });
-      expect(db.college.findFirst).toHaveBeenCalledWith({
-        where: { id: '1', userId: 'test-user-123' },
         include: { checklist: true },
       });
       expect(revalidatePath).toHaveBeenCalledWith('/college/1');
@@ -405,8 +428,15 @@ describe('Server Actions - college.ts', () => {
       const statuses = ['NOT_STARTED', 'IN_PROGRESS', 'SUBMITTED', 'WAITLISTED', 'ACCEPTED', 'DECLINED'] as const;
 
       for (const status of statuses) {
-        (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
-        (db.college.findFirst as jest.Mock).mockResolvedValue({ id: '1', status, checklist: null });
+        const mockTx = {
+          college: {
+            update: jest.fn().mockResolvedValue({ id: '1', status, checklist: null }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
 
         const result = await updateCollegeStatus('1', status);
 
@@ -416,15 +446,23 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should return error when college not found', async () => {
-      (db.college.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
+      const mockTx = {
+        college: {
+          update: jest.fn().mockRejectedValue(new Error('Record to update not found.')),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await updateCollegeStatus('1', 'SUBMITTED');
 
-      expect(result.error).toBe('College not found or unauthorized');
+      expect(result.error).toBe('Failed to update status');
     });
 
     it('should handle database errors', async () => {
-      (db.college.updateMany as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.$transaction as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await updateCollegeStatus('1', 'SUBMITTED');
 
