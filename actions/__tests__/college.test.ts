@@ -361,6 +361,45 @@ describe('Server Actions - college.ts', () => {
 
       expect(result.error).toBe('Failed to update college');
     });
+
+    describe('Transaction behavior', () => {
+      it('should use transaction for atomic update', async () => {
+        const mockTx = {
+          college: {
+            update: jest.fn().mockResolvedValue({ id: '1', name: 'Updated', checklist: null }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        await updateCollege('1', { name: 'Updated' });
+
+        // Verify transaction was used
+        expect(db.$transaction).toHaveBeenCalled();
+        // Verify single update call (optimized pattern)
+        expect(mockTx.college.update).toHaveBeenCalledTimes(1);
+      });
+
+      it('should rollback on update failure', async () => {
+        const mockTx = {
+          college: {
+            update: jest.fn().mockRejectedValue(new Error('Update failed mid-transaction')),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        const result = await updateCollege('1', { name: 'Test' });
+
+        expect(result.error).toBe('Failed to update college');
+        // Revalidation should not occur on failure
+        expect(revalidatePath).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('deleteCollege', () => {
@@ -406,6 +445,48 @@ describe('Server Actions - college.ts', () => {
       const result = await deleteCollege('1');
 
       expect(result.error).toBe('Failed to delete college');
+    });
+
+    describe('Transaction behavior', () => {
+      it('should use transaction for atomic delete', async () => {
+        const mockTx = {
+          college: {
+            delete: jest.fn().mockResolvedValue({ id: '1', name: 'MIT' }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        await deleteCollege('1');
+
+        // Verify transaction was used
+        expect(db.$transaction).toHaveBeenCalled();
+        // Verify delete was called with proper parameters
+        expect(mockTx.college.delete).toHaveBeenCalledWith({
+          where: { id: '1', userId: 'test-user-123' },
+        });
+      });
+
+      it('should handle cascade delete of checklist within transaction', async () => {
+        const mockTx = {
+          college: {
+            // Prisma automatically cascades delete to checklist
+            delete: jest.fn().mockResolvedValue({ id: '1', name: 'MIT' }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        const result = await deleteCollege('1');
+
+        expect(result.success).toBe('College deleted!');
+        // Checklist cascade is handled by Prisma automatically
+        expect(mockTx.college.delete).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
@@ -484,6 +565,27 @@ describe('Server Actions - college.ts', () => {
 
       expect(result.error).toBe('Failed to update status');
     });
+
+    describe('Transaction behavior', () => {
+      it('should use transaction for atomic status update', async () => {
+        const mockTx = {
+          college: {
+            update: jest.fn().mockResolvedValue({ id: '1', status: 'SUBMITTED', checklist: null }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        await updateCollegeStatus('1', 'SUBMITTED');
+
+        // Verify transaction was used
+        expect(db.$transaction).toHaveBeenCalled();
+        // Verify single update call (optimized pattern)
+        expect(mockTx.college.update).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe('updateChecklist', () => {
@@ -529,6 +631,65 @@ describe('Server Actions - college.ts', () => {
         expect(result.error).toContain('Failed to update checklist');
         // Transaction should have been attempted
         expect(db.$transaction).toHaveBeenCalled();
+      });
+
+      it('should preserve error messages from transaction failures', async () => {
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockRejectedValue(new Error('Database connection lost')),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        const result = await updateChecklist('1', { lorTeacher: true });
+
+        // Should preserve the specific error message
+        expect(result.error).toContain('Database connection lost');
+      });
+
+      it('should handle "College not found" within transaction', async () => {
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue(null),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        const result = await updateChecklist('1', { lorTeacher: true });
+
+        // Should preserve the "not found" error message
+        expect(result.error).toContain('College not found or unauthorized');
+      });
+
+      it('should rollback if checklist create fails', async () => {
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue({
+              ...mockCollege,
+              checklist: null, // No existing checklist
+            }),
+            update: jest.fn(),
+          },
+          checklist: {
+            create: jest.fn().mockRejectedValue(new Error('Unique constraint violation')),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        const result = await updateChecklist('1', { lorTeacher: true });
+
+        // Should return error and not call college update
+        expect(result.error).toContain('Unique constraint violation');
+        expect(mockTx.college.update).not.toHaveBeenCalled();
       });
     });
 
