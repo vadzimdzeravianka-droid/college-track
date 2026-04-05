@@ -134,13 +134,12 @@ export async function deleteCollege(id: string) {
   try {
     const userId = await requireAuth();
 
-    const result = await db.college.deleteMany({
-      where: { id, userId },
+    // Wrap in transaction for consistency (also optimized to use delete instead of deleteMany)
+    await db.$transaction(async (tx) => {
+      return await tx.college.delete({
+        where: { id, userId },
+      });
     });
-
-    if (result.count === 0) {
-      return { error: "College not found or unauthorized" };
-    }
 
     revalidatePath("/dashboard");
     return { success: "College deleted!" };

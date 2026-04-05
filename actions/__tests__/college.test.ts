@@ -364,28 +364,44 @@ describe('Server Actions - college.ts', () => {
   });
 
   describe('deleteCollege', () => {
-    it('should delete college successfully', async () => {
-      (db.college.deleteMany as jest.Mock).mockResolvedValue({ count: 1 });
+    it('should delete college successfully using transaction', async () => {
+      const mockTx = {
+        college: {
+          delete: jest.fn().mockResolvedValue({ id: '1', name: 'MIT' }),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await deleteCollege('1');
 
       expect(result.success).toBe('College deleted!');
-      expect(db.college.deleteMany).toHaveBeenCalledWith({
+      expect(mockTx.college.delete).toHaveBeenCalledWith({
         where: { id: '1', userId: 'test-user-123' },
       });
       expect(revalidatePath).toHaveBeenCalledWith('/dashboard');
     });
 
     it('should return error when college not found', async () => {
-      (db.college.deleteMany as jest.Mock).mockResolvedValue({ count: 0 });
+      const mockTx = {
+        college: {
+          delete: jest.fn().mockRejectedValue(new Error('Record to delete not found.')),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await deleteCollege('nonexistent');
 
-      expect(result.error).toBe('College not found or unauthorized');
+      expect(result.error).toBe('Failed to delete college');
     });
 
     it('should handle database errors', async () => {
-      (db.college.deleteMany as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.$transaction as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await deleteCollege('1');
 
