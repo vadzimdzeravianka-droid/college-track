@@ -12,6 +12,7 @@ import { revalidatePath } from 'next/cache';
 
 jest.mock('@/lib/db', () => ({
   db: {
+    $transaction: jest.fn(),
     college: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
@@ -448,189 +449,311 @@ describe('Server Actions - college.ts', () => {
       },
     };
 
-    it('should update existing checklist', async () => {
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockCollege);
-      (db.checklist.update as jest.Mock).mockResolvedValue({
-        ...mockCollege.checklist,
-        lorTeacher: true,
+    describe('Transaction rollback', () => {
+      it('should rollback checklist update if status update fails', async () => {
+        // Mock transaction that simulates checklist update succeeding but status update failing
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue(mockCollege),
+            update: jest.fn().mockRejectedValue(new Error('Status update failed')),
+          },
+          checklist: {
+            update: jest.fn().mockResolvedValue({
+              ...mockCollege.checklist,
+              lorTeacher: true,
+            }),
+          },
+        };
+
+        (db.$transaction as jest.Mock) = jest.fn(async (callback) => {
+          return await callback(mockTx);
+        });
+
+        const result = await updateChecklist('1', { lorTeacher: true });
+
+        // Should return error
+        expect(result.error).toContain('Failed to update checklist');
+        // Transaction should have been attempted
+        expect(db.$transaction).toHaveBeenCalled();
       });
-      (db.college.update as jest.Mock).mockResolvedValue({ ...mockCollege, status: 'IN_PROGRESS' });
+    });
+
+    it('should update existing checklist', async () => {
+      const mockTx = {
+        college: {
+          findFirst: jest.fn().mockResolvedValue(mockCollege),
+          update: jest.fn().mockResolvedValue({ ...mockCollege, status: 'IN_PROGRESS' }),
+        },
+        checklist: {
+          update: jest.fn().mockResolvedValue({
+            ...mockCollege.checklist,
+            lorTeacher: true,
+          }),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await updateChecklist('1', { lorTeacher: true });
 
       expect(result.success).toBe('Checklist updated!');
-      expect(db.college.findFirst).toHaveBeenCalledWith({
+      expect(mockTx.college.findFirst).toHaveBeenCalledWith({
         where: { id: '1', userId: 'test-user-123' },
         include: { checklist: true },
       });
-      expect(db.checklist.update).toHaveBeenCalledWith({
+      expect(mockTx.checklist.update).toHaveBeenCalledWith({
         where: { collegeId: '1' },
         data: { lorTeacher: true },
       });
     });
 
     it('should create checklist if it does not exist', async () => {
-      (db.college.findFirst as jest.Mock).mockResolvedValue({
-        ...mockCollege,
-        checklist: null,
+      const mockTx = {
+        college: {
+          findFirst: jest.fn().mockResolvedValue({
+            ...mockCollege,
+            checklist: null,
+          }),
+          update: jest.fn().mockResolvedValue({ ...mockCollege, status: 'IN_PROGRESS' }),
+        },
+        checklist: {
+          create: jest.fn().mockResolvedValue({
+            id: 'c1',
+            collegeId: '1',
+            lorTeacher: true,
+          }),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
       });
-      (db.checklist.create as jest.Mock).mockResolvedValue({
-        id: 'c1',
-        collegeId: '1',
-        lorTeacher: true,
-      });
-      (db.college.update as jest.Mock).mockResolvedValue({ ...mockCollege, status: 'IN_PROGRESS' });
 
       const result = await updateChecklist('1', { lorTeacher: true });
 
       expect(result.success).toBe('Checklist updated!');
-      expect(db.checklist.create).toHaveBeenCalledWith({
+      expect(mockTx.checklist.create).toHaveBeenCalledWith({
         data: { collegeId: '1', lorTeacher: true },
       });
     });
 
     describe('Auto-status progression', () => {
       it('should progress from NOT_STARTED to IN_PROGRESS on first update', async () => {
-        (db.college.findFirst as jest.Mock).mockResolvedValue(mockCollege);
-        (db.checklist.update as jest.Mock).mockResolvedValue({
-          ...mockCollege.checklist,
-          lorTeacher: true,
-        });
-        (db.college.update as jest.Mock).mockResolvedValue({
-          ...mockCollege,
-          status: 'IN_PROGRESS',
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue(mockCollege),
+            update: jest.fn().mockResolvedValue({
+              ...mockCollege,
+              status: 'IN_PROGRESS',
+            }),
+          },
+          checklist: {
+            update: jest.fn().mockResolvedValue({
+              ...mockCollege.checklist,
+              lorTeacher: true,
+            }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
         });
 
         await updateChecklist('1', { lorTeacher: true });
 
-        expect(db.college.update).toHaveBeenCalledWith({
+        expect(mockTx.college.update).toHaveBeenCalledWith({
           where: { id: '1' },
           data: { status: 'IN_PROGRESS' },
         });
       });
 
       it('should progress from IN_PROGRESS to SUBMITTED when all items complete', async () => {
-        (db.college.findFirst as jest.Mock).mockResolvedValue({
-          ...mockCollege,
-          status: 'IN_PROGRESS',
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue({
+              ...mockCollege,
+              status: 'IN_PROGRESS',
+            }),
+            update: jest.fn().mockResolvedValue({}),
+          },
+          checklist: {
+            update: jest.fn().mockResolvedValue({
+              id: 'c1',
+              collegeId: '1',
+              lorTeacher: true,
+              transcriptSent: true,
+              testScoresSent: true,
+              essayCount: 2,
+              mainEssayComplete: true,
+              supplementalEssaysCompleted: 2,
+              finaidGreenLight: true,
+            }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
         });
-        (db.checklist.update as jest.Mock).mockResolvedValue({
-          id: 'c1',
-          collegeId: '1',
-          lorTeacher: true,
-          transcriptSent: true,
-          testScoresSent: true,
-          essayCount: 2,
-          mainEssayComplete: true,
-          supplementalEssaysCompleted: 2,
-          finaidGreenLight: true,
-        });
-        (db.college.update as jest.Mock).mockResolvedValue({});
 
         await updateChecklist('1', { finaidGreenLight: true });
 
-        expect(db.college.update).toHaveBeenCalledWith({
+        expect(mockTx.college.update).toHaveBeenCalledWith({
           where: { id: '1' },
           data: { status: 'SUBMITTED' },
         });
       });
 
       it('should revert from SUBMITTED to IN_PROGRESS when item unchecked', async () => {
-        (db.college.findFirst as jest.Mock).mockResolvedValue({
-          id: '1',
-          status: 'SUBMITTED',
-          checklist: {
-            id: 'c1',
-            collegeId: '1',
-            lorTeacher: true,
-            transcriptSent: true,
-            testScoresSent: true,
-            essayCount: 0,
-            mainEssayComplete: true,
-            supplementalEssaysCompleted: 0,
-            finaidGreenLight: true,
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue({
+              id: '1',
+              status: 'SUBMITTED',
+              checklist: {
+                id: 'c1',
+                collegeId: '1',
+                lorTeacher: true,
+                transcriptSent: true,
+                testScoresSent: true,
+                essayCount: 0,
+                mainEssayComplete: true,
+                supplementalEssaysCompleted: 0,
+                finaidGreenLight: true,
+              },
+            }),
+            update: jest.fn().mockResolvedValue({}),
           },
+          checklist: {
+            update: jest.fn().mockResolvedValue({
+              id: 'c1',
+              lorTeacher: false,
+            }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
         });
-        (db.checklist.update as jest.Mock).mockResolvedValue({
-          id: 'c1',
-          lorTeacher: false,
-        });
-        (db.college.update as jest.Mock).mockResolvedValue({});
 
         await updateChecklist('1', { lorTeacher: false });
 
-        expect(db.college.update).toHaveBeenCalledWith({
+        expect(mockTx.college.update).toHaveBeenCalledWith({
           where: { id: '1' },
           data: { status: 'IN_PROGRESS' },
         });
       });
 
       it('should not change status for WAITLISTED', async () => {
-        (db.college.findFirst as jest.Mock).mockResolvedValue({
-          ...mockCollege,
-          status: 'WAITLISTED',
-        });
-        (db.checklist.update as jest.Mock).mockResolvedValue({
-          ...mockCollege.checklist,
-          lorTeacher: true,
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue({
+              ...mockCollege,
+              status: 'WAITLISTED',
+            }),
+            update: jest.fn(),
+          },
+          checklist: {
+            update: jest.fn().mockResolvedValue({
+              ...mockCollege.checklist,
+              lorTeacher: true,
+            }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
         });
 
         await updateChecklist('1', { lorTeacher: true });
 
-        expect(db.college.update).not.toHaveBeenCalled();
+        expect(mockTx.college.update).not.toHaveBeenCalled();
       });
 
       it('should not change status for ACCEPTED', async () => {
-        (db.college.findFirst as jest.Mock).mockResolvedValue({
-          ...mockCollege,
-          status: 'ACCEPTED',
-        });
-        (db.checklist.update as jest.Mock).mockResolvedValue({
-          ...mockCollege.checklist,
-          lorTeacher: true,
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue({
+              ...mockCollege,
+              status: 'ACCEPTED',
+            }),
+            update: jest.fn(),
+          },
+          checklist: {
+            update: jest.fn().mockResolvedValue({
+              ...mockCollege.checklist,
+              lorTeacher: true,
+            }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
         });
 
         await updateChecklist('1', { lorTeacher: true });
 
-        expect(db.college.update).not.toHaveBeenCalled();
+        expect(mockTx.college.update).not.toHaveBeenCalled();
       });
 
       it('should not change status for DECLINED', async () => {
-        (db.college.findFirst as jest.Mock).mockResolvedValue({
-          ...mockCollege,
-          status: 'DECLINED',
-        });
-        (db.checklist.update as jest.Mock).mockResolvedValue({
-          ...mockCollege.checklist,
-          lorTeacher: true,
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue({
+              ...mockCollege,
+              status: 'DECLINED',
+            }),
+            update: jest.fn(),
+          },
+          checklist: {
+            update: jest.fn().mockResolvedValue({
+              ...mockCollege.checklist,
+              lorTeacher: true,
+            }),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
         });
 
         await updateChecklist('1', { lorTeacher: true });
 
-        expect(db.college.update).not.toHaveBeenCalled();
+        expect(mockTx.college.update).not.toHaveBeenCalled();
       });
 
       it('should handle 0 essays (all complete when essayCount is 0)', async () => {
-        (db.college.findFirst as jest.Mock).mockResolvedValue({
-          id: '1',
-          status: 'IN_PROGRESS',
-          checklist: {
-            ...mockCollege.checklist,
-            lorTeacher: true,
-            transcriptSent: true,
-            testScoresSent: true,
-            mainEssayComplete: true,
-            finaidGreenLight: true,
-            essayCount: 0,
-            supplementalEssaysCompleted: 0,
+        const mockTx = {
+          college: {
+            findFirst: jest.fn().mockResolvedValue({
+              id: '1',
+              status: 'IN_PROGRESS',
+              checklist: {
+                ...mockCollege.checklist,
+                lorTeacher: true,
+                transcriptSent: true,
+                testScoresSent: true,
+                mainEssayComplete: true,
+                finaidGreenLight: true,
+                essayCount: 0,
+                supplementalEssaysCompleted: 0,
+              },
+            }),
+            update: jest.fn().mockResolvedValue({}),
           },
+          checklist: {
+            update: jest.fn().mockResolvedValue({}),
+          },
+        };
+
+        (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+          return await callback(mockTx);
         });
-        (db.checklist.update as jest.Mock).mockResolvedValue({});
-        (db.college.update as jest.Mock).mockResolvedValue({});
 
         await updateChecklist('1', { finaidGreenLight: true });
 
-        expect(db.college.update).toHaveBeenCalledWith({
+        expect(mockTx.college.update).toHaveBeenCalledWith({
           where: { id: '1' },
           data: { status: 'SUBMITTED' },
         });
@@ -638,15 +761,23 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should return error when college not found', async () => {
-      (db.college.findFirst as jest.Mock).mockResolvedValue(null);
+      const mockTx = {
+        college: {
+          findFirst: jest.fn().mockResolvedValue(null),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
+      });
 
       const result = await updateChecklist('nonexistent', { lorTeacher: true });
 
-      expect(result.error).toBe('College not found or unauthorized');
+      expect(result.error).toContain('College not found or unauthorized');
     });
 
     it('should handle database errors', async () => {
-      (db.college.findFirst as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (db.$transaction as jest.Mock).mockRejectedValue(new Error('DB error'));
 
       const result = await updateChecklist('1', { lorTeacher: true });
 
@@ -654,10 +785,21 @@ describe('Server Actions - college.ts', () => {
     });
 
     it('should revalidate paths after update', async () => {
-      (db.college.findFirst as jest.Mock).mockResolvedValue(mockCollege);
-      (db.checklist.update as jest.Mock).mockResolvedValue({
-        ...mockCollege.checklist,
-        lorTeacher: true,
+      const mockTx = {
+        college: {
+          findFirst: jest.fn().mockResolvedValue(mockCollege),
+          update: jest.fn().mockResolvedValue({ ...mockCollege, status: 'IN_PROGRESS' }),
+        },
+        checklist: {
+          update: jest.fn().mockResolvedValue({
+            ...mockCollege.checklist,
+            lorTeacher: true,
+          }),
+        },
+      };
+
+      (db.$transaction as jest.Mock).mockImplementation(async (callback) => {
+        return await callback(mockTx);
       });
 
       await updateChecklist('1', { lorTeacher: true });

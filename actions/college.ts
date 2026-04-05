@@ -192,56 +192,61 @@ export async function updateChecklist(
   try {
     const userId = await requireAuth();
 
-    const college = await db.college.findFirst({
-      where: { id: collegeId, userId },
-      include: { checklist: true },
+    // Wrap all database operations in a transaction for atomicity
+    const updatedChecklist = await db.$transaction(async (tx) => {
+      const college = await tx.college.findFirst({
+        where: { id: collegeId, userId },
+        include: { checklist: true },
+      });
+
+      if (!college) {
+        throw new Error("College not found or unauthorized");
+      }
+
+      let checklist;
+      if (college.checklist) {
+        checklist = await tx.checklist.update({
+          where: { collegeId },
+          data: values,
+        });
+      } else {
+        checklist = await tx.checklist.create({
+          data: {
+            collegeId,
+            ...values,
+          },
+        });
+      }
+
+      const merged = { ...college.checklist, ...checklist, ...values };
+
+      const allComplete =
+        merged.lorTeacher &&
+        merged.transcriptSent &&
+        merged.testScoresSent &&
+        merged.mainEssayComplete &&
+        merged.finaidGreenLight &&
+        (merged.essayCount === 0 || merged.supplementalEssaysCompleted >= merged.essayCount);
+
+      let newStatus = college.status;
+
+      if (college.status === "NOT_STARTED") {
+        newStatus = "IN_PROGRESS";
+      } else if (college.status === "IN_PROGRESS" && allComplete) {
+        newStatus = "SUBMITTED";
+      } else if (college.status === "SUBMITTED" && !allComplete) {
+        newStatus = "IN_PROGRESS";
+      }
+
+      if (newStatus !== college.status) {
+        await tx.college.update({
+          where: { id: collegeId },
+          data: { status: newStatus },
+        });
+      }
+
+      return checklist;
     });
-
-    if (!college) {
-      return { error: "College not found or unauthorized" };
-    }
-
-    let updatedChecklist;
-    if (college.checklist) {
-      updatedChecklist = await db.checklist.update({
-        where: { collegeId },
-        data: values,
-      });
-    } else {
-      updatedChecklist = await db.checklist.create({
-        data: {
-          collegeId,
-          ...values,
-        },
-      });
-    }
-
-    const merged = { ...college.checklist, ...updatedChecklist, ...values };
-
-    const allComplete =
-      merged.lorTeacher &&
-      merged.transcriptSent &&
-      merged.testScoresSent &&
-      merged.mainEssayComplete &&
-      merged.finaidGreenLight &&
-      (merged.essayCount === 0 || merged.supplementalEssaysCompleted >= merged.essayCount);
-
-    let newStatus = college.status;
-
-    if (college.status === "NOT_STARTED") {
-      newStatus = "IN_PROGRESS";
-    } else if (college.status === "IN_PROGRESS" && allComplete) {
-      newStatus = "SUBMITTED";
-    } else if (college.status === "SUBMITTED" && !allComplete) {
-      newStatus = "IN_PROGRESS";
-    }
-
-    if (newStatus !== college.status) {
-      await db.college.update({
-        where: { id: collegeId },
-        data: { status: newStatus },
-      });
-    }
 
     revalidatePath(`/college/${collegeId}`);
     revalidatePath("/dashboard");
