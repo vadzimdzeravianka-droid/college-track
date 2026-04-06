@@ -1,5 +1,24 @@
 "use server";
 
+/**
+ * College Server Actions
+ *
+ * All mutation operations (create, update, delete) use Prisma transactions
+ * to ensure atomicity and data integrity. This prevents partial updates
+ * where one operation succeeds while another fails, which could leave the
+ * database in an inconsistent state.
+ *
+ * Transaction Protection:
+ * - updateChecklist: Wraps checklist update + auto-status progression
+ * - updateCollege: Single atomic update with ownership verification
+ * - updateCollegeStatus: Single atomic status update
+ * - deleteCollege: Atomic delete with cascade to checklist
+ * - createCollege: Already atomic via Prisma nested write (no transaction needed)
+ *
+ * Note: Read operations (getColleges, getCollegeById) do not need transactions
+ * as they are single operations with no mutation risk.
+ */
+
 import { db } from "@/lib/db";
 import { CollegeSchema, ChecklistSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
@@ -108,22 +127,17 @@ export async function updateCollege(
     const userId = await requireAuth();
     const { deadlineApp, deadlineFinaid, ...rest } = values;
 
-    const result = await db.college.updateMany({
-      where: { id, userId },
-      data: {
-        ...rest,
-        deadlineApp: deadlineApp ? new Date(deadlineApp) : undefined,
-        deadlineFinaid: deadlineFinaid ? new Date(deadlineFinaid) : undefined,
-      },
-    });
-
-    if (result.count === 0) {
-      return { error: "College not found or unauthorized" };
-    }
-
-    const college = await db.college.findFirst({
-      where: { id, userId },
-      include: { checklist: true },
+    // Wrap in transaction and use single update call (optimized from updateMany + findFirst)
+    const college = await db.$transaction(async (tx) => {
+      return await tx.college.update({
+        where: { id, userId },
+        data: {
+          ...rest,
+          deadlineApp: deadlineApp ? new Date(deadlineApp) : undefined,
+          deadlineFinaid: deadlineFinaid ? new Date(deadlineFinaid) : undefined,
+        },
+        include: { checklist: true },
+      });
     });
 
     revalidatePath("/dashboard");
@@ -139,13 +153,12 @@ export async function deleteCollege(id: string) {
   try {
     const userId = await requireAuth();
 
-    const result = await db.college.deleteMany({
-      where: { id, userId },
+    // Wrap in transaction for consistency (also optimized to use delete instead of deleteMany)
+    await db.$transaction(async (tx) => {
+      return await tx.college.delete({
+        where: { id, userId },
+      });
     });
-
-    if (result.count === 0) {
-      return { error: "College not found or unauthorized" };
-    }
 
     revalidatePath("/dashboard");
     return { success: "College deleted!" };
@@ -162,18 +175,13 @@ export async function updateCollegeStatus(
   try {
     const userId = await requireAuth();
 
-    const result = await db.college.updateMany({
-      where: { id, userId },
-      data: { status },
-    });
-
-    if (result.count === 0) {
-      return { error: "College not found or unauthorized" };
-    }
-
-    const college = await db.college.findFirst({
-      where: { id, userId },
-      include: { checklist: true },
+    // Wrap in transaction and use single update call (optimized from updateMany + findFirst)
+    const college = await db.$transaction(async (tx) => {
+      return await tx.college.update({
+        where: { id, userId },
+        data: { status },
+        include: { checklist: true },
+      });
     });
 
     revalidatePath(`/college/${id}`);
@@ -192,56 +200,61 @@ export async function updateChecklist(
   try {
     const userId = await requireAuth();
 
-    const college = await db.college.findFirst({
-      where: { id: collegeId, userId },
-      include: { checklist: true },
+    // Wrap all database operations in a transaction for atomicity
+    const updatedChecklist = await db.$transaction(async (tx) => {
+      const college = await tx.college.findFirst({
+        where: { id: collegeId, userId },
+        include: { checklist: true },
+      });
+
+      if (!college) {
+        throw new Error("College not found or unauthorized");
+      }
+
+      let checklist;
+      if (college.checklist) {
+        checklist = await tx.checklist.update({
+          where: { collegeId },
+          data: values,
+        });
+      } else {
+        checklist = await tx.checklist.create({
+          data: {
+            collegeId,
+            ...values,
+          },
+        });
+      }
+
+      const merged = { ...college.checklist, ...checklist, ...values };
+
+      const allComplete =
+        merged.lorTeacher &&
+        merged.transcriptSent &&
+        merged.testScoresSent &&
+        merged.mainEssayComplete &&
+        merged.finaidGreenLight &&
+        (merged.essayCount === 0 || merged.supplementalEssaysCompleted >= merged.essayCount);
+
+      let newStatus = college.status;
+
+      if (college.status === "NOT_STARTED") {
+        newStatus = "IN_PROGRESS";
+      } else if (college.status === "IN_PROGRESS" && allComplete) {
+        newStatus = "SUBMITTED";
+      } else if (college.status === "SUBMITTED" && !allComplete) {
+        newStatus = "IN_PROGRESS";
+      }
+
+      if (newStatus !== college.status) {
+        await tx.college.update({
+          where: { id: collegeId },
+          data: { status: newStatus },
+        });
+      }
+
+      return checklist;
     });
-
-    if (!college) {
-      return { error: "College not found or unauthorized" };
-    }
-
-    let updatedChecklist;
-    if (college.checklist) {
-      updatedChecklist = await db.checklist.update({
-        where: { collegeId },
-        data: values,
-      });
-    } else {
-      updatedChecklist = await db.checklist.create({
-        data: {
-          collegeId,
-          ...values,
-        },
-      });
-    }
-
-    const merged = { ...college.checklist, ...updatedChecklist, ...values };
-
-    const allComplete =
-      merged.lorTeacher &&
-      merged.transcriptSent &&
-      merged.testScoresSent &&
-      merged.mainEssayComplete &&
-      merged.finaidGreenLight &&
-      (merged.essayCount === 0 || merged.supplementalEssaysCompleted >= merged.essayCount);
-
-    let newStatus = college.status;
-
-    if (college.status === "NOT_STARTED") {
-      newStatus = "IN_PROGRESS";
-    } else if (college.status === "IN_PROGRESS" && allComplete) {
-      newStatus = "SUBMITTED";
-    } else if (college.status === "SUBMITTED" && !allComplete) {
-      newStatus = "IN_PROGRESS";
-    }
-
-    if (newStatus !== college.status) {
-      await db.college.update({
-        where: { id: collegeId },
-        data: { status: newStatus },
-      });
-    }
 
     revalidatePath(`/college/${collegeId}`);
     revalidatePath("/dashboard");
