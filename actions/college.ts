@@ -1,5 +1,24 @@
 "use server";
 
+/**
+ * College Server Actions
+ *
+ * All mutation operations (create, update, delete) use Prisma transactions
+ * to ensure atomicity and data integrity. This prevents partial updates
+ * where one operation succeeds while another fails, which could leave the
+ * database in an inconsistent state.
+ *
+ * Transaction Protection:
+ * - updateChecklist: Wraps checklist update + auto-status progression
+ * - updateCollege: Single atomic update with ownership verification
+ * - updateCollegeStatus: Single atomic status update
+ * - deleteCollege: Atomic delete with cascade to checklist
+ * - createCollege: Already atomic via Prisma nested write (no transaction needed)
+ *
+ * Note: Read operations (getColleges, getCollegeById) do not need transactions
+ * as they are single operations with no mutation risk.
+ */
+
 import { db } from "@/lib/db";
 import { CollegeSchema, ChecklistSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";

@@ -192,10 +192,21 @@ All data mutations use Next.js Server Actions (`"use server"`) in `actions/colle
 - `updateCollegeStatus(id, status)` - Quick status update (ownership verified)
 - `updateChecklist(collegeId, values)` - Update checklist with auto-status progression (ownership verified)
 
+**Transaction Protection**:
+All mutation operations use Prisma transactions (`db.$transaction()`) to ensure atomicity and data integrity:
+- `updateChecklist`: Wraps checklist update + auto-status progression (prevents checklist updating without status)
+- `updateCollege`: Single atomic update with ownership verification
+- `updateCollegeStatus`: Single atomic status update
+- `deleteCollege`: Atomic delete with cascade to checklist
+- `createCollege`: Already atomic via Prisma nested write (no explicit transaction needed)
+
+Transactions ensure that if any operation fails mid-execution, all changes are rolled back, preventing partial updates and data inconsistency.
+
 **Important**:
 - Server actions automatically revalidate paths using `revalidatePath()` after mutations
 - All actions call `requireAuth()` to get current userId
 - All queries filter by userId or verify ownership to ensure data isolation
+- Read operations (getColleges, getCollegeById) do not need transactions (single operations)
 
 ### Form Validation
 
